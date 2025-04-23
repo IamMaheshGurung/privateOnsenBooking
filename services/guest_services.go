@@ -21,13 +21,12 @@ func NewGuestService(db *gorm.DB, logger *zap.Logger) *GuestService {
     }
 }
 
-func (gs *GuestService) GuestDetail (guestID uint, name string, email string, checkIn time.Time, checkOut time.Time) {
+func (gs *GuestService) GuestDetail (guestID uint, name string, email string, phone string) {
     guest := models.Guest{
         ID:       guestID,
         Name:     name,
         Email:    email,
-        CheckIn:  checkIn,
-        CheckOut: checkOut,
+        Phone: phone, 
     }
 
     if err := gs.db.Create(&guest).Error; err != nil {
@@ -69,8 +68,8 @@ func (gs *GuestService) UpdateGuest(guestID uint, name string, email string, che
 
     guest.Name = name
     guest.Email = email
-    guest.CheckIn = checkIn
-    guest.CheckOut = checkOut
+    guest.number = checkIn
+    guest = checkOut
 
     if err := gs.db.Save(&guest).Error; err != nil {
         gs.logger.Error("failed to update guest", zap.Error(err))

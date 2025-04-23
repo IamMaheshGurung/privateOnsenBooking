@@ -4,8 +4,7 @@ package utils
 
 import (
     "time"
-    "fmt"
-)
+  )
 
 
 
@@ -19,11 +18,7 @@ func GetTimeSlots() []string {
         slots = append(slots, slot.Format("15:04"))
     }
 
-    for i, slot := range slots {
-            fmt.Printf("%d: %s\n",i,  slot)
-
-    }
-
+  
 
         return slots
 }
@@ -31,7 +26,8 @@ func GetTimeSlots() []string {
 
 func GetAvailableSlots(date time.Time) []string {
     allSlot := GetTimeSlots()
-    booked := getBookedSlots(date)
+   booked := [] string {"room", "room1", "room2", "room3", "room4", "room5", "room6", "room7", "room8", "room9"}
+
 
     available := []string{}
 

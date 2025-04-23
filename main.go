@@ -8,8 +8,8 @@ import (
     "os/signal"
     "github.com/gofiber/fiber/v2"
     "fmt"
+    "github.com/gofiber/template/html/v2"
     "syscall"
-    "strings"
     "github.com/IamMaheshGurung/privateOnsenBooking/utils"
     "github.com/gofiber/fiber/v2/middleware/cors"
     "go.uber.org/zap"
@@ -22,7 +22,7 @@ import (
 func main() {
 
 
-    _, err := database.ConnectDB()
+    db, err := database.ConnectDB()
     if err != nil {
         fmt.Println("Error connecting to database", err)
         return
@@ -31,18 +31,24 @@ func main() {
 
 
 
-    database.SeedRooms()
+    database.SeedRooms(db)
 
     logger, err  := zap.NewProduction()
     if err != nil {
         fmt.Println("Error initializing logger", err)
     }
-
+    
+    engine := html.New("./templates", ".html")
+    
 
     app := fiber.New(fiber.Config{
         AppName: "private onsen booking",
-    })
+        Views: engine,
 
+    })
+    
+
+    app.Static("/static", "./static")
 
     app.Use(recover.New())
     app.Use(cors.New(cors.Config{
@@ -52,11 +58,26 @@ func main() {
     }))
 
    
-    app.Get("/happyworld", func(c *fiber.Ctx) error {
+    app.Get("/", func(c *fiber.Ctx) error {
         slots := utils.GetTimeSlots()
-        slotStr := strings.Join(slots, ", ") // Joins all time slots with comma and space
-        return c.SendString("Available slots are: " + slotStr)
+        return c.Render("index", fiber.Map{"slots": slots})
     })
+
+
+    app.Post("/booking", func(c *fiber.Ctx) error {
+        name := c.FormValue("name")
+        date := c.FormValue("date")
+        timeSlot := c.FormValue("slot")
+       
+        return c.Render("success", fiber.Map{
+            "name": name,
+            "date": date,
+            "time": timeSlot,
+        })
+
+    })
+
+
     c := make(chan os.Signal, 1)
     signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 

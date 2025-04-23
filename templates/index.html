@@ -1,0 +1,69 @@
+     <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kwangdi Hotel - Welcome</title>
+  <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-white font-sans">
+
+  <!-- Hero Section with background -->
+  <section class="relative bg-cover bg-center h-screen" style="background-image: url('https://images.unsplash.com/photo-1618221379834-8722193972b6?auto=format&fit=crop&w=1950&q=80');">
+    <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div class="text-center text-white px-4">
+        <h1 class="text-5xl font-bold mb-4">Welcome to Kwangdi Hotel</h1>
+        <p class="text-xl mb-6">Luxury, tranquility, and tradition in the heart of nature.</p>
+        <a href="#booking-section" class="bg-white text-blue-700 font-bold px-6 py-3 rounded hover:bg-blue-100 transition">
+          Get Started
+        </a>
+      </div>
+    </div>
+  </section>
+  <!-- Why Choose Us Section -->
+  <section class="py-16 bg-gray-50">
+    <div class="max-w-5xl mx-auto px-6 text-center">
+      <h2 class="text-3xl font-semibold text-gray-800 mb-6">Why Choose Kwangdi?</h2>
+      <div class="grid md:grid-cols-3 gap-8 text-left">
+        <div>
+          <h3 class="text-xl font-bold mb-2">🛏️ Comfortable Rooms</h3>
+          <p class="text-gray-600">Beautifully furnished rooms with traditional touches and modern amenities.</p>
+        </div>
+        <div>
+          <h3 class="text-xl font-bold mb-2">🧖 Private Onsen</h3>
+          <p class="text-gray-600">Experience true relaxation with our private hot spring baths overlooking nature.</p>
+        </div>
+        <div>
+          <h3 class="text-xl font-bold mb-2">🥢 Local Cuisine</h3>
+          <p class="text-gray-600">Taste authentic Japanese flavors made with love and local ingredients.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Booking Section -->
+  <section id="booking-section" class="py-16 bg-white">
+    <div class="max-w-3xl mx-auto px-6">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Book a Room</h2>
+      <form hx-post="/room-booking mv" hx-target="#booking-result" hx-swap="innerHTML" class="space-y-4 bg-gray-50 p-6 rounded-lg shadow-md">
+        
+        <input type="text" name="name" placeholder="Full Name" required class="w-full p-2 border rounded" />
+        <input type="email" name="email" placeholder="Email" required class="w-full p-2 border rounded" />
+        <input type="tel" name="phone" placeholder="Phone" required class="w-full p-2 border rounded" />
+        <input type="date" name="checkin" placeholder="check in" required class="w-full p-2 border rounded" />
+        <input type="date" name="checkout" placeholder="check out"  required class="w-full p-2 border rounded" />
+
+        <button type="submit" class="bg-blue-700 text-white py-2 w-full rounded hover:bg-blue-800 transition">
+          Book Room
+        </button>
+      </form>
+      <div id="booking-result" class="mt-4 text-green-600 font-medium text-center"></div>
+    </div>
+  </section>
+
+  <!-- Private Onsen Section (to be conditionally shown after booking) -->
+  <div id="onsen-section"></div>
+
+</body>
+</html>
+   

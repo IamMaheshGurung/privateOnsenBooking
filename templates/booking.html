@@ -1,0 +1,8 @@
+<ul>
+	{{range .Bookings}}
+		<li>{{.Name}} booked {{.Room}}</li>
+	{{else}}
+		<li>No bookings yet.</li>
+	{{end}}
+</ul>
+ 

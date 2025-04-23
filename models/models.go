@@ -12,7 +12,8 @@ type Guest struct {
     Name    string    `json:"name" gorm:"not null"`
     Email   string    `json:"email" gorm:"not null;unique"`
     Phone string   `json:"phone" gorm:"not null"`
-    CreatedAt time.Time 
+    CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
+    
 }
 
 
