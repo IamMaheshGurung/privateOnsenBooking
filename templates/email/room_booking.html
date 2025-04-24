@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Booking Confirmation</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .header {
+            background-color: #4A5568;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+            border: 1px solid #E2E8F0;
+        }
+        .footer {
+            background-color: #F7FAFC;
+            padding: 15px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #718096;
+        }
+        .booking-details {
+            border: 1px solid #E2E8F0;
+            padding: 15px;
+            margin: 20px 0;
+            background-color: #F7FAFC;
+        }
+        .details-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #EDF2F7;
+        }
+        .highlight {
+            color: #4A5568;
+            font-weight: bold;
+        }
+        .button {
+            display: inline-block;
+            background-color: #4A5568;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 3px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ .HotelName }}</h1>
+        <p>Booking Confirmation</p>
+    </div>
+    
+    <div class="content">
+        <p>Dear {{ .GuestName }},</p>
+        
+        <p>Thank you for choosing to stay with us at {{ .HotelName }}. We're delighted to confirm your booking details:</p>
+        
+        <div class="booking-details">
+            <div class="details-row">
+                <span>Booking Reference:</span>
+                <span class="highlight">#{{ .BookingID }}</span>
+            </div>
+            
+            <div class="details-row">
+                <span>Room Type:</span>
+                <span>{{ .RoomType }}</span>
+            </div>
+            
+            <div class="details-row">
+                <span>Room Number:</span>
+                <span>{{ .RoomNumber }}</span>
+            </div>
+            
+            <div class="details-row">
+                <span>Check-in Date:</span>
+                <span>{{ .CheckIn.Format "Monday, January 2, 2006" }} (after 3:00 PM)</span>
+            </div>
+            
+            <div class="details-row">
+                <span>Check-out Date:</span>
+                <span>{{ .CheckOut.Format "Monday, January 2, 2006" }} (before 11:00 AM)</span>
+            </div>
+            
+            <div class="details-row">
+                <span>Total Price:</span>
+                <span class="highlight">¥{{ printf "%.2f" .TotalPrice }}</span>
+            </div>
+        </div>
+        
+        <h3>What to expect during your stay:</h3>
+        <ul>
+            <li>Traditional Japanese hospitality and service</li>
+            <li>Access to our communal hot spring baths (6:00 AM - 10:00 PM)</li>
+            <li>Traditional Japanese breakfast and dinner included</li>
+        </ul>
+        
+        <p>Would you like to enhance your stay with a private onsen experience? Book our exclusive private onsen session:</p>
+        
+        <a href="https://yourdomain.com/bookings/{{ .BookingID }}/onsen" class="button">Book Private Onsen</a>
+        
+        <p>Need to make changes or cancel? Please contact us at least 48 hours before your check-in date.</p>
+        
+        <a href="{{ .CancellationURL }}" class="button" style="background-color: #E53E3E;">Cancel Booking</a>
+    </div>
+    
+    <div class="footer">
+        <p>{{ .HotelName }} | {{ .HotelAddress }} | {{ .HotelPhone }}</p>
+        <p>Booking made on {{ .BookingDate.Format "January 2, 2006 at 15:04" }}</p>
+    </div>
+</body>
+</html>
