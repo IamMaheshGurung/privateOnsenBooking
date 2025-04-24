@@ -3,7 +3,8 @@ package services
 import (
 	"errors"
 	"fmt"
-	"privateOnsen/models"
+
+	"github.com/IamMaheshGurung/privateOnsenBooking/models"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -259,7 +260,7 @@ func (gs *GuestService) CreateOrGetGuest(name, email, phone string) (*models.Gue
 	}
 
 	// Guest doesn't exist, create new one
-	if errors.Is(err, gorm.ErrRecordNotFound) || err != nil && err.Error() == fmt.Sprintf("guest not found with email %s", email) {
+	if errors.Is(err, gorm.ErrRecordNotFound) || err.Error() == fmt.Sprintf("guest not found with email %s", email) {
 		return gs.CreateGuest(name, email, phone)
 	}
 
