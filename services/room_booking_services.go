@@ -27,6 +27,71 @@ func NewRoomBookingService(db *gorm.DB, logger *zap.Logger, emailservice *EmailS
 	}
 }
 
+func (rbs *RoomBookingService) GetAllRooms() ([]*models.Room, error) {
+	var rooms []*models.Room
+	if err := rbs.db.Find(&rooms).Error; err != nil {
+		rbs.logger.Error("failed to fetch rooms", zap.Error(err))
+		return nil, fmt.Errorf("failed to fetch rooms: %w", err)
+	}
+
+	return rooms, nil
+}
+
+func (rbs *RoomBookingService) GetRoomByID(id uint) (*models.Room, error) {
+	var room *models.Room
+	if err := rbs.db.Find(&room, id).Error; err != nil {
+		rbs.logger.Error("failed to fetch room", zap.Error(err))
+		return nil, fmt.Errorf("failed to fetch room: %w", err)
+	}
+	return room, nil
+}
+
+func (rbs *RoomBookingService) CreateRoom(room models.Room) error {
+	if err := rbs.db.Create(room).Error; err != nil {
+		rbs.logger.Error("failed to create room", zap.Error(err))
+		return fmt.Errorf("failed to create room: %w", err)
+	}
+
+	return nil
+}
+
+func (rbs *RoomBookingService) UpdateRoom(room models.Room) (*models.Room, error) {
+	// Create an updated room using keyed fields
+	updatedRoom := models.Room{
+		ID:            room.ID,
+		RoomNo:        room.RoomNo,
+		Type:          room.Type,
+		Capacity:      room.Capacity,
+		PricePerNight: room.PricePerNight,
+		Description:   room.Description,
+		Amenities:     room.Amenities,
+		ImageURL:      room.ImageURL,
+	}
+
+	// Update the room in the database
+	if err := rbs.db.Save(&updatedRoom).Error; err != nil {
+		rbs.logger.Error("failed to update room", zap.Error(err))
+		return nil, fmt.Errorf("failed to update room: %w", err)
+	}
+
+	return &updatedRoom, nil
+}
+
+func (rbs *RoomBookingService) DeleteRoom(id uint) error {
+	var room models.Room
+	if err := rbs.db.First(&room, id).Error; err != nil {
+		rbs.logger.Error("failed to find room", zap.Error(err))
+		return fmt.Errorf("failed to find room: %w", err)
+	}
+
+	if err := rbs.db.Delete(&room).Error; err != nil {
+		rbs.logger.Error("failed to delete room", zap.Error(err))
+		return fmt.Errorf("failed to delete room: %w", err)
+	}
+
+	return nil
+}
+
 // Check if a room is available between checkIn and checkOut
 func (rbs *RoomBookingService) IsRoomAvailable(roomID uint, checkIn, checkOut time.Time) (bool, error) {
 	var count int64
@@ -41,6 +106,22 @@ func (rbs *RoomBookingService) IsRoomAvailable(roomID uint, checkIn, checkOut ti
 		return false, fmt.Errorf("failed to check room availability: %w", err)
 	}
 
+	return count == 0, nil
+}
+
+func (rbs *RoomBookingService) IsRoomAvailableForUpdate(roomID uint, bookingID uint, checkIn, checkOut time.Time) (bool, error) {
+	var count int64
+
+	// Count conflicting bookings, EXCLUDING the current booking being updated
+	if err := rbs.db.Model(&models.RoomBooking{}).
+		Where("room_id = ? AND id != ? AND status != ? AND check_in < ? AND check_out > ?",
+			roomID, bookingID, models.BookingStatusCancelled, checkOut, checkIn).
+		Count(&count).Error; err != nil {
+		rbs.logger.Error("failed to check room availability for update", zap.Error(err))
+		return false, fmt.Errorf("failed to check room availability for update: %w", err)
+	}
+
+	// Room is available if there are no conflicts with other bookings
 	return count == 0, nil
 }
 
@@ -104,18 +185,11 @@ func (rbs *RoomBookingService) CreateBooking(guestID, roomID uint, checkIn, chec
 		return nil, fmt.Errorf("failed to create booking: %w", err)
 	}
 
-	go func() {
-		if err := rbs.emailservice.SendRoomBookingConfirmation(&booking, &guest, &room); err != nil {
-			rbs.logger.Error("failed to send booking confirmation email", zap.Error(err))
-			// Email sending failed, but booking was created successfully
-		}
-	}()
-
 	return &booking, nil
 }
 
 // UpdateBookingByID updates an existing booking
-func (rbs *RoomBookingService) UpdateBookingByID(bookingID uint, name string, checkIn, checkOut time.Time) error {
+func (rbs *RoomBookingService) UpdateBookingByID(bookingID uint, checkIn, checkOut time.Time) error {
 	var booking models.RoomBooking
 	if err := rbs.db.First(&booking, bookingID).Error; err != nil {
 		return fmt.Errorf("failed to find booking: %w", err)
@@ -145,18 +219,6 @@ func (rbs *RoomBookingService) UpdateBookingByID(bookingID uint, name string, ch
 	// Update the booking details
 	booking.CheckIn = checkIn
 	booking.CheckOut = checkOut
-
-	// Update guest name if provided and if the related Guest model exists
-	if name != "" {
-		var guest models.Guest
-		if err := rbs.db.First(&guest, booking.GuestID).Error; err == nil {
-			guest.Name = name
-			if err := rbs.db.Save(&guest).Error; err != nil {
-				rbs.logger.Warn("failed to update guest name", zap.Error(err))
-				// Continue with booking update even if guest update fails
-			}
-		}
-	}
 
 	if err := rbs.db.Save(&booking).Error; err != nil {
 		return fmt.Errorf("failed to update booking: %w", err)
