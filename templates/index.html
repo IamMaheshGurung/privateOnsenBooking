@@ -4,39 +4,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kwangdi Hotel - Traditional Japanese Ryokan</title>
-    <link href="/static/css/tailwind.css" rel="stylesheet">
+    <!-- Either use CDN (for development only) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+  <!-- <link href="/static/css/tailwind.css" rel="stylesheet"> -->
     <script src="/static/js/htmx.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Shippori Mincho', serif;
+    <script>
+        tailwind.config = {
+          theme: {
+            extend: {
+              colors: {
+                cream: {
+                  light: '#F8F4E9',
+                  DEFAULT: '#F3EFE0',
+                  dark: '#E8E2D6'
+                },
+                leaf: {
+                  light: '#8C9E5E',
+                  DEFAULT: '#5A6B3D',
+                  dark: '#414F2A'
+                }
+              }
+            }
+          }
         }
-        .hero-image {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/static/images/hero-ryokan.jpg');
-            background-position: center;
-            background-size: cover;
-            height: 80vh;
-        }
-        .text-leaf {
-            color: #8C9E5E;
-        }
-        .bg-leaf {
-            background-color: #8C9E5E;
-        }
-        .text-leaf-dark {
-            color: #5A6B3D;
-        }
-        .bg-leaf-dark {
-            background-color: #5A6B3D;
-        }
-        .border-leaf {
-            border-color: #8C9E5E;
-        }
-    </style>
+      </script>
+      <style>
+          body {
+              font-family: 'Shippori Mincho', serif;
+              background-color: #F8F4E9; /* Light cream background */
+              color: #414F2A; /* Dark green text */
+          }
+          
+          .hero-image {
+              background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/static/images/hero/hero1.jpg');
+              background-position: center;
+              background-size: cover;
+              height: 80vh;
+          }
+      
+          /* Button & Accent Colors */
+          .btn-primary {
+              background-color: #5A6B3D;
+              color: #F8F4E9;
+              transition: all 0.3s ease;
+          }
+          
+          .btn-primary:hover {
+              background-color: #414F2A;
+          }
+          
+          /* Section Backgrounds */
+          .bg-cream-light {
+              background-color: #F8F4E9;
+          }
+          
+          .bg-cream {
+              background-color: #F3EFE0;
+          }
+          
+          .bg-cream-dark {
+              background-color: #E8E2D6;
+          }
+          
+          /* Text Colors */
+          .text-leaf-light {
+              color: #8C9E5E;
+          }
+          
+          .text-leaf {
+              color: #5A6B3D;
+          }
+          
+          .text-leaf-dark {
+              color: #414F2A;
+          }
+          
+          /* Border Colors */
+          .border-leaf {
+              border-color: #5A6B3D;
+          }
+      
+          /* Section Dividers */
+          .divider {
+              height: 2px;
+              width: 80px;
+              background-color: #8C9E5E;
+              margin: 1rem 0;
+          }
+          
+          .divider-center {
+              margin-left: auto;
+              margin-right: auto;
+          }
+          
+          /* Card Styles */
+          .card {
+              background-color: #FFFFFF;
+              border-radius: 0.5rem;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+              transition: all 0.3s ease;
+          }
+          
+          .card:hover {
+              transform: translateY(-5px);
+              box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+          }
+      </style>
 </head>
-<body class="bg-stone-50 text-stone-800">
+<body class="bg-cream-light text-leaf-dark">
     
     <!-- Navigation -->
     <div hx-get="/partials/navigation" hx-trigger="load" hx-swap="outerHTML"></div>
@@ -53,18 +131,18 @@
     </section>
 
     <!-- About Section -->
-    <section class="py-16 bg-stone-100">
+    <section class="py-16 bg-cream">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="order-2 lg:order-1">
                     <h2 class="text-3xl font-medium text-stone-800 mb-4">Welcome to Our <span class="text-leaf-dark">Traditional Ryokan</span></h2>
                     <div class="w-20 h-1 bg-leaf mb-6"></div>
-                    <p class="text-stone-700 mb-4">
+                    <p class="text-leaf-dark mb-4">
                         Nestled in the serene mountains, Kwangdi Hotel offers an authentic Japanese ryokan experience. 
                         Our carefully preserved traditional architecture and gardens create a peaceful atmosphere that 
                         allows guests to connect with nature and Japanese culture.
                     </p>
-                    <p class="text-stone-700 mb-6">
+                    <p class="text-leaf-dark mb-6">
                         Every room features traditional tatami flooring, sliding paper doors, and minimalist aesthetics that 
                         embody the Japanese principles of simplicity and harmony with nature.
                     </p>
@@ -76,7 +154,7 @@
                     </a>
                 </div>
                 <div class="order-1 lg:order-2">
-                    <img src="/static/images/ryokan-interior.jpg" alt="Traditional Ryokan Interior" class="rounded-lg shadow-lg w-full h-auto">
+                    <img src="/static/images/scene/scence3.jpg" alt="Traditional Ryokan Interior" class="rounded-lg shadow-lg w-full h-auto">
                 </div>
             </div>
         </div>
@@ -117,7 +195,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
-                    <img src="/static/images/private-onsen.jpg" alt="Private Onsen" class="rounded-lg shadow-lg w-full h-auto">
+                    <img src="/static/images/onsen/springonsen.jpg" alt="Private Onsen" class="rounded-lg shadow-lg w-full h-auto">
                 </div>
                 <div>
                     <h2 class="text-3xl font-medium mb-4">Private <span class="text-leaf">Onsen Experience</span></h2>
@@ -157,7 +235,7 @@
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                    <img src="/static/images/cuisine-1.jpg" alt="Breakfast" class="w-full h-64 object-cover">
+                    <img src="/static/images/cuisine/cuisine3.jpg" alt="Breakfast" class="w-full h-64 object-cover">
                     <div class="p-6">
                         <h3 class="text-xl font-medium text-stone-800 mb-2">Traditional Breakfast</h3>
                         <p class="text-stone-600">
@@ -167,7 +245,7 @@
                 </div>
                 
                 <div class="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                    <img src="/static/images/cuisine-2.jpg" alt="Dinner" class="w-full h-64 object-cover">
+                    <img src="/static/images/cuisine/cuisine.jpg" alt="Dinner" class="w-full h-64 object-cover">
                     <div class="p-6">
                         <h3 class="text-xl font-medium text-stone-800 mb-2">Kaiseki Dinner</h3>
                         <p class="text-stone-600">
@@ -177,7 +255,7 @@
                 </div>
                 
                 <div class="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                    <img src="/static/images/cuisine-3.jpg" alt="Tea Ceremony" class="w-full h-64 object-cover">
+                    <img src="/static/images/cuisine/cuisine1.jpg" alt="Tea Ceremony" class="w-full h-64 object-cover">
                     <div class="p-6">
                         <h3 class="text-xl font-medium text-stone-800 mb-2">Tea Ceremony</h3>
                         <p class="text-stone-600">
@@ -298,7 +376,7 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="py-16 bg-stone-800 text-white">
+    <section class="py-16 bg-leaf-dark text-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl font-medium mb-6">Experience Traditional Japanese Hospitality</h2>
             <p class="text-stone-300 max-w-3xl mx-auto mb-8">

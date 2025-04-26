@@ -33,7 +33,7 @@ func SeedRooms(db *gorm.DB) error {
 			PricePerNight: 15000,
 			Description:   "Traditional Japanese style room with tatami flooring and views of the cherry blossom garden.",
 			Amenities:     "Wi-Fi,Private Bathroom,Air Conditioning,Yukata,Tea Set",
-			ImageURL:      "/static/images/room-sakura.jpg",
+			ImageURL:      "/static/images/rooms/room1.jpg",
 		},
 		{
 			RoomNo:        "Fuji",
@@ -42,7 +42,7 @@ func SeedRooms(db *gorm.DB) error {
 			PricePerNight: 25000,
 			Description:   "Premium room with a private outdoor bath and mountain views.",
 			Amenities:     "Wi-Fi,Private Bathroom,Private Outdoor Bath,Air Conditioning,Yukata,Tea Set,Mini Fridge,TV",
-			ImageURL:      "/static/images/room-fuji.jpg",
+			ImageURL:      "/static/images/rooms/room3.jpg",
 		},
 		{
 			RoomNo:        "Koi",
@@ -51,7 +51,7 @@ func SeedRooms(db *gorm.DB) error {
 			PricePerNight: 18000,
 			Description:   "Spacious room overlooking our koi pond garden with both Western and Japanese-style seating.",
 			Amenities:     "Wi-Fi,Private Bathroom,Air Conditioning,Yukata,Tea Set,Mini Fridge",
-			ImageURL:      "/static/images/room-koi.jpg",
+			ImageURL:      "/static/images/rooms/room1.jpg",
 		},
 		{
 			RoomNo:        "Ajisai",
@@ -60,7 +60,7 @@ func SeedRooms(db *gorm.DB) error {
 			PricePerNight: 14000,
 			Description:   "Cozy traditional room with a view of our hydrangea garden.",
 			Amenities:     "Wi-Fi,Private Bathroom,Air Conditioning,Yukata,Tea Set",
-			ImageURL:      "/static/images/room-ajisai.jpg",
+			ImageURL:      "/static/images/rooms/room2.jpg",
 		},
 		{
 			RoomNo:        "Rhindo",
@@ -69,7 +69,7 @@ func SeedRooms(db *gorm.DB) error {
 			PricePerNight: 30000,
 			Description:   "Spacious family room with separate sleeping areas and garden access.",
 			Amenities:     "Wi-Fi,Private Bathroom,Air Conditioning,Yukata,Tea Set,Mini Fridge,TV,Extra Futons",
-			ImageURL:      "/static/images/room-rhindo.jpg",
+			ImageURL:      "/static/images/rooms/room3.jpg",
 		},
 		{
 			RoomNo:        "Yuki",
@@ -78,7 +78,7 @@ func SeedRooms(db *gorm.DB) error {
 			PricePerNight: 28000,
 			Description:   "Premium corner room with panoramic views and a private veranda.",
 			Amenities:     "Wi-Fi,Private Bathroom,Air Conditioning,Yukata,Tea Set,Mini Fridge,TV,Veranda",
-			ImageURL:      "/static/images/room-yuki.jpg",
+			ImageURL:      "/static/images/rooms/room1.jpg",
 		},
 		{
 			RoomNo:        "Kiku",
@@ -87,7 +87,7 @@ func SeedRooms(db *gorm.DB) error {
 			PricePerNight: 16000,
 			Description:   "Traditional room with authentic decor and chrysanthemum garden views.",
 			Amenities:     "Wi-Fi,Private Bathroom,Air Conditioning,Yukata,Tea Set",
-			ImageURL:      "/static/images/room-kiku.jpg",
+			ImageURL:      "/static/images/rooms/room3.jpg",
 		},
 		{
 			RoomNo:        "Matsu",
@@ -96,7 +96,7 @@ func SeedRooms(db *gorm.DB) error {
 			PricePerNight: 20000,
 			Description:   "Deluxe room with a pine tree garden view and upgraded amenities.",
 			Amenities:     "Wi-Fi,Private Bathroom,Air Conditioning,Yukata,Tea Set,Mini Fridge,TV",
-			ImageURL:      "/static/images/room-matsu.jpg",
+			ImageURL:      "/static/images/rooms/room2.jpg",
 		},
 		{
 			RoomNo:        "Tsubaki",
@@ -105,7 +105,7 @@ func SeedRooms(db *gorm.DB) error {
 			PricePerNight: 15000,
 			Description:   "Traditional room with camellia flower garden views and morning sunlight.",
 			Amenities:     "Wi-Fi,Private Bathroom,Air Conditioning,Yukata,Tea Set",
-			ImageURL:      "/static/images/room-tsubaki.jpg",
+			ImageURL:      "/static/images/rooms/room2.jpg",
 		},
 		{
 			RoomNo:        "Ume",
@@ -114,7 +114,7 @@ func SeedRooms(db *gorm.DB) error {
 			PricePerNight: 32000,
 			Description:   "Our largest family room with plum blossom garden views and sitting area.",
 			Amenities:     "Wi-Fi,Private Bathroom,Air Conditioning,Yukata,Tea Set,Mini Fridge,TV,Extra Futons",
-			ImageURL:      "/static/images/room-ume.jpg",
+			ImageURL:      "/static/images/rooms/room1.jpg",
 		},
 	}
 
