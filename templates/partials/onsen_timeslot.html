@@ -1,0 +1,46 @@
+<div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6 bg-stone-50">
+      <h3 class="text-lg leading-6 font-medium text-stone-900">Private Onsen Booking</h3>
+      <p class="mt-1 max-w-2xl text-sm text-stone-500">Please select a date and time for your private onsen experience.</p>
+    </div>
+    
+    <div class="border-t border-stone-200 p-6">
+      <form hx-post="/api/onsen/bookings" hx-target="#onsen-booking-container">
+        <input type="hidden" name="guest_id" value="{{ .GuestID }}">
+        <input type="hidden" name="room_id" value="{{ .RoomID }}">
+        <input type="hidden" name="booking_id" value="{{ .BookingID }}">
+        
+        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+          <div class="sm:col-span-3">
+            <label for="date" class="block text-sm font-medium text-stone-700">Date</label>
+            <div class="mt-1">
+              <input type="date" name="date" id="date" required 
+                    min="{{ .CheckIn }}" 
+                    max="{{ .CheckOut }}"
+                    hx-get="/api/onsen/slots" 
+                    hx-target="#time-slots-container"
+                    hx-trigger="change, load delay:100ms"
+                    class="shadow-sm focus:ring-leaf-500 focus:border-leaf-500 block w-full sm:text-sm border-stone-300 rounded-md">
+            </div>
+            <p class="mt-2 text-sm text-stone-500">Select a date during your stay.</p>
+          </div>
+  
+          <div class="sm:col-span-3">
+            <label for="time_slot" class="block text-sm font-medium text-stone-700">Time Slot</label>
+            <div class="mt-1" id="time-slots-container">
+              <select id="time_slot" name="time_slot" required disabled class="shadow-sm focus:ring-leaf-500 focus:border-leaf-500 block w-full sm:text-sm border-stone-300 rounded-md bg-stone-100">
+                <option value="">Select a date first</option>
+              </select>
+            </div>
+            <p class="mt-2 text-sm text-stone-500">Private sessions are 1 hour long.</p>
+          </div>
+  
+          <div class="sm:col-span-6 flex justify-end">
+            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-leaf-600 hover:bg-leaf-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-leaf-500">
+              Book Private Onsen
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>

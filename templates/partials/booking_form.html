@@ -1,0 +1,117 @@
+<div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6 bg-stone-50">
+      <h3 class="text-lg leading-6 font-medium text-stone-900">Room Booking</h3>
+      <p class="mt-1 max-w-2xl text-sm text-stone-500">Please fill out the form below to check availability and book your stay.</p>
+    </div>
+    
+    <div class="border-t border-stone-200">
+      <form id="booking-form" hx-post="/api/bookings" hx-target="#booking-result" hx-indicator="#form-spinner" class="p-6">
+        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+          <!-- Guest Information -->
+          <div class="sm:col-span-3">
+            <label for="guest_name" class="block text-sm font-medium text-stone-700">Full Name</label>
+            <div class="mt-1">
+              <input type="text" name="guest_name" id="guest_name" required class="shadow-sm focus:ring-leaf-500 focus:border-leaf-500 block w-full sm:text-sm border-stone-300 rounded-md">
+            </div>
+          </div>
+  
+          <div class="sm:col-span-3">
+            <label for="guest_email" class="block text-sm font-medium text-stone-700">Email Address</label>
+            <div class="mt-1">
+              <input type="email" name="guest_email" id="guest_email" required class="shadow-sm focus:ring-leaf-500 focus:border-leaf-500 block w-full sm:text-sm border-stone-300 rounded-md">
+            </div>
+          </div>
+  
+          <div class="sm:col-span-3">
+            <label for="guest_phone" class="block text-sm font-medium text-stone-700">Phone Number</label>
+            <div class="mt-1">
+              <input type="tel" name="guest_phone" id="guest_phone" required class="shadow-sm focus:ring-leaf-500 focus:border-leaf-500 block w-full sm:text-sm border-stone-300 rounded-md">
+            </div>
+          </div>
+  
+          <div class="sm:col-span-3">
+            <label for="room_id" class="block text-sm font-medium text-stone-700">Room Type</label>
+            <div class="mt-1">
+              <select id="room_id" name="room_id" required class="shadow-sm focus:ring-leaf-500 focus:border-leaf-500 block w-full sm:text-sm border-stone-300 rounded-md">
+                <option value="">Select a room</option>
+                {{ range .Rooms }}
+                  <option value="{{ .ID }}" data-price="{{ .PricePerNight }}">{{ .Type }} - ¥{{ .PricePerNight }}/night</option>
+                {{ end }}
+              </select>
+            </div>
+          </div>
+  
+          <div class="sm:col-span-3">
+            <label for="check_in" class="block text-sm font-medium text-stone-700">Check-in Date</label>
+            <div class="mt-1">
+              <input type="date" name="check_in" id="check_in" required 
+                    min="{{ .Today }}"
+                    hx-get="/api/bookings/check" 
+                    hx-trigger="change, load delay:100ms" 
+                    hx-include="[name='check_out'], [name='room_id']" 
+                    hx-target="#availability-message"
+                    class="shadow-sm focus:ring-leaf-500 focus:border-leaf-500 block w-full sm:text-sm border-stone-300 rounded-md">
+            </div>
+          </div>
+  
+          <div class="sm:col-span-3">
+            <label for="check_out" class="block text-sm font-medium text-stone-700">Check-out Date</label>
+            <div class="mt-1">
+              <input type="date" name="check_out" id="check_out" required 
+                    min="{{ .Tomorrow }}"
+                    hx-get="/api/bookings/check" 
+                    hx-trigger="change" 
+                    hx-include="[name='check_in'], [name='room_id']" 
+                    hx-target="#availability-message"
+                    class="shadow-sm focus:ring-leaf-500 focus:border-leaf-500 block w-full sm:text-sm border-stone-300 rounded-md">
+            </div>
+          </div>
+  
+          <div class="sm:col-span-6">
+            <label for="special_requests" class="block text-sm font-medium text-stone-700">Special Requests</label>
+            <div class="mt-1">
+              <textarea id="special_requests" name="special_requests" rows="3" class="shadow-sm focus:ring-leaf-500 focus:border-leaf-500 block w-full sm:text-sm border-stone-300 rounded-md"></textarea>
+              <p class="mt-2 text-sm text-stone-500">Let us know if you have any special requirements or preferences.</p>
+            </div>
+          </div>
+          
+          <!-- Availability message placeholder -->
+          <div class="sm:col-span-6" id="availability-message"></div>
+  
+          <div class="sm:col-span-6 flex justify-end">
+            <button type="submit" 
+                    id="submit-button"
+                    disabled
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-leaf-600 hover:bg-leaf-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-leaf-500 disabled:opacity-50 disabled:cursor-not-allowed">
+              <span id="form-spinner" class="htmx-indicator inline-block mr-2">
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </span>
+              Book Now
+            </button>
+          </div>
+        </div>
+      </form>
+      
+      <!-- Booking result placeholder -->
+      <div id="booking-result"></div>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('htmx:afterOnLoad', function(event) {
+      if (event.detail.target.id === 'availability-message') {
+        const submitBtn = document.getElementById('submit-button');
+        const response = event.detail.xhr.response;
+        
+        // Enable/disable submit button based on availability
+        if (response && response.includes('Room is available')) {
+          submitBtn.disabled = false;
+        } else {
+          submitBtn.disabled = true;
+        }
+      }
+    });
+  </script>

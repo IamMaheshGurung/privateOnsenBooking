@@ -1,0 +1,49 @@
+<div class="bg-white shadow-sm rounded-lg p-6 border border-leaf-200">
+    <h3 class="text-lg font-medium text-gray-900">Private Onsen Reservation</h3>
+    <p class="mt-1 text-sm text-gray-500">
+      Select your preferred date and time for your private onsen experience.
+    </p>
+    
+    <form hx-post="/api/onsen/bookings" hx-target="#onsen-booking-result" class="mt-4 space-y-6">
+      <input type="hidden" name="booking_id" value="{{.BookingID}}">
+      <input type="hidden" name="guest_id" value="{{.GuestID}}">
+      <input type="hidden" name="room_id" value="{{.RoomID}}">
+      
+      <!-- Date Selection -->
+      <div>
+        <label for="onsen_date" class="block text-sm font-medium text-gray-700">Date</label>
+        <div class="mt-1">
+          <select 
+            name="date" 
+            id="onsen_date"
+            hx-get="/api/onsen/slots"
+            hx-target="#time-slot-container"
+            hx-trigger="change"
+            required
+            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-leaf-500 focus:border-leaf-500 sm:text-sm rounded-md"
+          >
+            <option value="">Select a date</option>
+            {{range .AvailableDates}}
+            <option value="{{.Value}}">{{.Display}}</option>
+            {{end}}
+          </select>
+        </div>
+      </div>
+      
+      <!-- Time Slot Selection will be loaded here -->
+      <div id="time-slot-container">
+        <div class="text-sm text-gray-500">Please select a date first</div>
+      </div>
+      
+      <div>
+        <button
+          type="submit"
+          class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-leaf-600 hover:bg-leaf-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-leaf-500"
+        >
+          Reserve Onsen
+        </button>
+      </div>
+    </form>
+    
+    <div id="onsen-booking-result" class="mt-4"></div>
+  </div>

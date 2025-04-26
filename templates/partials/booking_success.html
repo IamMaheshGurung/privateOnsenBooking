@@ -1,0 +1,68 @@
+<div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+  <div class="px-4 py-5 sm:px-6 bg-green-50">
+    <div class="flex items-center">
+      <div class="flex-shrink-0">
+        <svg class="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <h3 class="ml-2 text-lg leading-6 font-medium text-green-800">Booking Confirmed!</h3>
+    </div>
+    <p class="mt-1 max-w-2xl text-sm text-green-600">
+      Your room has been successfully booked. A confirmation email has been sent to your email address.
+    </p>
+  </div>
+  
+  <div class="border-t border-stone-200">
+    <dl>
+      <div class="bg-stone-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-stone-500">Booking Reference</dt>
+        <dd class="mt-1 text-sm text-stone-900 sm:mt-0 sm:col-span-2">{{ .BookingID }}</dd>
+      </div>
+      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-stone-500">Guest Name</dt>
+        <dd class="mt-1 text-sm text-stone-900 sm:mt-0 sm:col-span-2">{{ .GuestName }}</dd>
+      </div>
+      <div class="bg-stone-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-stone-500">Room</dt>
+        <dd class="mt-1 text-sm text-stone-900 sm:mt-0 sm:col-span-2">{{ .RoomType }}</dd>
+      </div>
+      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-stone-500">Check-in Date</dt>
+        <dd class="mt-1 text-sm text-stone-900 sm:mt-0 sm:col-span-2">{{ .CheckIn }}</dd>
+      </div>
+      <div class="bg-stone-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-stone-500">Check-out Date</dt>
+        <dd class="mt-1 text-sm text-stone-900 sm:mt-0 sm:col-span-2">{{ .CheckOut }}</dd>
+      </div>
+      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-stone-500">Total Amount</dt>
+        <dd class="mt-1 text-sm text-stone-900 sm:mt-0 sm:col-span-2">¥{{ .TotalPrice }}</dd>
+      </div>
+    </dl>
+  </div>
+</div>
+
+<div id="onsen-booking-container">
+  {{ template "partials/_onsen_slots.html" . }}
+</div>
+
+<div class="mt-6">
+  <div class="bg-stone-50 px-4 py-5 sm:px-6 rounded-lg shadow">
+    <h3 class="text-base font-medium text-stone-700">Need to cancel?</h3>
+    <p class="mt-1 text-sm text-stone-500">
+      If you need to cancel your booking, you can do so by clicking the button below.
+    </p>
+    <div class="mt-4">
+      <button 
+        type="button" 
+        hx-post="/api/bookings/{{ .BookingID }}/cancel" 
+        hx-confirm="Are you sure you want to cancel this booking?"
+        hx-target="body"
+        class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+      >
+        Cancel Booking
+      </button>
+    </div>
+  </div>
+</div>

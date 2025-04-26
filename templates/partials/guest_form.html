@@ -1,0 +1,104 @@
+<!-- This will be loaded after selecting a room -->
+<div class="bg-white shadow-sm rounded-lg p-6">
+    <h3 class="text-xl font-bold text-gray-900 mb-4">Guest Information</h3>
+    
+    <form hx-post="/api/bookings/create" hx-target="#booking-confirmation" class="space-y-6">
+      <!-- Hidden fields from previous steps -->
+      <input type="hidden" name="room_id" value="{{.RoomID}}">
+      <input type="hidden" name="check_in" value="{{.CheckIn}}">
+      <input type="hidden" name="check_out" value="{{.CheckOut}}">
+      <input type="hidden" name="total_price" value="{{.TotalPrice}}">
+      <input type="hidden" name="night_count" value="{{.NightCount}}">
+      
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <!-- Full Name -->
+        <div>
+          <label for="guest_name" class="block text-sm font-medium text-gray-700">Full Name</label>
+          <div class="mt-1">
+            <input 
+              type="text" 
+              name="guest_name" 
+              id="guest_name" 
+              required
+              class="shadow-sm focus:ring-leaf-500 focus:border-leaf-500 block w-full sm:text-sm border-gray-300 rounded-md">
+          </div>
+        </div>
+        
+        <!-- Email -->
+        <div>
+          <label for="guest_email" class="block text-sm font-medium text-gray-700">Email Address</label>
+          <div class="mt-1">
+            <input 
+              type="email" 
+              name="guest_email" 
+              id="guest_email"
+              required
+              class="shadow-sm focus:ring-leaf-500 focus:border-leaf-500 block w-full sm:text-sm border-gray-300 rounded-md">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Phone -->
+      <div>
+        <label for="guest_phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
+        <div class="mt-1">
+          <input 
+            type="tel" 
+            name="guest_phone" 
+            id="guest_phone"
+            required
+            class="shadow-sm focus:ring-leaf-500 focus:border-leaf-500 block w-full sm:text-sm border-gray-300 rounded-md">
+        </div>
+      </div>
+      
+      <!-- Special Requests -->
+      <div>
+        <label for="special_requests" class="block text-sm font-medium text-gray-700">Special Requests</label>
+        <div class="mt-1">
+          <textarea 
+            name="special_requests" 
+            id="special_requests" 
+            rows="3"
+            class="shadow-sm focus:ring-leaf-500 focus:border-leaf-500 block w-full sm:text-sm border-gray-300 rounded-md"></textarea>
+        </div>
+        <p class="mt-2 text-sm text-gray-500">Let us know if you have any special requests or dietary requirements.</p>
+      </div>
+      
+      <!-- Terms and Conditions -->
+      <div class="flex items-start">
+        <div class="flex items-center h-5">
+          <input 
+            id="terms" 
+            name="terms" 
+            type="checkbox" 
+            required
+            class="focus:ring-leaf-500 h-4 w-4 text-leaf-600 border-gray-300 rounded">
+        </div>
+        <div class="ml-3 text-sm">
+          <label for="terms" class="font-medium text-gray-700">I agree to the terms and conditions</label>
+          <p class="text-gray-500">Your booking includes free cancellation up to 48 hours before check-in.</p>
+        </div>
+      </div>
+      
+      <!-- Book Now Button -->
+      <div>
+        <button
+          type="submit"
+          class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-leaf-600 hover:bg-leaf-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-leaf-500"
+        >
+          Complete Booking
+        </button>
+      </div>
+    </form>
+    
+    <div class="mt-4 p-4 border border-gray-200 rounded-md bg-gray-50">
+      <h4 class="text-sm font-medium text-gray-900">Booking Summary</h4>
+      <div class="mt-2 text-sm text-gray-500">
+        <p>{{.RoomType}} Room</p>
+        <p>Check-in: {{.CheckInFormatted}}</p>
+        <p>Check-out: {{.CheckOutFormatted}}</p>
+        <p>{{.NightCount}} nights</p>
+        <p class="mt-2 font-bold text-gray-900">Total: ¥{{.TotalPrice}}</p>
+      </div>
+    </div>
+  </div>
