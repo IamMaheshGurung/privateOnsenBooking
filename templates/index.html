@@ -1,124 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kwangdi Hotel - Traditional Japanese Ryokan</title>
-    <!-- Either use CDN (for development only) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-  <!-- <link href="/static/css/tailwind.css" rel="stylesheet"> -->
-    <script src="/static/js/htmx.min.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-          theme: {
-            extend: {
-              colors: {
-                cream: {
-                  light: '#F8F4E9',
-                  DEFAULT: '#F3EFE0',
-                  dark: '#E8E2D6'
-                },
-                leaf: {
-                  light: '#8C9E5E',
-                  DEFAULT: '#5A6B3D',
-                  dark: '#414F2A'
-                }
-              }
-            }
-          }
-        }
-      </script>
-      <style>
-          body {
-              font-family: 'Shippori Mincho', serif;
-              background-color: #F8F4E9; /* Light cream background */
-              color: #414F2A; /* Dark green text */
-          }
-          
-          .hero-image {
-              background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/static/images/hero/hero1.jpg');
-              background-position: center;
-              background-size: cover;
-              height: 80vh;
-          }
-      
-          /* Button & Accent Colors */
-          .btn-primary {
-              background-color: #5A6B3D;
-              color: #F8F4E9;
-              transition: all 0.3s ease;
-          }
-          
-          .btn-primary:hover {
-              background-color: #414F2A;
-          }
-          
-          /* Section Backgrounds */
-          .bg-cream-light {
-              background-color: #F8F4E9;
-          }
-          
-          .bg-cream {
-              background-color: #F3EFE0;
-          }
-          
-          .bg-cream-dark {
-              background-color: #E8E2D6;
-          }
-          
-          /* Text Colors */
-          .text-leaf-light {
-              color: #8C9E5E;
-          }
-          
-          .text-leaf {
-              color: #5A6B3D;
-          }
-          
-          .text-leaf-dark {
-              color: #414F2A;
-          }
-          
-          /* Border Colors */
-          .border-leaf {
-              border-color: #5A6B3D;
-          }
-      
-          /* Section Dividers */
-          .divider {
-              height: 2px;
-              width: 80px;
-              background-color: #8C9E5E;
-              margin: 1rem 0;
-          }
-          
-          .divider-center {
-              margin-left: auto;
-              margin-right: auto;
-          }
-          
-          /* Card Styles */
-          .card {
-              background-color: #FFFFFF;
-              border-radius: 0.5rem;
-              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-              transition: all 0.3s ease;
-          }
-          
-          .card:hover {
-              transform: translateY(-5px);
-              box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-          }
-      </style>
-</head>
-<body class="bg-cream-light text-leaf-dark">
-    
-    <!-- Navigation -->
-    <div hx-get="/partials/navigation" hx-trigger="load" hx-swap="outerHTML"></div>
 
+{{define "content"}}
     <!-- Hero Section -->
     <section class="hero-image flex items-center justify-center">
         <div class="text-center text-white p-6">
@@ -161,34 +42,112 @@
     </section>
 
     <!-- Room Preview Section -->
-    <section class="py-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-medium text-stone-800 mb-4">Our Accommodations</h2>
-                <div class="w-20 h-1 bg-leaf mx-auto mb-6"></div>
-                <p class="text-stone-600 max-w-3xl mx-auto">
-                    Experience traditional Japanese hospitality with our selection of rooms, 
-                    each offering a unique blend of comfort and cultural authenticity.
-                </p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-                hx-get="/rooms/preview" 
-                hx-trigger="load"
-                hx-swap="innerHTML">
-                <!-- Room cards will be loaded here -->
-                <div class="animate-pulse bg-stone-200 rounded-lg h-96"></div>
-                <div class="animate-pulse bg-stone-200 rounded-lg h-96"></div>
-                <div class="animate-pulse bg-stone-200 rounded-lg h-96"></div>
-            </div>
-            
-            <div class="text-center mt-10">
-                <a href="/rooms" class="bg-transparent hover:bg-leaf text-leaf hover:text-white border border-leaf hover:border-transparent px-6 py-3 rounded-md font-medium transition-colors duration-300">
-                    View All Rooms
-                </a>
-            </div>
+   <!-- In index.html or rooms.html -->
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-medium text-leaf mb-4">Our Accommodations</h2>
+            <div class="divider divider-center"></div>
+            <p class="text-leaf-dark max-w-3xl mx-auto">
+                Experience traditional Japanese hospitality with our selection of rooms, 
+                each offering a unique blend of comfort and cultural authenticity.
+            </p>
         </div>
-    </section>
+        
+       <!-- Room Grid with Enhanced Error Handling -->
+<div id="rooms-container" class="min-h-[300px]">
+    <!-- Debug information -->
+    <div id="debug-info" class="mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded hidden">
+        <p id="debug-message"></p>
+    </div>
+    
+    <!-- Loading state -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" 
+         hx-get="/rooms/preview" 
+         hx-trigger="load" 
+         hx-swap="outerHTML"
+         hx-indicator="#rooms-loading"
+         hx-on:htmx:beforeRequest="document.getElementById('debug-info').classList.remove('hidden'); document.getElementById('debug-message').textContent = 'Sending request to /rooms/preview...'"
+         hx-on:htmx:afterRequest="document.getElementById('debug-message').textContent += ' | Request completed.'"
+         hx-on:htmx:responseError="document.getElementById('debug-message').textContent += ' | Error: ' + event.detail.xhr.status + ' ' + event.detail.xhr.statusText">
+        
+        <!-- Loading placeholder cards -->
+        <div class="bg-white animate-pulse rounded-lg shadow-md p-6">
+            <div class="bg-gray-200 h-48 w-full mb-4"></div>
+            <div class="h-6 bg-gray-200 rounded w-2/3 mb-4"></div>
+            <div class="h-4 bg-gray-200 rounded mb-2"></div>
+            <div class="h-4 bg-gray-200 rounded mb-2 w-5/6"></div>
+            <div class="h-8 bg-gray-200 rounded mt-4"></div>
+        </div>
+        
+        <div class="bg-white animate-pulse rounded-lg shadow-md p-6">
+            <div class="bg-gray-200 h-48 w-full mb-4"></div>
+            <div class="h-6 bg-gray-200 rounded w-2/3 mb-4"></div>
+            <div class="h-4 bg-gray-200 rounded mb-2"></div>
+            <div class="h-4 bg-gray-200 rounded mb-2 w-5/6"></div>
+            <div class="h-8 bg-gray-200 rounded mt-4"></div>
+        </div>
+        
+        <div class="bg-white animate-pulse rounded-lg shadow-md p-6">
+            <div class="bg-gray-200 h-48 w-full mb-4"></div>
+            <div class="h-6 bg-gray-200 rounded w-2/3 mb-4"></div>
+            <div class="h-4 bg-gray-200 rounded mb-2"></div>
+            <div class="h-4 bg-gray-200 rounded mb-2 w-5/6"></div>
+            <div class="h-8 bg-gray-200 rounded mt-4"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Manual load button for debugging -->
+<div class="text-center mt-4 mb-8">
+    <button class="bg-leaf text-white px-4 py-2 rounded-md"
+            onclick="manuallyLoadRooms()">
+        Manually Load Rooms
+    </button>
+</div>
+
+<script>
+    function manuallyLoadRooms() {
+        // Show debug info
+        document.getElementById('debug-info').classList.remove('hidden');
+        document.getElementById('debug-message').textContent = 'Manually fetching rooms...';
+        
+        // Fetch rooms directly with fetch API as a fallback
+        fetch('/rooms/preview')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.status);
+                }
+                return response.text();
+            })
+            .then(html => {
+                document.getElementById('rooms-container').innerHTML = html;
+                document.getElementById('debug-message').textContent += ' | Success! Rooms loaded.';
+            })
+            .catch(error => {
+                document.getElementById('debug-message').textContent += ' | Error: ' + error.message;
+                console.error('Error fetching rooms:', error);
+            });
+    }
+    
+    // Debug HTMX events
+    document.addEventListener('htmx:afterSettle', function(evt) {
+        console.log('HTMX content settled:', evt.detail.elt);
+    });
+    
+    document.addEventListener('htmx:responseError', function(evt) {
+        console.error('HTMX response error:', evt.detail.xhr.status, evt.detail.xhr.responseText);
+    });
+</script>
+        
+        <!-- View All Rooms button -->
+        <div class="text-center mt-10">
+            <a href="/rooms/preview" class="btn-primary px-6 py-2 rounded-md font-medium">
+                View All Rooms
+            </a>
+        </div>
+    </div>
+</section>
 
     <!-- Onsen Section -->
     <section class="py-16 bg-stone-800 text-white">
@@ -388,9 +347,66 @@
             </a>
         </div>
     </section>
+<!-- Add this at the end of your index.html file, before the closing </section> tag -->
+<script>
+    // Check if HTMX is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof htmx === 'undefined') {
+            console.error("HTMX is not loaded! Attempting to load it now...");
+            
+            // Create script element
+            var script = document.createElement('script');
+            script.src = 'https://unpkg.com/htmx.org@1.9.6/dist/htmx.min.js';
+            script.onload = function() {
+                console.log("HTMX loaded successfully, initializing...");
+                // Re-initialize HTMX for our container
+                htmx.process(document.getElementById('rooms-container'));
+            };
+            script.onerror = function() {
+                console.error("Failed to load HTMX from CDN");
+                document.getElementById('rooms-container').innerHTML = 
+                    '<div class="col-span-3 text-center py-8 text-red-500">' +
+                    '<p class="text-lg">Failed to load room data. Please refresh the page or try again later.</p>' +
+                    '</div>';
+            };
+            
+            // Add script to document
+            document.head.appendChild(script);
+        } else {
+            console.log("HTMX is loaded, version:", htmx.version);
+        }
+    });
+</script>
 
-    <!-- Footer -->
-    <div hx-get="/partials/footer" hx-trigger="load" hx-swap="outerHTML"></div>
+
+<script>
+    // Check room data via API
+    fetch('/api/rooms/check')
+        .then(response => response.json())
+        .then(data => {
+            console.log('Room check:', data);
+            if (data.roomCount === 0) {
+                console.warn('No rooms in database. Make sure data is seeded.');
+            }
+        })
+        .catch(err => console.error('Failed to check rooms:', err));
     
-</body>
-</html>
+    // Log HTMX events
+    document.addEventListener('htmx:beforeRequest', function(evt) {
+        console.log('HTMX request starting:', evt.detail.requestConfig);
+    });
+    
+    document.addEventListener('htmx:afterRequest', function(evt) {
+        console.log('HTMX request finished:', {
+            successful: evt.detail.successful,
+            failed: evt.detail.failed,
+            xhr: evt.detail.xhr
+        });
+    });
+</script>
+
+    
+
+
+    
+{{end}}

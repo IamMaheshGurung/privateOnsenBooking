@@ -1,65 +1,121 @@
-<header x-data="{ mobileMenuOpen: false }" class="bg-white shadow-sm relative z-10">
-    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between h-16">
-        <div class="flex items-center">
-          <a href="/" class="flex-shrink-0 flex items-center">
-            <img class="h-10 w-auto" src="/static/images/logo.png" alt="Kwangdi Hotel">
+{{ define "head"}}
+<header class="site-header">
+    <nav class="nav-container">
+      <div class="flex justify-between h-16 items-center">
+        <!-- Logo and brand name -->
+        <div class="flex">
+          <a href="/" class="nav-logo animate-logo">
+            <img src="/static/images/logo.png" alt="Kwangdi Hotel Logo">
+            <span>Kwangdi Hotel</span>
           </a>
-          <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-            <a href="/" class="border-leaf-500 text-stone-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-              Home
-            </a>
-            <a href="/rooms" class="border-transparent text-stone-500 hover:border-stone-300 hover:text-stone-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-              Rooms
-            </a>
-            <a href="/cuisine" class="border-transparent text-stone-500 hover:border-stone-300 hover:text-stone-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-              Cuisine
-            </a>
-            <a href="/gallery" class="border-transparent text-stone-500 hover:border-stone-300 hover:text-stone-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-              Gallery
-            </a>
-            <a href="/contact" class="border-transparent text-stone-500 hover:border-stone-300 hover:text-stone-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-              Contact
-            </a>
-          </div>
         </div>
-        <div class="hidden sm:ml-6 sm:flex sm:items-center">
-          <a href="/booking" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-leaf-600 hover:bg-leaf-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-leaf-500">
+  
+        <!-- Desktop navigation links -->
+        <div class="hidden md:flex md:items-center md:space-x-1">
+          <a href="/" class="nav-link">
+            Home
+          </a>
+          <a href="/rooms" class="nav-link">
+            Rooms
+          </a>
+          <div class="japanese-dropdown">
+            <a href="/onsen" class="nav-link flex items-center">
+              Onsen
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </a>
+            <div class="japanese-dropdown-menu">
+              <a href="/onsen/private" class="dropdown-item">Private Onsen</a>
+              <a href="/onsen/public" class="dropdown-item">Public Bath</a>
+              <a href="/onsen/outdoor" class="dropdown-item">Outdoor Onsen</a>
+            </div>
+          </div>
+          <a href="/about" class="nav-link">
+            About
+          </a>
+          <a href="/contact" class="nav-link">
+            Contact
+          </a>
+        </div>
+  
+        <!-- Book now button for desktop -->
+        <div class="hidden md:flex md:items-center ml-4">
+          <a href="/booking" class="btn-primary px-4 py-2 rounded-md text-sm font-medium shadow-sm hover:shadow-md transition-all">
             Book Now
           </a>
         </div>
-        <div class="-mr-2 flex items-center sm:hidden">
-          <button @click="mobileMenuOpen = !mobileMenuOpen" type="button" class="inline-flex items-center justify-center p-2 rounded-md text-stone-400 hover:text-stone-500 hover:bg-stone-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-leaf-500" aria-expanded="false">
+  
+        <!-- Mobile menu button -->
+        <div class="flex items-center md:hidden">
+          <button type="button" id="mobile-menu-button" class="mobile-menu-button">
             <span class="sr-only">Open main menu</span>
-            <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <!-- Icon when menu is closed -->
+            <svg id="menu-closed-icon" class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            <!-- Icon when menu is open -->
+            <svg id="menu-open-icon" class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
       </div>
     </nav>
   
-    <!-- Mobile menu -->
-    <div x-show="mobileMenuOpen" class="sm:hidden" id="mobile-menu">
-      <div class="pt-2 pb-3 space-y-1">
-        <a href="/" class="bg-leaf-50 border-leaf-500 text-leaf-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
+    <!-- Mobile menu, show/hide based on menu state -->
+    <div id="mobile-menu" class="mobile-menu hidden md:hidden">
+      <div class="px-2 pt-2 pb-3 space-y-1">
+        <a href="/" class="mobile-nav-link">
           Home
         </a>
-        <a href="/rooms" class="border-transparent text-stone-500 hover:bg-stone-50 hover:border-stone-300 hover:text-stone-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
+        <a href="/rooms" class="mobile-nav-link">
           Rooms
         </a>
-        <a href="/cuisine" class="border-transparent text-stone-500 hover:bg-stone-50 hover:border-stone-300 hover:text-stone-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
-          Cuisine
+        <a href="/onsen" class="mobile-nav-link">
+          Onsen
         </a>
-        <a href="/gallery" class="border-transparent text-stone-500 hover:bg-stone-50 hover:border-stone-300 hover:text-stone-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
-          Gallery
+        <a href="/about" class="mobile-nav-link">
+          About
         </a>
-        <a href="/contact" class="border-transparent text-stone-500 hover:bg-stone-50 hover:border-stone-300 hover:text-stone-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
+        <a href="/contact" class="mobile-nav-link">
           Contact
         </a>
-        <a href="/booking" class="block w-full text-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-leaf-600 hover:bg-leaf-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-leaf-500 mx-2">
+        <a href="/booking" class="mobile-book-button">
           Book Now
         </a>
       </div>
     </div>
   </header>
+  
+  <script>
+    document.getElementById('mobile-menu-button').addEventListener('click', function() {
+      const mobileMenu = document.getElementById('mobile-menu');
+      const closedIcon = document.getElementById('menu-closed-icon');
+      const openIcon = document.getElementById('menu-open-icon');
+      
+      if (mobileMenu.classList.contains('hidden')) {
+        mobileMenu.classList.remove('hidden');
+        closedIcon.classList.add('hidden');
+        openIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        closedIcon.classList.remove('hidden');
+        openIcon.classList.add('hidden');
+      }
+    });
+    
+    // Add active class to current page
+    document.addEventListener('DOMContentLoaded', function() {
+      const currentPath = window.location.pathname;
+      const navLinks = document.querySelectorAll('.nav-link, .mobile-nav-link');
+      
+      navLinks.forEach(link => {
+        const href = link.getAttribute('href');
+        if (href === currentPath || (href !== '/' && currentPath.startsWith(href))) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+  {{ end }}
