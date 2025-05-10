@@ -192,7 +192,7 @@ func (ctrl *RoomController) DeleteRoom(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := ctrl.Service.DeleteRoom(uint(id)); err != nil {
+	if err := ctrl.Service.DeactivateRoom(uint(id)); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to delete room: " + err.Error(),
 		})

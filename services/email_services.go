@@ -5,66 +5,72 @@ import (
 	"fmt"
 	"html/template"
 	"net/smtp"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/IamMaheshGurung/privateOnsenBooking/models"
-
 	"go.uber.org/zap"
 )
 
-// EmailConfig holds the configuration for email sending
+// EmailConfig contains all the SMTP configuration options
 type EmailConfig struct {
 	SMTPServer   string
 	SMTPPort     int
-	Username     string
-	Password     string
+	SMTPUsername string
+	SMTPPassword string
 	FromEmail    string
 	FromName     string
 	TemplatesDir string
+	Environment  string // "development", "production", etc.
 }
 
-// EmailService handles all email sending operations
+// EmailService handles sending email notifications
 type EmailService struct {
 	logger *zap.Logger
 	config EmailConfig
 }
 
-// NewEmailService creates a new instance of EmailService
+// NewEmailService creates a new email service instance
 func NewEmailService(logger *zap.Logger, config EmailConfig) *EmailService {
+	// Set default values if not provided
+	if config.FromName == "" {
+		config.FromName = "Kwangdi Onsen"
+	}
+
+	if config.TemplatesDir == "" {
+		config.TemplatesDir = "./templates/emails"
+	}
+
 	return &EmailService{
 		logger: logger,
 		config: config,
 	}
 }
 
-// EmailData contains data used in email templates
-type EmailData struct {
-	GuestName       string
-	BookingID       uint
-	CheckIn         time.Time
-	CheckOut        time.Time
-	RoomType        string
-	RoomNumber      string
-	TotalPrice      float64
-	OnsenDate       time.Time
-	OnsenTimeSlot   string
-	OnsenPrice      float64
-	HotelName       string
-	HotelAddress    string
-	HotelPhone      string
-	BookingDate     time.Time
-	CancellationURL string
-	CustomMessage   string
-	Subject         string
-}
+// SendEmail sends an email with the given parameters
+func (es *EmailService) SendEmail(to, subject, body string) error {
+	// Skip sending in development mode if configured to do so
+	if es.config.Environment == "development" && os.Getenv("SEND_EMAILS") != "true" {
+		es.logger.Info("Email sending skipped in development mode",
+			zap.String("to", to),
+			zap.String("subject", subject))
+		return nil
+	}
 
-// sendEmail sends an email using the SMTP configuration
-func (es *EmailService) sendEmail(to, subject, body string) error {
-	// Set up authentication information
+	// Check if SMTP configuration is available
+	if es.config.SMTPServer == "" || es.config.SMTPPort == 0 {
+		es.logger.Warn("SMTP not configured, email not sent",
+			zap.String("to", to),
+			zap.String("subject", subject))
+		return fmt.Errorf("SMTP not configured")
+	}
+
+	// Setup authentication
 	auth := smtp.PlainAuth(
 		"",
-		es.config.Username,
-		es.config.Password,
+		es.config.SMTPUsername,
+		es.config.SMTPPassword,
 		es.config.SMTPServer,
 	)
 
@@ -101,190 +107,225 @@ func (es *EmailService) sendEmail(to, subject, body string) error {
 	return nil
 }
 
-// renderTemplate renders an email template with the provided data
-func (es *EmailService) renderTemplate(templateName string, data EmailData) (string, error) {
-	// Construct template path
-	templatePath := fmt.Sprintf("%s/%s.html", es.config.TemplatesDir, templateName)
+// renderTemplate parses and renders an email template with the given data
+func (es *EmailService) renderTemplate(templateName string, data interface{}) (string, error) {
+	templatePath := filepath.Join(es.config.TemplatesDir, templateName+".html")
 
-	// Parse the template
+	// Check if template file exists
+	if _, err := os.Stat(templatePath); os.IsNotExist(err) {
+		es.logger.Error("email template not found", zap.String("template", templatePath))
+		return "", fmt.Errorf("email template not found: %s", templateName)
+	}
+
+	// Parse template file
 	tmpl, err := template.ParseFiles(templatePath)
 	if err != nil {
 		es.logger.Error("failed to parse email template",
-			zap.String("template", templateName),
+			zap.String("template", templatePath),
 			zap.Error(err))
 		return "", fmt.Errorf("failed to parse email template: %w", err)
 	}
 
-	// Execute the template with data
-	var tpl bytes.Buffer
-	if err := tmpl.Execute(&tpl, data); err != nil {
-		es.logger.Error("failed to execute email template",
-			zap.String("template", templateName),
+	// Execute template with data
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, data); err != nil {
+		es.logger.Error("failed to render email template",
+			zap.String("template", templatePath),
 			zap.Error(err))
-		return "", fmt.Errorf("failed to execute email template: %w", err)
+		return "", fmt.Errorf("failed to render email template: %w", err)
 	}
 
-	return tpl.String(), nil
+	return buf.String(), nil
 }
 
-// SendRoomBookingConfirmation sends a booking confirmation email
-func (es *EmailService) SendRoomBookingConfirmation(booking *models.RoomBooking, guest *models.Guest, room *models.Room) error {
-	// Prepare email data
-	data := EmailData{
-		GuestName:       guest.Name,
-		BookingID:       booking.ID,
-		CheckIn:         booking.CheckIn,
-		CheckOut:        booking.CheckOut,
-		RoomType:        room.Type,
-		RoomNumber:      room.RoomNo,
-		TotalPrice:      booking.TotalPrice,
-		HotelName:       "Traditional Japanese Ryokan", // Configure these values in a real app
-		HotelAddress:    "123 Sakura Street, Kyoto, Japan",
-		HotelPhone:      "+81 123-456-7890",
-		BookingDate:     booking.CreatedAt,
-		CancellationURL: fmt.Sprintf("https://yourdomain.com/bookings/cancel/%d", booking.ID),
+// SendBookingConfirmation sends a booking confirmation email to the guest
+func (es *EmailService) SendBookingConfirmation(booking *models.RoomBooking, guest *models.Guest, room *models.Room) error {
+	// Skip if no guest email
+	if guest == nil || guest.Email == "" {
+		es.logger.Warn("no guest email available for booking confirmation",
+			zap.Uint("bookingID", booking.ID),
+			zap.Uint("guestID", booking.GuestID))
+		return fmt.Errorf("no guest email available")
 	}
 
-	// Render template
-	body, err := es.renderTemplate("room_booking_confirmation", data)
+	// Prepare template data
+	data := map[string]interface{}{
+		"Booking":      booking,
+		"Guest":        guest,
+		"Room":         room,
+		"HotelName":    es.config.FromName,
+		"CheckInDate":  booking.CheckIn.Format("Monday, January 2, 2006"),
+		"CheckOutDate": booking.CheckOut.Format("Monday, January 2, 2006"),
+		"TotalNights":  int(booking.CheckOut.Sub(booking.CheckIn).Hours() / 24),
+		"TotalPrice":   fmt.Sprintf("%.2f", booking.TotalPrice),
+		"Year":         time.Now().Year(),
+	}
+
+	// Render email template
+	body, err := es.renderTemplate("booking_confirmation", data)
 	if err != nil {
 		return err
 	}
 
-	// Set subject
-	subject := fmt.Sprintf("Booking Confirmation #%d - Traditional Japanese Ryokan", booking.ID)
-
 	// Send email
-	return es.sendEmail(guest.Email, subject, body)
+	subject := fmt.Sprintf("Your Booking Confirmation #%s - %s", booking.ReferenceNumber, es.config.FromName)
+	return es.SendEmail(guest.Email, subject, body)
 }
 
-// SendOnsenBookingConfirmation sends an onsen booking confirmation email
-func (es *EmailService) SendOnsenBookingConfirmation(booking *models.OnsenBooking, guest *models.Guest) error {
-	// Prepare email data
-	data := EmailData{
-		GuestName:     guest.Name,
-		BookingID:     booking.ID,
-		OnsenDate:     booking.Date,
-		OnsenTimeSlot: booking.TimeSlot,
-		OnsenPrice:    booking.Price,
-		HotelName:     "Traditional Japanese Ryokan",
-		HotelAddress:  "123 Sakura Street, Kyoto, Japan",
-		HotelPhone:    "+81 123-456-7890",
-		BookingDate:   booking.CreatedAt,
-	}
-
-	// Render template
-	body, err := es.renderTemplate("onsen_booking_confirmation", data)
-	if err != nil {
-		return err
-	}
-
-	// Set subject
-	subject := fmt.Sprintf("Private Onsen Reservation #%d - Traditional Japanese Ryokan", booking.ID)
-
-	// Send email
-	return es.sendEmail(guest.Email, subject, body)
-}
-
-// SendBookingCancellationNotice sends a cancellation notice email
+// SendBookingCancellationNotice sends a booking cancellation confirmation email
 func (es *EmailService) SendBookingCancellationNotice(booking *models.RoomBooking, guest *models.Guest, room *models.Room) error {
-	// Prepare email data
-	data := EmailData{
-		GuestName:   guest.Name,
-		BookingID:   booking.ID,
-		CheckIn:     booking.CheckIn,
-		CheckOut:    booking.CheckOut,
-		RoomType:    room.Type,
-		RoomNumber:  room.RoomNo,
-		HotelName:   "Traditional Japanese Ryokan",
-		HotelPhone:  "+81 123-456-7890",
-		BookingDate: booking.CreatedAt,
+	// Skip if no guest email
+	if guest == nil || guest.Email == "" {
+		es.logger.Warn("no guest email available for cancellation notice",
+			zap.Uint("bookingID", booking.ID))
+		return fmt.Errorf("no guest email available")
 	}
 
-	// Render template
+	cancellationFeeText := "No cancellation fee has been applied."
+	if booking.CancellationFee > 0 {
+		cancellationFeeText = fmt.Sprintf("A cancellation fee of %.2f has been applied.", booking.CancellationFee)
+	}
+
+	// Prepare template data
+	data := map[string]interface{}{
+		"Booking":             booking,
+		"Guest":               guest,
+		"Room":                room,
+		"HotelName":           es.config.FromName,
+		"CancellationDate":    booking.CancelledAt.Format("Monday, January 2, 2006"),
+		"CheckInDate":         booking.CheckIn.Format("Monday, January 2, 2006"),
+		"CancellationFeeText": cancellationFeeText,
+		"Year":                time.Now().Year(),
+	}
+
+	// Render email template
 	body, err := es.renderTemplate("booking_cancellation", data)
 	if err != nil {
 		return err
 	}
 
-	// Set subject
-	subject := fmt.Sprintf("Booking Cancellation #%d - Traditional Japanese Ryokan", booking.ID)
-
 	// Send email
-	return es.sendEmail(guest.Email, subject, body)
+	subject := fmt.Sprintf("Booking Cancellation #%s - %s", booking.ReferenceNumber, es.config.FromName)
+	return es.SendEmail(guest.Email, subject, body)
 }
 
-// SendOnsenCancellationNotice sends an onsen cancellation notice email
-func (es *EmailService) SendOnsenCancellationNotice(booking *models.OnsenBooking, guest *models.Guest) error {
-	// Prepare email data
-	data := EmailData{
-		GuestName:     guest.Name,
-		BookingID:     booking.ID,
-		OnsenDate:     booking.Date,
-		OnsenTimeSlot: booking.TimeSlot,
-		HotelName:     "Traditional Japanese Ryokan",
-		HotelPhone:    "+81 123-456-7890",
+// SendCheckInReminder sends a reminder email before check-in date
+func (es *EmailService) SendCheckInReminder(booking *models.RoomBooking, guest *models.Guest, room *models.Room) error {
+	// Skip if no guest email
+	if guest == nil || guest.Email == "" {
+		es.logger.Warn("no guest email available for check-in reminder",
+			zap.Uint("bookingID", booking.ID))
+		return fmt.Errorf("no guest email available")
 	}
 
-	// Render template
-	body, err := es.renderTemplate("onsen_cancellation", data)
-	if err != nil {
-		return err
+	// Calculate days until check-in
+	daysUntilCheckIn := int(booking.CheckIn.Sub(time.Now()).Hours() / 24)
+
+	// Prepare template data
+	data := map[string]interface{}{
+		"Booking":          booking,
+		"Guest":            guest,
+		"Room":             room,
+		"HotelName":        es.config.FromName,
+		"CheckInDate":      booking.CheckIn.Format("Monday, January 2, 2006"),
+		"CheckInTime":      "3:00 PM", // Modify as needed
+		"DaysUntilCheckIn": daysUntilCheckIn,
+		"Year":             time.Now().Year(),
 	}
 
-	// Set subject
-	subject := fmt.Sprintf("Onsen Reservation Cancellation #%d - Traditional Japanese Ryokan", booking.ID)
-
-	// Send email
-	return es.sendEmail(guest.Email, subject, body)
-}
-
-// SendCustomEmail sends a custom email to a guest
-func (es *EmailService) SendCustomEmail(email string, subject string, message string) error {
-	// Prepare email data
-	data := EmailData{
-		CustomMessage: message,
-		HotelName:     "Traditional Japanese Ryokan",
-		HotelAddress:  "123 Sakura Street, Kyoto, Japan",
-		HotelPhone:    "+81 123-456-7890",
-		Subject:       subject,
-	}
-
-	// Render template
-	body, err := es.renderTemplate("custom_message", data)
+	// Render email template
+	body, err := es.renderTemplate("checkin_reminder", data)
 	if err != nil {
 		return err
 	}
 
 	// Send email
-	return es.sendEmail(email, subject, body)
+	subject := fmt.Sprintf("Your Stay at %s Begins Soon", es.config.FromName)
+	return es.SendEmail(guest.Email, subject, body)
 }
 
-// SendBookingReminder sends a booking reminder email
-func (es *EmailService) SendBookingReminder(booking *models.RoomBooking, guest *models.Guest, room *models.Room) error {
-	// Prepare email data
-	data := EmailData{
-		GuestName:    guest.Name,
-		BookingID:    booking.ID,
-		CheckIn:      booking.CheckIn,
-		CheckOut:     booking.CheckOut,
-		RoomType:     room.Type,
-		RoomNumber:   room.RoomNo,
-		HotelName:    "Traditional Japanese Ryokan",
-		HotelAddress: "123 Sakura Street, Kyoto, Japan",
-		HotelPhone:   "+81 123-456-7890",
+// SendContactFormNotification sends an email to hotel staff when contact form is submitted
+func (es *EmailService) SendContactFormNotification(name, email, message string) error {
+	// Prepare template data
+	data := map[string]interface{}{
+		"Name":          name,
+		"Email":         email,
+		"Message":       message,
+		"SubmittedDate": time.Now().Format("Monday, January 2, 2006 at 3:04 PM"),
+		"Year":          time.Now().Year(),
 	}
 
-	// Render template
-	body, err := es.renderTemplate("booking_reminder", data)
+	// Render email template
+	body, err := es.renderTemplate("contact_form_notification", data)
 	if err != nil {
 		return err
 	}
 
-	// Set subject
-	subject := fmt.Sprintf("Your Stay Reminder - Traditional Japanese Ryokan - %s",
-		booking.CheckIn.Format("Jan 2"))
+	// Send email to the configured address (or default to the FromEmail)
+	notificationEmail := os.Getenv("CONTACT_NOTIFICATION_EMAIL")
+	if notificationEmail == "" {
+		notificationEmail = es.config.FromEmail
+	}
+
+	subject := fmt.Sprintf("New Contact Form Submission - %s", name)
+	return es.SendEmail(notificationEmail, subject, body)
+}
+
+// SendSpecialOfferEmail sends a promotional email to a guest
+func (es *EmailService) SendSpecialOfferEmail(guest *models.Guest, offerTitle, offerDescription string, validUntil time.Time) error {
+	// Skip if no guest email
+	if guest == nil || guest.Email == "" {
+		es.logger.Warn("no guest email available for special offer",
+			zap.String("guestName", guest.Name))
+		return fmt.Errorf("no guest email available")
+	}
+
+	// Prepare template data
+	data := map[string]interface{}{
+		"Guest":            guest,
+		"HotelName":        es.config.FromName,
+		"OfferTitle":       offerTitle,
+		"OfferDescription": offerDescription,
+		"ValidUntil":       validUntil.Format("Monday, January 2, 2006"),
+		"Year":             time.Now().Year(),
+	}
+
+	// Render email template
+	body, err := es.renderTemplate("special_offer", data)
+	if err != nil {
+		return err
+	}
 
 	// Send email
-	return es.sendEmail(guest.Email, subject, body)
+	subject := fmt.Sprintf("Special Offer: %s - %s", offerTitle, es.config.FromName)
+	return es.SendEmail(guest.Email, subject, body)
+}
+
+// SendAdminNotification sends a notification email to admin
+func (es *EmailService) SendAdminNotification(subject, message string, data map[string]interface{}) error {
+	adminEmail := os.Getenv("ADMIN_EMAIL")
+	if adminEmail == "" {
+		es.logger.Warn("admin email not configured, notification not sent")
+		return fmt.Errorf("admin email not configured")
+	}
+
+	// Add default data
+	if data == nil {
+		data = make(map[string]interface{})
+	}
+
+	data["Subject"] = subject
+	data["Message"] = message
+	data["Timestamp"] = time.Now().Format("2006-01-02 15:04:05")
+	data["HotelName"] = es.config.FromName
+	data["Year"] = time.Now().Year()
+
+	// Render email template
+	body, err := es.renderTemplate("admin_notification", data)
+	if err != nil {
+		return err
+	}
+
+	// Send email
+	return es.SendEmail(adminEmail, subject, body)
 }

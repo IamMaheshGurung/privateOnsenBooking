@@ -20,28 +20,33 @@ type Room struct {
 	Type          string    `json:"type" gorm:"not null"`      // Standard, Deluxe, Suite, etc.
 	Capacity      int       `json:"capacity" gorm:"default:2"` // Number of guests
 	PricePerNight float64   `json:"price_per_night" gorm:"not null"`
-	Description   string    `json:"description"` // Room description
-	Amenities     string    `json:"amenities"`   // Comma-separated list or JSON
-	ImageURL      string    `json:"image_url"`   // Main room image URL
+	Status        string    `json:"status" gorm:"default:'active'"` // Available, Booked, Maintenance
+	Description   string    `json:"description"`                    // Room description
+	Amenities     string    `json:"amenities"`                      // Comma-separated list or JSON
+	ImageURL      string    `json:"image_url"`                      // Main room image URL
 	CreatedAt     time.Time `json:"created_at" gorm:"autoCreateTime"`
 }
 
 // RoomBooking represents a hotel room booking
 type RoomBooking struct {
-	ID              uint      `json:"id" gorm:"primaryKey"`
-	GuestID         uint      `json:"guest_id"`
-	Guest           Guest     `json:"guest" gorm:"foreignKey:GuestID"`
-	RoomID          uint      `json:"room_id"`
-	Room            Room      `json:"room" gorm:"foreignKey:RoomID"`
-	CheckIn         time.Time `json:"check_in" gorm:"not null"`
-	CheckOut        time.Time `json:"check_out" gorm:"not null"`
-	ActualCheckIn   time.Time `json:"actual_check_in"`
-	ActualCheckOut  time.Time `json:"actual_check_out"`
-	Status          string    `json:"status" gorm:"default:'confirmed'"` // Status as string instead of bool
-	SpecialRequests string    `json:"special_requests"`                  // Any special guest requests
-	TotalPrice      float64   `json:"total_price"`                       // Total price for the stay
-	CreatedAt       time.Time `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt       time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+	ID                 uint      `json:"id" gorm:"primaryKey"`
+	GuestID            uint      `json:"guest_id"`
+	Guest              Guest     `json:"guest" gorm:"foreignKey:GuestID"`
+	RoomID             uint      `json:"room_id"`
+	Room               Room      `json:"room" gorm:"foreignKey:RoomID"`
+	CheckIn            time.Time `json:"check_in" gorm:"not null"`
+	CheckOut           time.Time `json:"check_out" gorm:"not null"`
+	ActualCheckIn      time.Time `json:"actual_check_in"`
+	ActualCheckOut     time.Time `json:"actual_check_out"`
+	CancellationFee    float64   `json:"cancellation_fee"`                  // Cancellation fee if applicable
+	CancellationReason string    `json:"cancellation_reason"`               // Reason for cancellation if applicable
+	CancelledAt        time.Time `json:"cancelled_at"`                      // Timestamp of cancellation
+	ReferenceNumber    string    `json:"reference"`                         // Reference number for the booking
+	Status             string    `json:"status" gorm:"default:'confirmed'"` // Status as string instead of bool
+	SpecialRequests    string    `json:"special_requests"`                  // Any special guest requests
+	TotalPrice         float64   `json:"total_price"`                       // Total price for the stay
+	CreatedAt          time.Time `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt          time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 }
 
 // OnsenBooking represents a private onsen booking
@@ -63,8 +68,10 @@ type OnsenBooking struct {
 
 // Booking status constants
 const (
-	BookingStatusConfirmed = "confirmed"
-	BookingStatusCancelled = "cancelled"
-	BookingStatusCheckedIn = "checked_in"
-	BookingStatusCompleted = "completed"
+	BookingStatusConfirmed  = "confirmed"
+	BookingStatusCancelled  = "cancelled"
+	BookingStatusCheckedIn  = "checked_in"
+	BookingStatusCheckedOut = "checked_out"
+	BookingStatusCompleted  = "completed"
+	BookingStatusRejected   = "rejected"
 )

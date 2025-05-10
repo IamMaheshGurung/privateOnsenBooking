@@ -405,7 +405,7 @@ func (ctrl *BookingController) CreateBooking(c *fiber.Ctx) error {
 
 	// Send confirmation email asynchronously
 	go func() {
-		if err := ctrl.EmailService.SendRoomBookingConfirmation(createdBooking, guest, room); err != nil {
+		if err := ctrl.EmailService.SendBookingConfirmation(createdBooking, guest, room); err != nil {
 			ctrl.Logger.Error("Failed to send confirmation email",
 				zap.Uint("bookingID", createdBooking.ID),
 				zap.Error(err))
@@ -1082,4 +1082,134 @@ func (ctrl *BookingController) validateBookingDates(checkIn, checkOut time.Time)
 	}
 
 	return nil
+}
+
+// ShowBookingForm displays the booking form
+func (bc *BookingController) ShowBookingForm(c *fiber.Ctx) error {
+	roomID := c.Query("room_id")
+	checkIn := c.Query("check_in")
+	checkOut := c.Query("check_out")
+
+	return c.Render("booking/form", fiber.Map{
+		"RoomID":   roomID,
+		"CheckIn":  checkIn,
+		"CheckOut": checkOut,
+	})
+}
+
+// ShowConfirmation displays the booking confirmation page
+func (bc *BookingController) ShowConfirmation(c *fiber.Ctx) error {
+	bookingID := c.Query("booking_id")
+	if bookingID == "" {
+		return c.Redirect("/rooms")
+	}
+
+	id, err := strconv.ParseUint(bookingID, 10, 32)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).Render("error", fiber.Map{
+			"Message": "Invalid booking ID",
+		})
+	}
+
+	booking, err := bc.RoomService.GetBookingByID(uint(id))
+	if err != nil {
+		bc.Logger.Error("Failed to get booking details", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).Render("error", fiber.Map{
+			"Message": "Booking not found",
+		})
+	}
+
+	return c.Render("booking/confirmation", fiber.Map{
+		"Booking": booking,
+	})
+}
+
+// ShowLookupForm displays the form to look up a booking
+func (ctrl *BookingController) ShowLookupForm(c *fiber.Ctx) error {
+	return c.Render("booking/lookup_form", fiber.Map{})
+}
+
+// LookupBooking processes the booking lookup request
+func (ctrl *BookingController) LookupBooking(c *fiber.Ctx) error {
+	email := c.FormValue("email")
+	bookingCode := c.FormValue("booking_code")
+
+	if email == "" || bookingCode == "" {
+		return c.Status(fiber.StatusBadRequest).Render("partials/lookup_error", fiber.Map{
+			"Message": "Please provide both email and booking code",
+		})
+	}
+
+	booking, err := ctrl.RoomService.GetBookingByEmailAndCode(email, bookingCode)
+	if err != nil {
+		ctrl.Logger.Error("Failed to look up booking", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).Render("partials/lookup_error", fiber.Map{
+			"Message": "Booking not found with the provided details",
+		})
+	}
+
+	return c.Render("partials/booking_details", fiber.Map{
+		"Booking": booking,
+	})
+}
+
+// ShowBookingDetails displays the details of a booking
+func (ctrl *BookingController) ShowBookingDetails(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid booking ID",
+		})
+	}
+
+	booking, err := ctrl.RoomService.GetBookingByID(uint(id))
+	if err != nil {
+		ctrl.Logger.Error("Failed to get booking details", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).Render("error", fiber.Map{
+			"Message": "Booking not found",
+		})
+	}
+
+	return c.Render("booking/details", fiber.Map{
+		"Booking": booking,
+	})
+}
+
+// CancelBookingByGuest allows a guest to cancel their booking
+func (ctrl *BookingController) CancelBookingByGuest(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid booking ID",
+		})
+	}
+
+	// Verify the cancellation is authorized (e.g., by checking email and booking code)
+	email := c.FormValue("email")
+	bookingCode := c.FormValue("booking_code")
+
+	if email == "" || bookingCode == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Missing authentication details",
+		})
+	}
+
+	// Check if the provided details match the booking
+	authorized, err := ctrl.RoomService.VerifyBookingOwnership(uint(id), email, bookingCode)
+	if err != nil || !authorized {
+		ctrl.Logger.Error("Unauthorized cancellation attempt", zap.Error(err))
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Not authorized to cancel this booking",
+		})
+	}
+
+	if err := ctrl.RoomService.CancelBooking(uint(id)); err != nil {
+		ctrl.Logger.Error("Failed to cancel booking", zap.Error(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Unable to cancel booking",
+		})
+	}
+
+	// For HTMX: Show cancellation successful message
+	return c.Render("partials/cancellation_success", fiber.Map{})
 }
