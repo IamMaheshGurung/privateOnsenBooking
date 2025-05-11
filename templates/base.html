@@ -4,245 +4,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{.Title}}</title>
-    
+    <title>{{ .Title }}</title>
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.6" integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni" crossorigin="anonymous"></script>
+    <!-- TailwindCSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="/static/js/htmx.min.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
     <script>
         tailwind.config = {
-          theme: {
-            extend: {
-              colors: {
-                cream: {
-                  light: '#F8F4E9',
-                  DEFAULT: '#F3EFE0',
-                  dark: '#E8E2D6'
-                },
-                leaf: {
-                  light: '#8C9E5E',
-                  DEFAULT: '#5A6B3D',
-                  dark: '#414F2A'
+            theme: {
+                extend: {
+                    colors: {
+                        'cream': '#F8F0E0',
+                        'cream-light': '#FAF5EA',
+                        'cream-dark': '#E9DFC8',
+                        'leaf': '#8C9E5E',
+                        'leaf-dark': '#596839',
+                        'wood': '#8E6C48',
+                        'stone': '#C4B6AB'
+                    }
                 }
-              }
             }
-          }
         }
-      </script>
-            <style>
-              body {
-                  font-family: 'Shippori Mincho', serif;
-                  background-color: #F8F4E9; /* Light cream background */
-                  color: #414F2A; /* Dark green text */
-              }
-              
-              .hero-image {
-                  background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/static/images/hero/hero1.jpg');
-                  background-position: center;
-                  background-size: cover;
-                  height: 80vh;
-              }
-          
-              /* Button & Accent Colors */
-              .btn-primary {
-                  background-color: #5A6B3D;
-                  color: #F8F4E9;
-                  transition: all 0.3s ease;
-              }
-              
-              .btn-primary:hover {
-                  background-color: #414F2A;
-              }
-              
-              /* Navigation Styles */
-              .site-header {
-                  background-color: white;
-                  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-                  position: sticky;
-                  top: 0;
-                  z-index: 50;
-              }
-              
-              .nav-container {
-                  max-width: 80rem;
-                  margin-left: auto;
-                  margin-right: auto;
-                  padding-left: 1rem;
-                  padding-right: 1rem;
-              }
-              
-              .nav-logo {
-                  font-weight: 500;
-                  color: #5A6B3D;
-                  display: flex;
-                  align-items: center;
-              }
-              
-              .nav-logo img {
-                  height: 2.5rem;
-                  width: auto;
-                  margin-right: 0.75rem;
-              }
-              
-              .nav-link {
-                  color: #414F2A;
-                  font-weight: 500;
-                  padding: 0.5rem 0.75rem;
-                  border-radius: 0.375rem;
-                  transition: all 0.2s ease;
-              }
-              
-              .nav-link:hover {
-                  color: #5A6B3D;
-                  background-color: #F3EFE0;
-              }
-              
-              .nav-link.active {
-                  color: #5A6B3D;
-                  background-color: #F3EFE0;
-              }
-              
-              .mobile-menu-button {
-                  color: #414F2A;
-                  padding: 0.5rem;
-                  border-radius: 0.375rem;
-                  transition: all 0.2s ease;
-              }
-              
-              .mobile-menu-button:hover {
-                  color: #5A6B3D;
-                  background-color: #F3EFE0;
-              }
-              
-              .mobile-menu {
-                  background-color: #F8F4E9;
-                  border-bottom: 1px solid #E8E2D6;
-              }
-              
-              .mobile-nav-link {
-                  display: block;
-                  padding: 0.75rem 1rem;
-                  color: #414F2A;
-                  font-weight: 500;
-                  border-radius: 0.375rem;
-                  transition: all 0.2s ease;
-              }
-              
-              .mobile-nav-link:hover {
-                  color: #5A6B3D;
-                  background-color: #F3EFE0;
-              }
-              
-              .mobile-book-button {
-                  display: block;
-                  width: 100%;
-                  text-align: center;
-                  padding: 0.75rem 1rem;
-                  margin-top: 0.75rem;
-                  background-color: #5A6B3D;
-                  color: white;
-                  font-weight: 500;
-                  border-radius: 0.375rem;
-                  transition: all 0.2s ease;
-              }
-              
-              .mobile-book-button:hover {
-                  background-color: #414F2A;
-              }
-              
-              /* Logo Animation */
-              @keyframes logoFloat {
-                  0% {
-                      transform: translateY(0px);
-                  }
-                  50% {
-                      transform: translateY(-5px);
-                  }
-                  100% {
-                      transform: translateY(0px);
-                  }
-              }
-              
-              .animate-logo:hover {
-                  animation: logoFloat 2s ease infinite;
-              }
-              
-              /* Japanese-style dropdown menu */
-              .japanese-dropdown {
-                  position: relative;
-              }
-              
-              .japanese-dropdown-menu {
-                  position: absolute;
-                  top: 100%;
-                  left: 0;
-                  width: 12rem;
-                  margin-top: 0.5rem;
-                  padding: 0.5rem 0;
-                  background-color: white;
-                  border: 1px solid #E8E2D6;
-                  border-radius: 0.375rem;
-                  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-                  opacity: 0;
-                  visibility: hidden;
-                  transform: translateY(-10px);
-                  transition: all 0.3s ease;
-                  z-index: 20;
-              }
-              
-              .japanese-dropdown:hover .japanese-dropdown-menu {
-                  opacity: 1;
-                  visibility: visible;
-                  transform: translateY(0);
-              }
-              
-              .dropdown-item {
-                  display: block;
-                  padding: 0.5rem 1rem;
-                  color: #414F2A;
-                  transition: all 0.2s ease;
-              }
-              
-              .dropdown-item:hover {
-                  background-color: #F3EFE0;
-                  color: #5A6B3D;
-              }
-              
-              /* Notification badge */
-              .notification-badge {
-                  position: absolute;
-                  top: -0.25rem;
-                  right: -0.25rem;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  width: 1.25rem;
-                  height: 1.25rem;
-                  border-radius: 9999px;
-                  background-color: #8C9E5E;
-                  color: white;
-                  font-size: 0.75rem;
-                  font-weight: 600;
-              }
-          </style>
-      
-      {{block "head" .}}{{end}}
+    </script>
+    <style>
+        .hero-image {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/static/images/onsen-hero.jpg');
+            height: 600px;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            position: relative;
+        }
+    </style>
+    {{block "head" .}}{{end}}
 </head>
 <body class="bg-cream-light text-leaf-dark flex flex-col min-h-screen">
     <!-- Navigation -->
-    <div id="navigation" hx-get="/partials/navigation" hx-trigger="load" hx-swap="outerHTML"></div>
+    <nav class="bg-leaf-dark text-white shadow-md">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <a href="/" class="text-2xl font-bold">Kwangdi Onsen</a>
+                <div class="hidden md:flex space-x-8">
+                    <a href="/" class="hover:text-cream">Home</a>
+                    <a href="/rooms" class="hover:text-cream">Rooms</a>
+                    <a href="/onsen" class="hover:text-cream">Onsen</a>
+                    <a href="/about" class="hover:text-cream">About</a>
+                    <a href="/contact" class="hover:text-cream">Contact</a>
+                </div>
+                <div>
+                    <a href="/booking" class="bg-cream hover:bg-cream-dark text-leaf-dark px-4 py-2 rounded-md font-medium">
+                        Book Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
     
     <!-- Main content -->
     <main class="flex-grow">
-        {{block "content" .}}{{end}}
+        {{block "content" .}}
+        <p>Default content if no content block is defined</p>
+        {{end}}
     </main>
     
     <!-- Footer -->
-    <div id="footer" hx-get="/partials/footer" hx-trigger="load" hx-swap="outerHTML"></div>
+    <footer class="bg-leaf-dark text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-medium mb-4">Kwangdi Onsen</h3>
+                    <p class="text-stone-300">
+                        Traditional Japanese ryokan offering authentic hospitality and private onsen experiences.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium mb-4">Contact</h3>
+                    <ul class="space-y-2 text-stone-300">
+                        <li>123 Mountain Road, Miyagi</li>
+                        <li>Japan 123-4567</li>
+                        <li>info@kwangdionsen.com</li>
+                        <li>+81-123-456-7890</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="/" class="text-stone-300 hover:text-white">Home</a></li>
+                        <li><a href="/rooms" class="text-stone-300 hover:text-white">Rooms</a></li>
+                        <li><a href="/about" class="text-stone-300 hover:text-white">About</a></li>
+                        <li><a href="/contact" class="text-stone-300 hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-stone-700 text-center text-stone-400">
+                <p>&copy; 2023 Kwangdi Onsen. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
     
     {{block "scripts" .}}{{end}}
+    
+    
+       
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if HTMX is loaded
+        if (typeof htmx === 'undefined') {
+            console.error("HTMX is not loaded! Page functionality will be limited.");
+            
+            // Add visible error message
+            const errorMsg = document.createElement('div');
+            errorMsg.style.position = 'fixed';
+            errorMsg.style.bottom = '10px';
+            errorMsg.style.right = '10px';
+            errorMsg.style.padding = '10px';
+            errorMsg.style.backgroundColor = '#fee2e2';
+            errorMsg.style.color = '#dc2626';
+            errorMsg.style.borderRadius = '5px';
+            errorMsg.style.zIndex = '9999';
+            errorMsg.textContent = 'HTMX library failed to load. Please refresh the page.';
+            document.body.appendChild(errorMsg);
+            
+            // Try loading HTMX directly
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/htmx.org@1.9.6/dist/htmx.min.js';
+            script.onload = function() {
+                console.log("HTMX loaded successfully, initializing...");
+                htmx.process(document.body);
+                errorMsg.textContent = 'HTMX loaded successfully! Refreshing...';
+                errorMsg.style.backgroundColor = '#dcfce7';
+                errorMsg.style.color = '#16a34a';
+                setTimeout(() => window.location.reload(), 1000);
+            };
+            document.head.appendChild(script);
+        } else {
+            console.log("HTMX is properly loaded, version:", htmx.version);
+        }
+    });
+</script>
+   
 </body>
 </html>

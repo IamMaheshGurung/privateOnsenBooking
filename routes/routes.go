@@ -1,6 +1,9 @@
 package routes
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/IamMaheshGurung/privateOnsenBooking/controllers"
 	"github.com/IamMaheshGurung/privateOnsenBooking/middleware"
 	"github.com/gofiber/fiber/v2"
@@ -16,50 +19,177 @@ func SetupRoutes(app *fiber.App,
 	bookingController *controllers.BookingController,
 	guestController *controllers.GuestController) {
 
-	// Setup global middleware
+	// 1. Setup global middleware first
 	setupMiddleware(app)
 
-	// Static pages
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.Render("index", fiber.Map{
-			"Title": "Kwangdi Hotel - Traditional Japanese Ryokan",
-		})
-	})
-
-	app.Get("/about", func(c *fiber.Ctx) error {
-		return c.Render("about", fiber.Map{
-			"Title": "About - Kwangdi Hotel",
-		})
-	})
-
-	app.Get("/contact", func(c *fiber.Ctx) error {
-		return c.Render("contact", fiber.Map{
-			"Title": "Contact Us - Kwangdi Hotel",
-		})
-	})
-
-	// Partials for HTMX
+	// 2. CRITICAL: Setup partials routes before any page routes
+	// This ensures partials are registered and available for HTMX requests
 	partials := app.Group("/partials")
 	setupPartialsRoutes(partials)
 
-	// Main feature routes
+	// 3. Add debugging routes to help troubleshoot template issues
+	setupDebugRoutes(app)
+
+	// 4. Then setup static file serving (early to ensure assets are available)
+	app.Static("/static", "./static")
+
+	// 5. Only after partials and static files are setup, register page routes
+	setupPageRoutes(app)
+
+	// 6. Register feature routes
 	setupRoomRoutes(app, roomController)
 	setupBookingRoutes(app, bookingController)
 	setupGuestRoutes(app, guestController)
 
-	// Setup Onsen routes if you add the controller later
-	// setupOnsenRoutes(app, onsenController)
-
-	// Setup static file serving
-	app.Static("/static", "./static")
-
-	// API routes for frontend functionality
+	// 7. API routes for frontend functionality
 	api := app.Group("/api")
 	setupApiRoutes(api, roomController, bookingController, guestController)
 
-	// Admin routes with authentication
+	// 8. Admin routes with authentication
 	admin := app.Group("/admin", middleware.AdminAuth())
 	setupAdminRoutes(admin, roomController, bookingController, guestController)
+}
+
+// setupPartialsRoutes configures routes for HTML partials (used by HTMX)
+// This MUST be called before any page routes to ensure partials are available
+func setupPartialsRoutes(router fiber.Router) {
+	// Log that we're setting up partials
+	fmt.Println("Setting up partials routes")
+
+	// Navigation and footer
+	router.Get("/navigation", func(c *fiber.Ctx) error {
+		fmt.Println("Loading navigation partial")
+		return c.Render("partials/navigation", fiber.Map{
+			"CurrentPath": c.Path(),
+			"CurrentYear": time.Now().Year(),
+		})
+	})
+
+	router.Get("/footer", func(c *fiber.Ctx) error {
+		fmt.Println("Loading footer partial")
+		return c.Render("partials/footer", fiber.Map{
+			"CurrentYear": time.Now().Year(),
+		})
+	})
+
+	// Home page partials
+	router.Get("/hero", func(c *fiber.Ctx) error {
+		fmt.Println("Loading hero partial")
+		return c.Render("partials/hero", fiber.Map{})
+	})
+
+	// Room partials
+	router.Get("/room-card", func(c *fiber.Ctx) error {
+		fmt.Println("Loading room-card partial")
+		return c.Render("partials/room_card", fiber.Map{})
+	})
+
+	router.Get("/room-grid", func(c *fiber.Ctx) error {
+		fmt.Println("Loading room-grid partial")
+		return c.Render("partials/room_grid", fiber.Map{})
+	})
+
+	// Booking partials
+	router.Get("/booking-form", func(c *fiber.Ctx) error {
+		return c.Render("partials/booking_form", fiber.Map{})
+	})
+
+	router.Get("/booking-summary", func(c *fiber.Ctx) error {
+		return c.Render("partials/booking_summary", fiber.Map{})
+	})
+
+	// HTMX test endpoint (for debugging)
+	router.Get("/test", func(c *fiber.Ctx) error {
+		return c.SendString("<div class='bg-green-100 p-4 rounded text-green-800'>HTMX is working! Loaded at: " +
+			time.Now().Format("15:04:05") + "</div>")
+	})
+}
+
+// setupDebugRoutes adds debugging routes to test template rendering
+func setupDebugRoutes(app *fiber.App) {
+	// Direct HTML response (no templates)
+	app.Get("/debug/direct", func(c *fiber.Ctx) error {
+		return c.SendString(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Direct HTML Response</title>
+                <script src="https://cdn.tailwindcss.com"></script>
+            </head>
+            <body class="p-8 bg-gray-100">
+                <h1 class="text-2xl font-bold mb-4">Direct HTML Response</h1>
+                <p>If you can see this, basic HTTP response is working.</p>
+                <p>Generated at: ` + time.Now().Format(time.RFC3339) + `</p>
+            </body>
+            </html>
+        `)
+	})
+
+	// HTMX test page
+	app.Get("/debug/htmx", func(c *fiber.Ctx) error {
+		return c.Render("debug/htmx-test", fiber.Map{
+			"Title": "HTMX Test Page",
+		})
+	})
+}
+
+// setupPageRoutes configures basic page routes (after partials are setup)
+func setupPageRoutes(app *fiber.App) {
+	// Home page
+
+	// Add this to your setupPageRoutes function in routes.go
+	app.Get("/simple", func(c *fiber.Ctx) error {
+		// Send direct HTML without using templates
+		return c.SendString(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Simple Test</title>
+        </head>
+        <body>
+            <h1>Simple Test Page</h1>
+            <p>If you can see this, your server is responding correctly.</p>
+            <p>Time: ` + time.Now().Format(time.RFC3339) + `</p>
+        </body>
+        </html>
+    `)
+	})
+	app.Get("/", func(c *fiber.Ctx) error {
+		// Log that we're handling the request
+		fmt.Println("Rendering index template")
+
+		// Try rendering with additional data
+		err := c.Render("index", fiber.Map{
+			"Title":       "Kwangdi Hotel - Traditional Japanese Ryokan",
+			"Debug":       "If you can see this, template is rendering",
+			"CurrentYear": time.Now().Year(),
+		})
+
+		// Check for errors
+		if err != nil {
+			fmt.Println("Error rendering template:", err)
+			return c.Status(500).SendString("Error: " + err.Error())
+		}
+
+		fmt.Println("Successfully rendered template")
+		return nil
+	})
+
+	// About page
+	app.Get("/about", func(c *fiber.Ctx) error {
+		return c.Render("about", fiber.Map{
+			"Title":       "About - Kwangdi Hotel",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
+
+	// Contact page
+	app.Get("/contact", func(c *fiber.Ctx) error {
+		return c.Render("contact", fiber.Map{
+			"Title":       "Contact Us - Kwangdi Hotel",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
 }
 
 // setupMiddleware configures global middleware for the application
@@ -86,41 +216,6 @@ func setupMiddleware(app *fiber.App) {
 	app.Use(func(c *fiber.Ctx) error {
 		c.Set("X-Request-ID", c.GetRespHeader("X-Request-ID"))
 		return c.Next()
-	})
-}
-
-// setupPartialsRoutes configures routes for HTML partials (used by HTMX)
-func setupPartialsRoutes(router fiber.Router) {
-	// Navigation and footer
-	router.Get("/navigation", func(c *fiber.Ctx) error {
-		return c.Render("partials/navigation", fiber.Map{})
-	})
-
-	router.Get("/footer", func(c *fiber.Ctx) error {
-		return c.Render("partials/footer", fiber.Map{})
-	})
-
-	// Home page partials
-	router.Get("/hero", func(c *fiber.Ctx) error {
-		return c.Render("partials/hero", fiber.Map{})
-	})
-
-	// Room partials
-	router.Get("/room-card", func(c *fiber.Ctx) error {
-		return c.Render("partials/room_card", fiber.Map{})
-	})
-
-	router.Get("/room-grid", func(c *fiber.Ctx) error {
-		return c.Render("partials/room_grid", fiber.Map{})
-	})
-
-	// Booking partials
-	router.Get("/booking-form", func(c *fiber.Ctx) error {
-		return c.Render("partials/booking_form", fiber.Map{})
-	})
-
-	router.Get("/booking-summary", func(c *fiber.Ctx) error {
-		return c.Render("partials/booking_summary", fiber.Map{})
 	})
 }
 

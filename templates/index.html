@@ -1,9 +1,8 @@
-
 {{define "content"}}
     <!-- Hero Section -->
     <section class="hero-image flex items-center justify-center">
         <div class="text-center text-white p-6">
-            <h1 class="text-4xl md:text-6xl font-semibold mb-4">Experience Serenity at Kwangdi Hotel</h1>
+            <h1 class="text-4xl md:text-6xl font-semibold mb-4">Experience Serenity at Kwangdi Onsen</h1>
             <p class="text-xl md:text-2xl mb-8">Traditional Japanese hospitality in a peaceful mountain setting</p>
             <a href="/booking" class="bg-leaf hover:bg-leaf-dark text-white px-8 py-3 rounded-md font-medium transition-colors duration-300">
                 Check Availability
@@ -11,324 +10,89 @@
         </div>
     </section>
 
-    <!-- About Section -->
-    <section class="py-16 bg-cream">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="order-2 lg:order-1">
-                    <h2 class="text-3xl font-medium text-stone-800 mb-4">Welcome to Our <span class="text-leaf-dark">Traditional Ryokan</span></h2>
-                    <div class="w-20 h-1 bg-leaf mb-6"></div>
-                    <p class="text-leaf-dark mb-4">
-                        Nestled in the serene mountains, Kwangdi Hotel offers an authentic Japanese ryokan experience. 
-                        Our carefully preserved traditional architecture and gardens create a peaceful atmosphere that 
-                        allows guests to connect with nature and Japanese culture.
-                    </p>
-                    <p class="text-leaf-dark mb-6">
-                        Every room features traditional tatami flooring, sliding paper doors, and minimalist aesthetics that 
-                        embody the Japanese principles of simplicity and harmony with nature.
-                    </p>
-                    <a href="/about" class="text-leaf-dark hover:text-leaf font-medium inline-flex items-center">
-                        Learn more about our history
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                        </svg>
-                    </a>
-                </div>
-                <div class="order-1 lg:order-2">
-                    <img src="/static/images/scene/scence3.jpg" alt="Traditional Ryokan Interior" class="rounded-lg shadow-lg w-full h-auto">
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Room Preview Section -->
-   <!-- In index.html or rooms.html -->
-<section class="py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-medium text-leaf mb-4">Our Accommodations</h2>
-            <div class="divider divider-center"></div>
-            <p class="text-leaf-dark max-w-3xl mx-auto">
-                Experience traditional Japanese hospitality with our selection of rooms, 
-                each offering a unique blend of comfort and cultural authenticity.
-            </p>
-        </div>
-        
-       <!-- Room Grid with Enhanced Error Handling -->
-<div id="rooms-container" class="min-h-[300px]">
-    <!-- Debug information -->
-    <div id="debug-info" class="mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded hidden">
-        <p id="debug-message"></p>
-    </div>
-    
-    <!-- Loading state -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" 
-         hx-get="/rooms/preview" 
-         hx-trigger="load" 
-         hx-swap="outerHTML"
-         hx-indicator="#rooms-loading"
-         hx-on:htmx:beforeRequest="document.getElementById('debug-info').classList.remove('hidden'); document.getElementById('debug-message').textContent = 'Sending request to /rooms/preview...'"
-         hx-on:htmx:afterRequest="document.getElementById('debug-message').textContent += ' | Request completed.'"
-         hx-on:htmx:responseError="document.getElementById('debug-message').textContent += ' | Error: ' + event.detail.xhr.status + ' ' + event.detail.xhr.statusText">
-        
-        <!-- Loading placeholder cards -->
-        <div class="bg-white animate-pulse rounded-lg shadow-md p-6">
-            <div class="bg-gray-200 h-48 w-full mb-4"></div>
-            <div class="h-6 bg-gray-200 rounded w-2/3 mb-4"></div>
-            <div class="h-4 bg-gray-200 rounded mb-2"></div>
-            <div class="h-4 bg-gray-200 rounded mb-2 w-5/6"></div>
-            <div class="h-8 bg-gray-200 rounded mt-4"></div>
-        </div>
-        
-        <div class="bg-white animate-pulse rounded-lg shadow-md p-6">
-            <div class="bg-gray-200 h-48 w-full mb-4"></div>
-            <div class="h-6 bg-gray-200 rounded w-2/3 mb-4"></div>
-            <div class="h-4 bg-gray-200 rounded mb-2"></div>
-            <div class="h-4 bg-gray-200 rounded mb-2 w-5/6"></div>
-            <div class="h-8 bg-gray-200 rounded mt-4"></div>
-        </div>
-        
-        <div class="bg-white animate-pulse rounded-lg shadow-md p-6">
-            <div class="bg-gray-200 h-48 w-full mb-4"></div>
-            <div class="h-6 bg-gray-200 rounded w-2/3 mb-4"></div>
-            <div class="h-4 bg-gray-200 rounded mb-2"></div>
-            <div class="h-4 bg-gray-200 rounded mb-2 w-5/6"></div>
-            <div class="h-8 bg-gray-200 rounded mt-4"></div>
-        </div>
-    </div>
-</div>
-
-<!-- Manual load button for debugging -->
-<div class="text-center mt-4 mb-8">
-    <button class="bg-leaf text-white px-4 py-2 rounded-md"
-            onclick="manuallyLoadRooms()">
-        Manually Load Rooms
-    </button>
-</div>
-
-<script>
-    function manuallyLoadRooms() {
-        // Show debug info
-        document.getElementById('debug-info').classList.remove('hidden');
-        document.getElementById('debug-message').textContent = 'Manually fetching rooms...';
-        
-        // Fetch rooms directly with fetch API as a fallback
-        fetch('/rooms/preview')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok: ' + response.status);
-                }
-                return response.text();
-            })
-            .then(html => {
-                document.getElementById('rooms-container').innerHTML = html;
-                document.getElementById('debug-message').textContent += ' | Success! Rooms loaded.';
-            })
-            .catch(error => {
-                document.getElementById('debug-message').textContent += ' | Error: ' + error.message;
-                console.error('Error fetching rooms:', error);
-            });
-    }
-    
-    // Debug HTMX events
-    document.addEventListener('htmx:afterSettle', function(evt) {
-        console.log('HTMX content settled:', evt.detail.elt);
-    });
-    
-    document.addEventListener('htmx:responseError', function(evt) {
-        console.error('HTMX response error:', evt.detail.xhr.status, evt.detail.xhr.responseText);
-    });
-</script>
-        
-        <!-- View All Rooms button -->
-        <div class="text-center mt-10">
-            <a href="/rooms/preview" class="btn-primary px-6 py-2 rounded-md font-medium">
-                View All Rooms
-            </a>
-        </div>
-    </div>
-</section>
-
-    <!-- Onsen Section -->
-    <section class="py-16 bg-stone-800 text-white">
+    <section class="py-16 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div>
-                    <img src="/static/images/onsen/springonsen.jpg" alt="Private Onsen" class="rounded-lg shadow-lg w-full h-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-leaf-dark">Our Accommodations</h2>
+                <p class="mt-2 text-lg text-gray-600">Experience the perfect blend of tradition and comfort</p>
+            </div>
+            
+            <!-- Room Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Room 1 -->
+                <div class="bg-cream-light rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
+                    <img src="/static/images/room1.jpg" alt="Traditional Room" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2">Traditional Room</h3>
+                        <p class="text-gray-600 mb-4">Experience authentic Japanese living with tatami floors and traditional decor.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-leaf-dark font-bold">$120/night</span>
+                            <a href="/rooms/1" class="text-leaf hover:text-leaf-dark">View Details →</a>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <h2 class="text-3xl font-medium mb-4">Private <span class="text-leaf">Onsen Experience</span></h2>
-                    <div class="w-20 h-1 bg-leaf mb-6"></div>
-                    <p class="text-stone-300 mb-4">
-                        Immerse yourself in the healing waters of our private onsen baths. Each onsen is fed by natural hot 
-                        springs and surrounded by carefully arranged rocks and plants to create a serene atmosphere.
-                    </p>
-                    <p class="text-stone-300 mb-6">
-                        Our private onsens can be booked exclusively for your personal use, allowing you to enjoy the 
-                        traditional Japanese bathing experience in complete privacy and tranquility.
-                    </p>
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <a href="/booking" class="bg-leaf hover:bg-leaf-dark text-white text-center px-6 py-3 rounded-md font-medium transition-colors duration-300">
-                            Book a Stay
-                        </a>
-                        <a href="/onsen" class="bg-transparent hover:bg-stone-700 text-white text-center border border-white px-6 py-3 rounded-md font-medium transition-colors duration-300">
-                            Learn About Our Onsen
-                        </a>
+                
+                <!-- Room 2 -->
+                <div class="bg-cream-light rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
+                    <img src="/static/images/room2.jpg" alt="Deluxe Room" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2">Deluxe Room</h3>
+                        <p class="text-gray-600 mb-4">Spacious accommodation with premium amenities and garden views.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-leaf-dark font-bold">$180/night</span>
+                            <a href="/rooms/2" class="text-leaf hover:text-leaf-dark">View Details →</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Room 3 -->
+                <div class="bg-cream-light rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
+                    <img src="/static/images/room3.jpg" alt="Premium Suite" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2">Premium Suite</h3>
+                        <p class="text-gray-600 mb-4">Our finest accommodation with private onsen and mountain views.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-leaf-dark font-bold">$250/night</span>
+                            <a href="/rooms/3" class="text-leaf hover:text-leaf-dark">View Details →</a>
+                        </div>
                     </div>
                 </div>
             </div>
+            
+            <div class="text-center mt-10">
+                <a href="/rooms" class="inline-block bg-leaf hover:bg-leaf-dark text-white px-6 py-2 rounded-md transition-colors duration-300">
+                    View All Rooms
+                </a>
+            </div>
         </div>
     </section>
 
-    <!-- Cuisine Section -->
-    <section class="py-16">
+    <!-- Features Section -->
+    <section class="py-16 bg-cream-light">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <h2 class="text-3xl font-medium text-stone-800 mb-4">Traditional Japanese Cuisine</h2>
-                <div class="w-20 h-1 bg-leaf mx-auto mb-6"></div>
-                <p class="text-stone-600 max-w-3xl mx-auto">
-                    Experience the art of kaiseki dining, a traditional multi-course Japanese dinner 
-                    using only the freshest seasonal ingredients from our local region.
-                </p>
+                <h2 class="text-3xl font-bold text-leaf-dark">Experience Kwangdi Onsen</h2>
+                <p class="mt-2 text-lg text-gray-600">Immerse yourself in Japanese tradition and hospitality</p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                    <img src="/static/images/cuisine/cuisine3.jpg" alt="Breakfast" class="w-full h-64 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-medium text-stone-800 mb-2">Traditional Breakfast</h3>
-                        <p class="text-stone-600">
-                            Start your day with a nutritious Japanese breakfast featuring grilled fish, steamed rice, miso soup, and seasonal side dishes.
-                        </p>
-                    </div>
+                <div class="text-center p-6">
+                    <div class="text-4xl text-leaf mb-4">🌿</div>
+                    <h3 class="text-xl font-semibold mb-2">Private Onsen</h3>
+                    <p class="text-gray-600">Enjoy the therapeutic benefits of mineral-rich hot springs in complete privacy.</p>
                 </div>
                 
-                <div class="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                    <img src="/static/images/cuisine/cuisine.jpg" alt="Dinner" class="w-full h-64 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-medium text-stone-800 mb-2">Kaiseki Dinner</h3>
-                        <p class="text-stone-600">
-                            Our kaiseki dinners showcase the freshest seasonal ingredients prepared with traditional techniques to highlight natural flavors.
-                        </p>
-                    </div>
+                <div class="text-center p-6">
+                    <div class="text-4xl text-leaf mb-4">🍵</div>
+                    <h3 class="text-xl font-semibold mb-2">Traditional Cuisine</h3>
+                    <p class="text-gray-600">Savor authentic Japanese meals prepared with fresh, local ingredients.</p>
                 </div>
                 
-                <div class="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                    <img src="/static/images/cuisine/cuisine1.jpg" alt="Tea Ceremony" class="w-full h-64 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-medium text-stone-800 mb-2">Tea Ceremony</h3>
-                        <p class="text-stone-600">
-                            Experience the traditional Japanese tea ceremony with carefully prepared matcha and seasonal wagashi sweets.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Testimonials -->
-    <section class="py-16 bg-stone-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-medium text-stone-800 mb-4">Guest Experiences</h2>
-                <div class="w-20 h-1 bg-leaf mx-auto mb-6"></div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <div class="flex items-center mb-4">
-                        <div class="text-leaf">
-                            <!-- 5 Stars -->
-                            <div class="flex">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-stone-600 mb-4">
-                        "An absolutely magical experience. The private onsen was the highlight of our trip to Japan. The staff was incredibly attentive and the traditional meals were exquisite."
-                    </p>
-                    <div class="font-medium">
-                        <p class="text-stone-800">Emma L.</p>
-                        <p class="text-stone-500 text-sm">New York, USA</p>
-                    </div>
-                </div>
-                
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <div class="flex items-center mb-4">
-                        <div class="text-leaf">
-                            <!-- 5 Stars -->
-                            <div class="flex">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-stone-600 mb-4">
-                        "The perfect balance of tradition and comfort. The tatami rooms were authentic yet comfortable, and soaking in the onsen with mountain views was incredibly relaxing."
-                    </p>
-                    <div class="font-medium">
-                        <p class="text-stone-800">David T.</p>
-                        <p class="text-stone-500 text-sm">Melbourne, Australia</p>
-                    </div>
-                </div>
-                
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <div class="flex items-center mb-4">
-                        <div class="text-leaf">
-                            <!-- 5 Stars -->
-                            <div class="flex">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-stone-600 mb-4">
-                        "The kaiseki dining experience was phenomenal, and the personalized service made us feel like honored guests. The online booking process was seamless and the private onsen was pure bliss."
-                    </p>
-                    <div class="font-medium">
-                        <p class="text-stone-800">Naomi K.</p>
-                        <p class="text-stone-500 text-sm">Toronto, Canada</p>
-                    </div>
+                <div class="text-center p-6">
+                    <div class="text-4xl text-leaf mb-4">🏔️</div>
+                    <h3 class="text-xl font-semibold mb-2">Scenic Location</h3>
+                    <p class="text-gray-600">Nestled in the mountains with breathtaking views and peaceful surroundings.</p>
                 </div>
             </div>
         </div>
@@ -337,76 +101,16 @@
     <!-- CTA Section -->
     <section class="py-16 bg-leaf-dark text-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl font-medium mb-6">Experience Traditional Japanese Hospitality</h2>
-            <p class="text-stone-300 max-w-3xl mx-auto mb-8">
-                Book your stay at Kwangdi Hotel and immerse yourself in Japanese culture, 
-                relaxing onsen baths, and exquisite cuisine in our peaceful mountain retreat.
-            </p>
-            <a href="/booking" class="bg-leaf hover:bg-leaf-dark text-white px-8 py-3 rounded-md font-medium transition-colors duration-300 inline-block">
-                Check Availability
-            </a>
+            <h2 class="text-3xl font-bold mb-4">Begin Your Journey to Tranquility</h2>
+            <p class="text-xl mb-8 max-w-2xl mx-auto">Reserve your stay at Kwangdi Onsen and experience the perfect blend of tradition, comfort and serenity.</p>
+            <div class="space-x-4">
+                <a href="/booking" class="bg-cream text-leaf-dark hover:bg-cream-dark px-8 py-3 rounded-md font-medium transition-colors duration-300">
+                    Book Now
+                </a>
+                <a href="/contact" class="border border-white hover:bg-white hover:text-leaf-dark px-8 py-3 rounded-md font-medium transition-colors duration-300">
+                    Contact Us
+                </a>
+            </div>
         </div>
     </section>
-<!-- Add this at the end of your index.html file, before the closing </section> tag -->
-<script>
-    // Check if HTMX is loaded
-    document.addEventListener('DOMContentLoaded', function() {
-        if (typeof htmx === 'undefined') {
-            console.error("HTMX is not loaded! Attempting to load it now...");
-            
-            // Create script element
-            var script = document.createElement('script');
-            script.src = 'https://unpkg.com/htmx.org@1.9.6/dist/htmx.min.js';
-            script.onload = function() {
-                console.log("HTMX loaded successfully, initializing...");
-                // Re-initialize HTMX for our container
-                htmx.process(document.getElementById('rooms-container'));
-            };
-            script.onerror = function() {
-                console.error("Failed to load HTMX from CDN");
-                document.getElementById('rooms-container').innerHTML = 
-                    '<div class="col-span-3 text-center py-8 text-red-500">' +
-                    '<p class="text-lg">Failed to load room data. Please refresh the page or try again later.</p>' +
-                    '</div>';
-            };
-            
-            // Add script to document
-            document.head.appendChild(script);
-        } else {
-            console.log("HTMX is loaded, version:", htmx.version);
-        }
-    });
-</script>
-
-
-<script>
-    // Check room data via API
-    fetch('/api/rooms/check')
-        .then(response => response.json())
-        .then(data => {
-            console.log('Room check:', data);
-            if (data.roomCount === 0) {
-                console.warn('No rooms in database. Make sure data is seeded.');
-            }
-        })
-        .catch(err => console.error('Failed to check rooms:', err));
-    
-    // Log HTMX events
-    document.addEventListener('htmx:beforeRequest', function(evt) {
-        console.log('HTMX request starting:', evt.detail.requestConfig);
-    });
-    
-    document.addEventListener('htmx:afterRequest', function(evt) {
-        console.log('HTMX request finished:', {
-            successful: evt.detail.successful,
-            failed: evt.detail.failed,
-            xhr: evt.detail.xhr
-        });
-    });
-</script>
-
-    
-
-
-    
 {{end}}
