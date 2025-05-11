@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/IamMaheshGurung/privateOnsenBooking/models"
@@ -201,5 +202,232 @@ func (ctrl *RoomController) DeleteRoom(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"success": true,
 		"message": "Room deleted successfully",
+	})
+}
+
+// GetRoomDetails returns details for a specific room
+func (rc *RoomController) GetRoomDetails(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid room ID",
+		})
+	}
+
+	room, err := rc.Service.GetRoomByID(uint(id))
+	if err != nil {
+		rc.Logger.Error("Failed to get room details", zap.Error(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to get room details",
+		})
+	}
+
+	return c.Render("rooms/detail", fiber.Map{
+		"Room": room,
+	})
+}
+
+// GetRoomTypes returns all available room types
+func (rc *RoomController) GetRoomTypes(c *fiber.Ctx) error {
+	rooms, err := rc.Service.GetAllRooms()
+	if err != nil {
+		rc.Logger.Error("Failed to get room types", zap.Error(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to get room types",
+		})
+	}
+
+	// Extract unique room types
+	typeMap := make(map[string]bool)
+	var types []string
+
+	for _, room := range rooms {
+		if !typeMap[room.Type] {
+			typeMap[room.Type] = true
+			types = append(types, room.Type)
+		}
+	}
+
+	return c.JSON(fiber.Map{
+		"types": types,
+	})
+}
+
+func (rc *RoomController) PreviewRooms(c *fiber.Ctx) error {
+	rooms, err := rc.Service.GetAllRooms()
+	if err != nil {
+		rc.Logger.Error("Failed to get rooms for preview", zap.Error(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to get room preview",
+		})
+	}
+
+	// Limit to 3 rooms for preview
+	previewRooms := rooms
+	if len(rooms) > 3 {
+		previewRooms = rooms[:3]
+	}
+
+	return c.Render("partials/room_preview", fiber.Map{
+		"Rooms": previewRooms,
+	})
+}
+
+// AdminListRooms displays all rooms in the admin panel
+func (rc *RoomController) AdminListRooms(c *fiber.Ctx) error {
+	rooms, err := rc.Service.GetAllRooms()
+	if err != nil {
+		rc.Logger.Error("Failed to list rooms for admin", zap.Error(err))
+		return c.Status(fiber.StatusInternalServerError).Render("admin/error", fiber.Map{
+			"Message": "Failed to load rooms",
+			"Error":   err.Error(),
+		})
+	}
+
+	return c.Render("admin/rooms/index", fiber.Map{
+		"Rooms": rooms,
+		"Title": "Room Management",
+	})
+}
+
+// ShowAddRoomForm displays the form to add a new room
+func (rc *RoomController) ShowAddRoomForm(c *fiber.Ctx) error {
+	return c.Render("admin/rooms/form", fiber.Map{
+		"Title":  "Add New Room",
+		"Action": "/admin/rooms/add",
+		"Room":   models.Room{},
+	})
+}
+
+// AddRoom processes the form submission to add a new room
+func (rc *RoomController) AddRoom(c *fiber.Ctx) error {
+	room := new(models.Room)
+
+	// Parse the form
+	if err := c.BodyParser(room); err != nil {
+		rc.Logger.Error("Failed to parse room form data", zap.Error(err))
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid room data",
+		})
+	}
+
+	// Handle file upload for room image
+	file, err := c.FormFile("image")
+	if err == nil {
+		// Save the file
+		filename := fmt.Sprintf("room_%d_%s", time.Now().Unix(), file.Filename)
+		if err := c.SaveFile(file, fmt.Sprintf("./static/uploads/%s", filename)); err != nil {
+			rc.Logger.Error("Failed to save room image", zap.Error(err))
+		} else {
+			room.ImageURL = fmt.Sprintf("/static/uploads/%s", filename)
+		}
+	}
+
+	// Create the room in the database
+	if err := rc.Service.CreateRoom(*room); err != nil {
+		rc.Logger.Error("Failed to create room", zap.Error(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to create room",
+		})
+	}
+
+	// Check if this is an HTMX request
+	if c.Get("HX-Request") == "true" {
+		c.Set("HX-Redirect", "/admin/rooms")
+		return c.SendStatus(fiber.StatusCreated)
+	}
+
+	return c.Redirect("/admin/rooms")
+}
+
+// ShowEditRoomForm displays the form to edit an existing room
+func (rc *RoomController) ShowEditRoomForm(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid room ID",
+		})
+	}
+
+	room, err := rc.Service.GetRoomByID(uint(id))
+	if err != nil {
+		rc.Logger.Error("Failed to get room for editing", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).Render("admin/error", fiber.Map{
+			"Message": "Room not found",
+			"Error":   err.Error(),
+		})
+	}
+
+	return c.Render("admin/rooms/form", fiber.Map{
+		"Title":  "Edit Room",
+		"Action": fmt.Sprintf("/admin/rooms/%d/edit", id),
+		"Room":   room,
+	})
+}
+
+// EditRoom processes the form submission to update an existing room
+func (rc *RoomController) EditRoom(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid room ID",
+		})
+	}
+
+	// Get the existing room
+	existingRoom, err := rc.Service.GetRoomByID(uint(id))
+	if err != nil {
+		rc.Logger.Error("Failed to get room for updating", zap.Error(err))
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "Room not found",
+		})
+	}
+
+	// Parse form data into a new room
+	updatedRoom := new(models.Room)
+	if err := c.BodyParser(updatedRoom); err != nil {
+		rc.Logger.Error("Failed to parse room update form", zap.Error(err))
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid form data",
+		})
+	}
+
+	// Set the ID to ensure we update the right record
+	updatedRoom.ID = uint(id)
+
+	// Handle file upload if a new image is provided
+	file, err := c.FormFile("image")
+	if err == nil {
+		// Save the new image
+		filename := fmt.Sprintf("room_%d_%s", time.Now().Unix(), file.Filename)
+		if err := c.SaveFile(file, fmt.Sprintf("./static/uploads/%s", filename)); err != nil {
+			rc.Logger.Error("Failed to save updated room image", zap.Error(err))
+		} else {
+			updatedRoom.ImageURL = fmt.Sprintf("/static/uploads/%s", filename)
+		}
+	} else {
+		// Keep the existing image if no new one is uploaded
+		updatedRoom.ImageURL = existingRoom.ImageURL
+	}
+
+	// Update the room
+	result, err := rc.Service.UpdateRoom(*updatedRoom)
+	if err != nil {
+		rc.Logger.Error("Failed to update room", zap.Error(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to update room",
+		})
+	}
+
+	// Check if this is an HTMX request
+	if c.Get("HX-Request") == "true" {
+		c.Set("HX-Redirect", "/admin/rooms")
+		return c.SendStatus(fiber.StatusOK)
+	}
+
+	return c.Render("admin/rooms_updated", fiber.Map{
+		"Room":    result,
+		"Title":   "Room Updated",
+		"Message": "Room updated successfully",
 	})
 }

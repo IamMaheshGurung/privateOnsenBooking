@@ -25,7 +25,7 @@ func main() {
 	}
 	defer logger.Sync()
 
-	config := config.NewConfig()
+	config := config.GetConfig()
 
 	// Connect to database
 	db, err := database.ConnectDB()
@@ -53,7 +53,7 @@ func main() {
 
 	// Initialize template engine
 	engine := html.New("./templates", ".html")
-	engine.Reload(true) // Enable hot-reloading for development
+	engine.Reload(true)
 
 	// Add template functions
 	engine.AddFunc("dict", func(values ...interface{}) (map[string]interface{}, error) {
@@ -105,8 +105,19 @@ func main() {
 	// Setup static file serving
 	app.Static("/static", "./static")
 
+	econfig := services.EmailConfig{
+		SMTPServer:   config.SMTPHost,
+		SMTPPort:     config.SMTPPort,
+		SMTPUsername: config.SMTPUser,
+		SMTPPassword: config.SMTPPass,
+		FromEmail:    config.SMTPFrom,
+		FromName:     config.SMTPFromName,
+		TemplatesDir: config.SMTPTemplates,
+		Environment:  config.Environment,
+	}
+
 	// Initialize services
-	emailService := services.NewEmailService(logger, config) // Configure this with your email settings
+	emailService := services.NewEmailService(logger, econfig) // Configure this with your email settings
 	roomBookingService := services.NewRoomBookingService(db, logger, emailService)
 	guestService := services.NewGuestService(db, logger)
 

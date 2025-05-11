@@ -184,7 +184,7 @@ func setupApiRoutes(router fiber.Router,
 	roomsApi := router.Group("/rooms")
 	roomsApi.Get("/", roomController.GetAllRooms)
 	roomsApi.Get("/:id", roomController.GetRoomByID)
-	roomsApi.Get("/available", roomController.GetAvailableRoomsJSON)
+	roomsApi.Get("/available", roomController.GetAvailableRooms)
 
 	// Booking API endpoints
 	bookingsApi := router.Group("/bookings")
