@@ -1,116 +1,310 @@
 {{define "content"}}
     <!-- Hero Section -->
     <section class="hero-image flex items-center justify-center">
-        <div class="text-center text-white p-6">
-            <h1 class="text-4xl md:text-6xl font-semibold mb-4">Experience Serenity at Kwangdi Onsen</h1>
-            <p class="text-xl md:text-2xl mb-8">Traditional Japanese hospitality in a peaceful mountain setting</p>
-            <a href="/booking" class="bg-leaf hover:bg-leaf-dark text-white px-8 py-3 rounded-md font-medium transition-colors duration-300">
-                Check Availability
-            </a>
+        <div class="text-center text-white p-6 max-w-4xl">
+            <h1 class="text-4xl md:text-6xl font-semibold mb-4">Welcome to Kwangdi Pahuna Ghar</h1>
+            <p class="text-xl md:text-2xl mb-8">Traditional Nepali hospitality in the beautiful Shantipur valley</p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="/booking" class="bg-forest hover:bg-forest-dark text-white px-8 py-3 rounded-md font-medium transition-colors duration-300 shadow-md">
+                    Check Availability
+                </a>
+                <a href="/virtual-tour" class="bg-transparent border border-white hover:bg-white hover:text-forest-dark text-white px-8 py-3 rounded-md font-medium transition-colors duration-300">
+                    <i class="fas fa-camera mr-2"></i>Virtual Tour
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Welcome Section -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:flex lg:items-center lg:space-x-12">
+                <div class="lg:w-1/2">
+                    <h2 class="text-3xl font-bold text-forest-dark mb-4">Welcome to Kwangdi Pahuna Ghar</h2>
+                    <p class="text-gray-600 mb-6">Nestled in the serene Shantipur valley of Gulmi district, our traditional Nepali guesthouse offers an authentic experience with modern comforts. Immerse yourself in the natural beauty of rural Nepal while enjoying warm hospitality and delicious local cuisine.</p>
+                    <p class="text-gray-600 mb-6">At Kwangdi Pahuna Ghar, we strive to provide a peaceful retreat where you can escape city life and connect with Nepal's rich cultural heritage and natural splendor.</p>
+                    <a href="/about" class="inline-flex items-center text-forest hover:text-forest-dark font-medium">
+                        Learn more about our guesthouse
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                </div>
+                <div class="mt-8 lg:mt-0 lg:w-1/2">
+                    <div class="relative">
+                        <img src="/static/images/nepali-house.jpg" alt="Nepali Guesthouse" class="rounded-lg shadow-lg w-full h-80 object-cover">
+                        <div class="absolute -bottom-5 -right-5 bg-cream p-4 rounded shadow-lg">
+                            <span class="font-serif text-lg text-forest-dark">नमस्ते</span>
+                            <p class="text-sm text-gray-600">Traditional Nepali welcome</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
     <!-- Room Preview Section -->
-    <section class="py-16 bg-white">
+    <section class="py-16 bg-cream-light">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-leaf-dark">Our Accommodations</h2>
-                <p class="mt-2 text-lg text-gray-600">Experience the perfect blend of tradition and comfort</p>
+                <span class="text-sm font-medium tracking-wider text-forest uppercase">Accommodations</span>
+                <h2 class="text-3xl font-bold text-forest-dark mt-2">Comfortable Rooms</h2>
+                <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">Experience the perfect blend of traditional Nepali design and modern comfort in our carefully designed rooms</p>
             </div>
             
             <!-- Room Grid -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Room 1 -->
-                <div class="bg-cream-light rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
-                    <img src="/static/images/room1.jpg" alt="Traditional Room" class="w-full h-48 object-cover">
+                <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="relative">
+                        <img src="/static/images/room1.jpg" alt="Standard Room" class="w-full h-48 object-cover">
+                        <span class="absolute top-4 right-4 bg-cream-dark text-forest-dark text-xs font-bold px-2 py-1 rounded">From NPR 2,500/night</span>
+                    </div>
                     <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2">Traditional Room</h3>
-                        <p class="text-gray-600 mb-4">Experience authentic Japanese living with tatami floors and traditional decor.</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-leaf-dark font-bold">$120/night</span>
-                            <a href="/rooms/1" class="text-leaf hover:text-leaf-dark">View Details →</a>
+                        <h3 class="text-xl font-semibold mb-2 text-forest-dark">Standard Room</h3>
+                        <p class="text-gray-600 mb-4">Cozy rooms with traditional Nepali touches and modern amenities for a comfortable stay.</p>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <div class="flex items-center mr-4">
+                                <i class="fas fa-users mr-2 text-forest"></i>
+                                <span>2 Guests</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-expand-arrows-alt mr-2 text-forest"></i>
+                                <span>20m²</span>
+                            </div>
                         </div>
+                        <a href="/rooms/1" class="inline-block w-full text-center bg-forest hover:bg-forest-dark text-white py-2 rounded-md font-medium transition-colors duration-300">
+                            View Details
+                        </a>
                     </div>
                 </div>
                 
                 <!-- Room 2 -->
-                <div class="bg-cream-light rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
-                    <img src="/static/images/room2.jpg" alt="Deluxe Room" class="w-full h-48 object-cover">
+                <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="relative">
+                        <img src="/static/images/room2.jpg" alt="Deluxe Room" class="w-full h-48 object-cover">
+                        <span class="absolute top-4 right-4 bg-cream-dark text-forest-dark text-xs font-bold px-2 py-1 rounded">From NPR 4,000/night</span>
+                    </div>
                     <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2">Deluxe Room</h3>
-                        <p class="text-gray-600 mb-4">Spacious accommodation with premium amenities and garden views.</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-leaf-dark font-bold">$180/night</span>
-                            <a href="/rooms/2" class="text-leaf hover:text-leaf-dark">View Details →</a>
+                        <h3 class="text-xl font-semibold mb-2 text-forest-dark">Deluxe Room</h3>
+                        <p class="text-gray-600 mb-4">Spacious accommodation with premium amenities and stunning valley views.</p>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <div class="flex items-center mr-4">
+                                <i class="fas fa-users mr-2 text-forest"></i>
+                                <span>2-3 Guests</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-expand-arrows-alt mr-2 text-forest"></i>
+                                <span>30m²</span>
+                            </div>
                         </div>
+                        <a href="/rooms/2" class="inline-block w-full text-center bg-forest hover:bg-forest-dark text-white py-2 rounded-md font-medium transition-colors duration-300">
+                            View Details
+                        </a>
                     </div>
                 </div>
                 
                 <!-- Room 3 -->
-                <div class="bg-cream-light rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
-                    <img src="/static/images/room3.jpg" alt="Premium Suite" class="w-full h-48 object-cover">
+                <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="relative">
+                        <img src="/static/images/room3.jpg" alt="Family Suite" class="w-full h-48 object-cover">
+                        <span class="absolute top-4 right-4 bg-cream-dark text-forest-dark text-xs font-bold px-2 py-1 rounded">From NPR 6,000/night</span>
+                    </div>
                     <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2">Premium Suite</h3>
-                        <p class="text-gray-600 mb-4">Our finest accommodation with private onsen and mountain views.</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-leaf-dark font-bold">$250/night</span>
-                            <a href="/rooms/3" class="text-leaf hover:text-leaf-dark">View Details →</a>
+                        <h3 class="text-xl font-semibold mb-2 text-forest-dark">Family Suite</h3>
+                        <p class="text-gray-600 mb-4">Our finest accommodation with separate living space and panoramic mountain views.</p>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <div class="flex items-center mr-4">
+                                <i class="fas fa-users mr-2 text-forest"></i>
+                                <span>4-6 Guests</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-expand-arrows-alt mr-2 text-forest"></i>
+                                <span>45m²</span>
+                            </div>
                         </div>
+                        <a href="/rooms/3" class="inline-block w-full text-center bg-forest hover:bg-forest-dark text-white py-2 rounded-md font-medium transition-colors duration-300">
+                            View Details
+                        </a>
                     </div>
                 </div>
             </div>
             
             <div class="text-center mt-10">
-                <a href="/rooms" class="inline-block bg-leaf hover:bg-leaf-dark text-white px-6 py-2 rounded-md transition-colors duration-300">
+                <a href="/rooms" class="inline-flex items-center bg-forest hover:bg-forest-dark text-white px-6 py-3 rounded-md transition-colors duration-300">
                     View All Rooms
+                    <i class="fas fa-arrow-right ml-2"></i>
                 </a>
             </div>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section class="py-16 bg-cream-light">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-leaf-dark">Experience Kwangdi Onsen</h2>
-                <p class="mt-2 text-lg text-gray-600">Immerse yourself in Japanese tradition and hospitality</p>
+<section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <span class="text-sm font-medium tracking-wider text-forest uppercase">Experience</span>
+            <h2 class="text-3xl font-bold text-forest-dark mt-2">Authentic Nepali Hospitality</h2>
+            <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">Immerse yourself in Nepali culture with our carefully curated experiences</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-12">
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-cream mb-4">
+                    <i class="fas fa-hiking text-2xl text-forest"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Guided Treks</h3>
+                <p class="text-gray-600">Explore the stunning Gulmi district with our experienced local guides who know the best trails and viewpoints in the region.</p>
+                <a href="/experiences/trekking" class="inline-flex items-center mt-4 text-forest hover:text-forest-dark text-sm font-medium">
+                    Learn more
+                    <i class="fas fa-chevron-right text-xs ml-1"></i>
+                </a>
+            </div>
+
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-cream mb-4">
+                    <i class="fas fa-drum text-2xl text-forest"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Panche Baja</h3>
+                <p class="text-gray-600">Experience the vibrant rhythms of traditional Nepali folk music with live Panche Baja performances featuring authentic local instruments.</p>
+                <a href="/experiences/panche-baja" class="inline-flex items-center mt-4 text-forest hover:text-forest-dark text-sm font-medium">
+                    Learn more
+                    <i class="fas fa-chevron-right text-xs ml-1"></i>
+                </a>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="text-center p-6">
-                    <div class="text-4xl text-leaf mb-4">🌿</div>
-                    <h3 class="text-xl font-semibold mb-2">Private Onsen</h3>
-                    <p class="text-gray-600">Enjoy the therapeutic benefits of mineral-rich hot springs in complete privacy.</p>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-cream mb-4">
+                    <i class="fas fa-utensils text-2xl text-forest"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Traditional Cuisine</h3>
+                <p class="text-gray-600">Savor authentic Nepali meals prepared with fresh, local ingredients from our organic garden, showcasing regional specialties.</p>
+                <a href="/dining" class="inline-flex items-center mt-4 text-forest hover:text-forest-dark text-sm font-medium">
+                    Learn more
+                    <i class="fas fa-chevron-right text-xs ml-1"></i>
+                </a>
+            </div>
+            
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-cream mb-4">
+                    <i class="fas fa-theater-masks text-2xl text-forest"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Sorathi Dance</h3>
+                <p class="text-gray-600">Witness the enchanting Sorathi folk dance, a cultural heritage of Nepal that tells stories through graceful movements and colorful costumes.</p>
+                <a href="/experiences/sorathi" class="inline-flex items-center mt-4 text-forest hover:text-forest-dark text-sm font-medium">
+                    Learn more
+                    <i class="fas fa-chevron-right text-xs ml-1"></i>
+                </a>
+            </div>
+            
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-cream mb-4">
+                    <i class="fas fa-user-friends text-2xl text-forest"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Gatu Nach</h3>
+                <p class="text-gray-600">Enjoy the rhythmic and energetic Gatu Nach, a traditional dance form of the Gurung community, performed by skilled local dancers.</p>
+                <a href="/experiences/gatu-nach" class="inline-flex items-center mt-4 text-forest hover:text-forest-dark text-sm font-medium">
+                    Learn more
+                    <i class="fas fa-chevron-right text-xs ml-1"></i>
+                </a>
+            </div>
+            
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-cream mb-4">
+                    <i class="fas fa-music text-2xl text-forest"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Kwangdi Club Dance</h3>
+                <p class="text-gray-600">Join in our evening Kwangdi Club performances where modern meets traditional with fusion dance performances by talented local youth.</p>
+                <a href="/experiences/kwangdi-club" class="inline-flex items-center mt-4 text-forest hover:text-forest-dark text-sm font-medium">
+                    Learn more
+                    <i class="fas fa-chevron-right text-xs ml-1"></i>
+                </a>
+            </div>
+        </div>
+        
+        <div class="mt-16 text-center">
+            <a href="/experiences" class="inline-flex items-center px-6 py-3 border border-forest text-forest hover:bg-forest hover:text-white transition-colors duration-300 rounded-md">
+                Explore All Cultural Experiences
+                <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+    <!-- Testimonials Section -->
+    <section class="py-16 bg-cream-light">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <span class="text-sm font-medium tracking-wider text-forest uppercase">Testimonials</span>
+                <h2 class="text-3xl font-bold text-forest-dark mt-2">What Our Guests Say</h2>
+            </div>
+            
+            <div class="mt-12 max-w-lg mx-auto grid gap-8 lg:grid-cols-2 lg:max-w-none">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="text-forest">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <blockquote class="text-gray-600 mb-4">
+                        "Our stay at Kwangdi Pahuna Ghar was the highlight of our Nepal trip. The views are stunning, the food delicious, and the hosts treated us like family. The guided trek to nearby villages was an incredible cultural experience."
+                    </blockquote>
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <img class="h-10 w-10 rounded-full" src="/static/images/testimonials/guest1.jpg" alt="Guest">
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900">Maria & John</p>
+                            <p class="text-sm text-gray-500">United Kingdom</p>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="text-center p-6">
-                    <div class="text-4xl text-leaf mb-4">🍵</div>
-                    <h3 class="text-xl font-semibold mb-2">Traditional Cuisine</h3>
-                    <p class="text-gray-600">Savor authentic Japanese meals prepared with fresh, local ingredients.</p>
-                </div>
-                
-                <div class="text-center p-6">
-                    <div class="text-4xl text-leaf mb-4">🏔️</div>
-                    <h3 class="text-xl font-semibold mb-2">Scenic Location</h3>
-                    <p class="text-gray-600">Nestled in the mountains with breathtaking views and peaceful surroundings.</p>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="text-forest">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <blockquote class="text-gray-600 mb-4">
+                        "If you want to experience authentic rural Nepal away from tourist crowds, this is the place to stay. The family-run guesthouse offers incredible hospitality, and the cooking class was a real highlight. We'll definitely return!"
+                    </blockquote>
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <img class="h-10 w-10 rounded-full" src="/static/images/testimonials/guest2.jpg" alt="Guest">
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900">David & Lisa</p>
+                            <p class="text-sm text-gray-500">Australia</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- CTA Section -->
-    <section class="py-16 bg-leaf-dark text-white">
+    <section class="py-16 bg-forest-dark text-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl font-bold mb-4">Begin Your Journey to Tranquility</h2>
-            <p class="text-xl mb-8 max-w-2xl mx-auto">Reserve your stay at Kwangdi Onsen and experience the perfect blend of tradition, comfort and serenity.</p>
-            <div class="space-x-4">
-                <a href="/booking" class="bg-cream text-leaf-dark hover:bg-cream-dark px-8 py-3 rounded-md font-medium transition-colors duration-300">
-                    Book Now
+            <h2 class="text-3xl font-bold mb-4">Experience Authentic Nepali Hospitality</h2>
+            <p class="text-xl mb-8 max-w-2xl mx-auto">Book your stay at Kwangdi Pahuna Ghar and discover the beauty, culture and warmth of Gulmi district.</p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="/booking" class="bg-cream text-forest-dark hover:bg-cream-dark px-8 py-3 rounded-md font-medium transition-colors duration-300 shadow-md">
+                    <i class="fas fa-calendar-check mr-2"></i>Book Now
                 </a>
-                <a href="/contact" class="border border-white hover:bg-white hover:text-leaf-dark px-8 py-3 rounded-md font-medium transition-colors duration-300">
-                    Contact Us
+                <a href="/contact" class="border border-white hover:bg-white hover:text-forest-dark px-8 py-3 rounded-md font-medium transition-colors duration-300">
+                    <i class="fas fa-envelope mr-2"></i>Contact Us
                 </a>
             </div>
+            <p class="mt-6 text-sm text-cream-light">Special discounts for longer stays and Nepali citizens</p>
         </div>
     </section>
 {{end}}

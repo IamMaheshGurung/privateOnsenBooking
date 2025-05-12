@@ -1,57 +1,176 @@
-<footer class="bg-stone-800 text-stone-200">
-    <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-        <!-- Hotel Info -->
-        <div class="col-span-1">
-          <img src="/static/images/logo-light.png" alt="Kwangdi Hotel" class="h-12 mb-4">
-          <p class="text-sm text-stone-300">
-            Experience serenity and traditional Japanese hospitality in our ryokan nestled in the beautiful mountains.
-          </p>
+{{ define "footer" }}
+<footer class="bg-forest-dark text-white pt-16 pb-8">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Top Footer Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-10">
+      <!-- About Section -->
+      <div class="space-y-4">
+        <div class="flex items-center mb-6">
+          <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-cream-dark mr-3">
+            <img src="/static/images/logo.png" alt="Kwangdi Pahuna Ghar" class="w-full h-full object-cover">
+          </div>
+          <div>
+            <h3 class="font-serif text-lg font-bold text-white">Kwangdi Pahuna Ghar</h3>
+            <p class="text-xs text-cream-light">क्वाङ्दी पाहुना घर</p>
+          </div>
         </div>
-        
-        <!-- Contact Info -->
-        <div class="col-span-1">
-          <h3 class="text-leaf-400 font-medium mb-4">Contact Us</h3>
-          <address class="not-italic text-sm">
-            <p class="mb-2">123 Sakura Street</p>
-            <p class="mb-2">Kyoto, Japan 123-4567</p>
-            <p class="mb-2">
-              <span class="block">Email: info@kwangdihotel.com</span>
-              <span class="block">Phone: +81 123-456-7890</span>
-            </p>
-          </address>
-        </div>
-        
-        <!-- Quick Links -->
-        <div class="col-span-1">
-          <h3 class="text-leaf-400 font-medium mb-4">Quick Links</h3>
-          <ul class="space-y-2 text-sm">
-            <li><a href="/rooms" class="text-stone-300 hover:text-white">Our Rooms</a></li>
-            <li><a href="/booking" class="text-stone-300 hover:text-white">Book a Room</a></li>
-            <li><a href="/cuisine" class="text-stone-300 hover:text-white">Dining</a></li>
-            <li><a href="/gallery" class="text-stone-300 hover:text-white">Photo Gallery</a></li>
-            <li><a href="/booking/cancel" class="text-stone-300 hover:text-white">Cancel Booking</a></li>
-          </ul>
-        </div>
-        
-        <!-- Newsletter -->
-        <div class="col-span-1">
-          <h3 class="text-leaf-400 font-medium mb-4">Stay Updated</h3>
-          <form class="mt-2">
-            <div class="flex rounded-md shadow-sm">
-              <input type="email" name="email" id="email" class="focus:ring-leaf-500 focus:border-leaf-500 flex-1 block w-full rounded-none rounded-l-md sm:text-sm border-stone-300 bg-stone-700 text-white border-stone-600" placeholder="Your email">
-              <button type="button" class="inline-flex items-center px-4 py-2 border border-transparent rounded-r-md shadow-sm text-sm font-medium text-white bg-leaf-600 hover:bg-leaf-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-leaf-500">
-                Subscribe
-              </button>
-            </div>
-          </form>
+        <p class="text-cream-light text-sm leading-relaxed">
+          Traditional Nepali guesthouse offering authentic hospitality in the beautiful Shantipur valley of Gulmi district, where culture meets comfort.
+        </p>
+        <div class="flex space-x-4 pt-2">
+          <a href="#" class="text-cream hover:text-white transition-colors">
+            <span class="sr-only">Facebook</span>
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a href="#" class="text-cream hover:text-white transition-colors">
+            <span class="sr-only">Instagram</span>
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a href="#" class="text-cream hover:text-white transition-colors">
+            <span class="sr-only">TripAdvisor</span>
+            <i class="fab fa-tripadvisor"></i>
+          </a>
+          <a href="#" class="text-cream hover:text-white transition-colors">
+            <span class="sr-only">WhatsApp</span>
+            <i class="fab fa-whatsapp"></i>
+          </a>
         </div>
       </div>
       
-      <div class="mt-8 pt-8 border-t border-stone-700">
-        <p class="text-sm text-stone-400 text-center">
-          &copy; 2023 Kwangdi Hotel. All rights reserved.
+      <!-- Useful Links -->
+      <div class="space-y-4">
+        <h3 class="text-lg font-medium mb-4 border-b border-forest pb-2">Quick Links</h3>
+        <ul class="space-y-2">
+          <li>
+            <a href="/" class="text-cream-light hover:text-white flex items-center group">
+              <i class="fas fa-chevron-right text-xs mr-2 text-forest group-hover:text-white transition-colors"></i>
+              <span>Home</span>
+            </a>
+          </li>
+          <li>
+            <a href="/about" class="text-cream-light hover:text-white flex items-center group">
+              <i class="fas fa-chevron-right text-xs mr-2 text-forest group-hover:text-white transition-colors"></i>
+              <span>About Us</span>
+            </a>
+          </li>
+          <li>
+            <a href="/rooms" class="text-cream-light hover:text-white flex items-center group">
+              <i class="fas fa-chevron-right text-xs mr-2 text-forest group-hover:text-white transition-colors"></i>
+              <span>Accommodations</span>
+            </a>
+          </li>
+          <li>
+            <a href="/experiences" class="text-cream-light hover:text-white flex items-center group">
+              <i class="fas fa-chevron-right text-xs mr-2 text-forest group-hover:text-white transition-colors"></i>
+              <span>Experiences</span>
+            </a>
+          </li>
+          <li>
+            <a href="/dining" class="text-cream-light hover:text-white flex items-center group">
+              <i class="fas fa-chevron-right text-xs mr-2 text-forest group-hover:text-white transition-colors"></i>
+              <span>Dining</span>
+            </a>
+          </li>
+          <li>
+            <a href="/location" class="text-cream-light hover:text-white flex items-center group">
+              <i class="fas fa-chevron-right text-xs mr-2 text-forest group-hover:text-white transition-colors"></i>
+              <span>Location</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <!-- Contact Info -->
+      <div class="space-y-4">
+        <h3 class="text-lg font-medium mb-4 border-b border-forest pb-2">Contact Us</h3>
+        <ul class="space-y-3 text-sm">
+          <li class="flex items-start">
+            <i class="fas fa-map-marker-alt mt-1 mr-3 text-cream"></i>
+            <span class="text-cream-light">Shantipur Valley, Gulmi District, Lumbini Province, Nepal</span>
+          </li>
+          <li class="flex items-start">
+            <i class="fas fa-phone-alt mt-1 mr-3 text-cream"></i>
+            <div class="text-cream-light">
+              <p>+977 9812345678</p>
+              <p>+977 9876543210</p>
+            </div>
+          </li>
+          <li class="flex items-start">
+            <i class="fas fa-envelope mt-1 mr-3 text-cream"></i>
+            <span class="text-cream-light">info@kwangdipahunaghar.com</span>
+          </li>
+          <li class="flex items-start">
+            <i class="fas fa-clock mt-1 mr-3 text-cream"></i>
+            <div class="text-cream-light">
+              <p>Check-in: 12:00 PM</p>
+              <p>Check-out: 11:00 AM</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+      
+      <!-- Newsletter -->
+      <div class="space-y-4">
+        <h3 class="text-lg font-medium mb-4 border-b border-forest pb-2">Newsletter</h3>
+        <p class="text-cream-light text-sm mb-4">
+          Subscribe to receive updates on special offers and events.
         </p>
+        <form class="space-y-3">
+          <div>
+            <input 
+              type="email" 
+              placeholder="Your Email Address" 
+              class="w-full px-4 py-2 bg-white bg-opacity-10 border border-forest rounded focus:outline-none focus:border-cream-light placeholder-gray-400 text-sm text-white"
+              required
+            >
+          </div>
+          <button 
+            type="submit" 
+            class="w-full bg-cream text-forest-dark hover:bg-cream-dark transition-colors px-4 py-2 rounded font-medium text-sm"
+          >
+            Subscribe
+          </button>
+        </form>
+        <div class="pt-4">
+          <h4 class="text-sm font-medium mb-2">We Accept:</h4>
+          <div class="flex space-x-2">
+            <i class="fab fa-cc-visa text-white opacity-70 hover:opacity-100 transition-opacity"></i>
+            <i class="fab fa-cc-mastercard text-white opacity-70 hover:opacity-100 transition-opacity"></i>
+            <i class="fab fa-cc-paypal text-white opacity-70 hover:opacity-100 transition-opacity"></i>
+            <i class="fas fa-money-bill-wave text-white opacity-70 hover:opacity-100 transition-opacity"></i>
+          </div>
+        </div>
       </div>
     </div>
-  </footer>
+    
+    <!-- Divider -->
+    <div class="border-t border-forest opacity-50 my-6"></div>
+    
+    <!-- Bottom Footer -->
+    <div class="flex flex-col md:flex-row justify-between items-center">
+      <div class="text-center md:text-left mb-4 md:mb-0">
+        <div style="height: 4px;" class="w-32 mx-auto md:mx-0 mb-4 bg-gradient-to-r from-nepali-blue to-nepali-red opacity-75 rounded"></div>
+        <p class="text-sm text-cream-light">
+          &copy; {{ .CurrentYear }} Kwangdi Pahuna Ghar. All rights reserved.
+        </p>
+      </div>
+      
+      <div class="flex flex-wrap justify-center gap-4 text-xs text-cream-light">
+        <a href="/terms" class="hover:text-white transition-colors">Terms & Conditions</a>
+        <a href="/privacy" class="hover:text-white transition-colors">Privacy Policy</a>
+        <a href="/cookies" class="hover:text-white transition-colors">Cookie Policy</a>
+        <a href="/sitemap" class="hover:text-white transition-colors">Sitemap</a>
+      </div>
+    </div>
+    
+    <!-- Language Selector -->
+    <div class="mt-6 pt-6 text-center">
+      <div class="inline-flex bg-forest rounded overflow-hidden">
+        <a href="?lang=en" class="px-3 py-1 text-xs text-cream-light hover:bg-forest-dark transition-colors">English</a>
+        <div class="w-px bg-forest-dark"></div>
+        <a href="?lang=np" class="px-3 py-1 text-xs text-cream-light hover:bg-forest-dark transition-colors">नेपाली</a>
+      </div>
+    </div>
+  </div>
+</footer>
+{{ end }}

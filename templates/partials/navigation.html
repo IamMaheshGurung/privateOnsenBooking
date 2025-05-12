@@ -1,66 +1,72 @@
 {{ define "head"}}
 <header class="site-header">
-    <nav class="nav-container">
-      <div class="flex justify-between h-16 items-center">
-        <!-- Logo and brand name -->
-        <div class="flex">
-          <a href="/" class="nav-logo animate-logo">
-            <img src="/static/images/logo.png" alt="Kwangdi Hotel Logo">
-            <span>Kwangdi Hotel</span>
-          </a>
-        </div>
-  
-        <!-- Desktop navigation links -->
-        <div class="hidden md:flex md:items-center md:space-x-1">
-          <a href="/" class="nav-link">
-            Home
-          </a>
-          <a href="/rooms" class="nav-link">
-            Rooms
-          </a>
-          <div class="japanese-dropdown">
-            <a href="/onsen" class="nav-link flex items-center">
-              Onsen
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-              </svg>
-            </a>
-            <div class="japanese-dropdown-menu">
-              <a href="/onsen/private" class="dropdown-item">Private Onsen</a>
-              <a href="/onsen/public" class="dropdown-item">Public Bath</a>
-              <a href="/onsen/outdoor" class="dropdown-item">Outdoor Onsen</a>
+    <!-- Navigation -->
+    <nav class="bg-forest-dark text-white shadow-md">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <a href="/" class="flex items-center">
+                    <div class="logo-round">
+                        <img src="/static/images/logo.png" alt="Kwangdi Pahuna Ghar Logo">
+                    </div>
+                    <span class="logo-text text-xl font-semibold">Kwangdi Pahuna Ghar</span>
+                </a>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center">
+                    <a href="/" class="nav-link">Home</a>
+                    
+                    <div class="dropdown-container relative">
+                        <a href="/rooms" class="nav-link flex items-center">
+                            Rooms
+                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="/rooms/standard" class="dropdown-item">Standard Rooms</a>
+                            <a href="/rooms/deluxe" class="dropdown-item">Deluxe Rooms</a>
+                            <a href="/rooms/family" class="dropdown-item">Family Suites</a>
+                        </div>
+                    </div>
+                    
+                    <div class="dropdown-container relative">
+                        <a href="/experiences" class="nav-link flex items-center">
+                            Experiences
+                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="/experiences/trekking" class="dropdown-item">Trekking</a>
+                            <a href="/experiences/cultural" class="dropdown-item">Cultural Tours</a>
+                            <a href="/experiences/cooking" class="dropdown-item">Nepali Cooking</a>
+                        </div>
+                    </div>
+                    
+                    <a href="/dining" class="nav-link">Dining</a>
+                    <a href="/about" class="nav-link">About</a>
+                    <a href="/contact" class="nav-link">Contact</a>
+                    
+                    <a href="/booking" class="ml-4 bg-cream hover:bg-cream-dark text-forest-dark px-4 py-2 rounded-md font-medium transition-all duration-300 shadow-sm hover:shadow-md">
+                        Book Now
+                    </a>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="p-2 focus:outline-none">
+                        <i class="fas fa-bars text-white text-xl"></i>
+                    </button>
+                </div>
             </div>
-          </div>
-          <a href="/about" class="nav-link">
-            About
-          </a>
-          <a href="/contact" class="nav-link">
-            Contact
-          </a>
+            
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="mobile-menu mt-2">
+                <a href="/" class="mobile-nav-link">Home</a>
+                <a href="/rooms" class="mobile-nav-link">Rooms</a>
+                <a href="/experiences" class="mobile-nav-link">Experiences</a>
+                <a href="/dining" class="mobile-nav-link">Dining</a>
+                <a href="/about" class="mobile-nav-link">About</a>
+                <a href="/contact" class="mobile-nav-link">Contact</a>
+                <a href="/booking" class="mobile-nav-link font-medium bg-forest">Book Now</a>
+            </div>
         </div>
-  
-        <!-- Book now button for desktop -->
-        <div class="hidden md:flex md:items-center ml-4">
-          <a href="/booking" class="btn-primary px-4 py-2 rounded-md text-sm font-medium shadow-sm hover:shadow-md transition-all">
-            Book Now
-          </a>
-        </div>
-  
-        <!-- Mobile menu button -->
-        <div class="flex items-center md:hidden">
-          <button type="button" id="mobile-menu-button" class="mobile-menu-button">
-            <span class="sr-only">Open main menu</span>
-            <!-- Icon when menu is closed -->
-            <svg id="menu-closed-icon" class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-            <!-- Icon when menu is open -->
-            <svg id="menu-open-icon" class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-      </div>
     </nav>
   
     <!-- Mobile menu, show/hide based on menu state -->

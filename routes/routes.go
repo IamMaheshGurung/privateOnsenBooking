@@ -154,7 +154,7 @@ func setupPageRoutes(app *fiber.App) {
         </html>
     `)
 	})
-	app.Get("/", func(c *fiber.Ctx) error {
+	app.Get("/home", func(c *fiber.Ctx) error {
 		// Log that we're handling the request
 		fmt.Println("Rendering index template")
 

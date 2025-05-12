@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/IamMaheshGurung/privateOnsenBooking/config"
@@ -16,6 +17,11 @@ import (
 	"github.com/gofiber/template/html/v2"
 	"go.uber.org/zap"
 )
+
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
+}
 
 func main() {
 	// Initialize logger
@@ -54,6 +60,13 @@ func main() {
 	// Initialize template engine
 	engine := html.New("./templates", ".html")
 	engine.Reload(true)
+	engine.Debug(true)
+	// Test template loading
+	if err := engine.Load(); err != nil {
+		fmt.Printf("ERROR LOADING TEMPLATES: %v\n", err)
+		// Exit early if templates can't be loaded
+		os.Exit(1)
+	}
 
 	// Add template functions
 	engine.AddFunc("dict", func(values ...interface{}) (map[string]interface{}, error) {
@@ -73,8 +86,9 @@ func main() {
 
 	// Create Fiber app
 	app := fiber.New(fiber.Config{
-		AppName: "private onsen booking",
-		Views:   engine,
+		AppName:     "private onsen booking",
+		Views:       engine,
+		ViewsLayout: "base",
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			code := fiber.StatusInternalServerError
 			if e, ok := err.(*fiber.Error); ok {
@@ -125,6 +139,18 @@ func main() {
 	roomController := controllers.NewRoomController(roomBookingService, logger)
 	bookingController := controllers.NewBookingController(roomBookingService, guestService, emailService, logger)
 	guestController := controllers.NewGuestController(guestService, logger)
+
+	// Setup routes
+	routes.SetupRoutes(app, roomController, bookingController, guestController)
+	cwd, err := os.Getwd()
+	if err != nil {
+		logger.Error("Failed to get current working directory", zap.Error(err))
+		return
+	}
+	fmt.Printf("Checking if index.html exists: %v\n",
+		fileExists(filepath.Join(cwd, "templates", "index.html")))
+
+	// Setup routes
 
 	// Setup routes
 	routes.SetupRoutes(app, roomController, bookingController, guestController)
