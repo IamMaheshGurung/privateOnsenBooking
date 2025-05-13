@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 
 	"github.com/IamMaheshGurung/privateOnsenBooking/config"
 	"github.com/IamMaheshGurung/privateOnsenBooking/controllers"
@@ -67,49 +68,51 @@ func main() {
 			// Continuing anyway, as this wont  effect the app
 		}
 	}
+	funcMap := template.FuncMap{
+		"toUpper": strings.ToUpper,
+		"ToUpper": strings.ToUpper,
+		"toupper": strings.ToUpper,
+		"ToLower": strings.ToLower,
+		"toLower": strings.ToLower,
+		"tolower": strings.ToLower,
+		"dict": func(values ...interface{}) (map[string]interface{}, error) {
+			if len(values)%2 != 0 {
+				return nil, fmt.Errorf("dict requires an even number of arguments")
+			}
+			dict := make(map[string]interface{}, len(values)/2)
+			for i := 0; i < len(values); i += 2 {
+				key, ok := values[i].(string)
+				if !ok {
+					return nil, fmt.Errorf("dict keys must be strings")
+				}
+				dict[key] = values[i+1]
+			}
+			return dict, nil
+
+		},
+	}
 
 	// Initialize template engine
 	engine := html.New("./templates", ".html")
 	engine.Reload(true)
 	engine.Debug(true)
-	// Test template loading
+	engine.AddFuncMap(funcMap)
+
 	if err := engine.Load(); err != nil {
 		fmt.Printf("ERROR LOADING TEMPLATES: %v\n", err)
 		// Exit early if templates can't be loaded
 		os.Exit(1)
 	}
 
-	// Add template functions
-	engine.AddFunc("dict", func(values ...interface{}) (map[string]interface{}, error) {
-		if len(values)%2 != 0 {
-			return nil, fmt.Errorf("dict requires an even number of arguments")
-		}
-		dict := make(map[string]interface{}, len(values)/2)
-		for i := 0; i < len(values); i += 2 {
-			key, ok := values[i].(string)
-			if !ok {
-				return nil, fmt.Errorf("dict keys must be strings")
-			}
-			dict[key] = values[i+1]
-		}
-		return dict, nil
-	})
-
-	//Basic upper and lower changes in case>>
-	engine.AddFunc("ToUpper", func(s string) string {
-		return strings.ToUpper(s)
-	})
-
-	engine.AddFunc("ToLower", func(s string) string {
-		return strings.ToLower(s)
-
-	})
+	if err := engine.Load(); err != nil {
+		log.Fatalf("ERROR LOADING TEMPLATES: %v", err)
+	}
 
 	// Create Fiber app
 	app := fiber.New(fiber.Config{
-		AppName:     "private onsen booking",
-		Views:       engine,
-		ViewsLayout: "base",
+		AppName: "private onsen booking",
+		Views:   engine,
+		//ViewsLayout: "base",
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			code := fiber.StatusInternalServerError
 			if e, ok := err.(*fiber.Error); ok {
@@ -163,6 +166,7 @@ func main() {
 
 	// Setup routes
 	routes.SetupRoutes(app, roomController, bookingController, guestController)
+
 	cwd, err := os.Getwd()
 	if err != nil {
 		logger.Error("Failed to get current working directory", zap.Error(err))
@@ -170,8 +174,6 @@ func main() {
 	}
 	fmt.Printf("Checking if index.html exists: %v\n",
 		fileExists(filepath.Join(cwd, "templates", "index.html")))
-
-	// Setup routes
 
 	// Get port from environment or use default
 	port := os.Getenv("PORT")

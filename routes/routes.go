@@ -6,8 +6,6 @@ import (
 
 	"github.com/IamMaheshGurung/privateOnsenBooking/controllers"
 	"github.com/gofiber/fiber/v2"
-	// Import your controllers if you have them
-	// "github.com/yourusername/privateOnsen/controllers"
 )
 
 // SetupRoutes configures all application routes
@@ -18,20 +16,22 @@ func SetupRoutes(
 	guestController *controllers.GuestController,
 ) {
 	// Setup routes by category
-	setupBasicRoutes(app)
-	setupPageRoutes(app)
-	setupBookingRoutes(app)
-	setupExperienceRoutes(app)
-	setupGalleryRoutes(app)
-	setupBlogRoutes(app)
-	setupRoomRoutes(app)
-	setupDiningRoutes(app)
-	setupAdminRoutes(app)
-	setupAPIRoutes(app)
+	SetupBookingRoutes(app)
+	SetupBasicRoutes(app)
+	SetupPageRoutes(app)
+
+	SetupExperienceRoutes(app)
+	SetupGalleryRoutes(app)
+	SetupBlogRoutes(app)
+	SetupRoomRoutes(app)
+	SetupDiningRoutes(app)
+	SetupAdminRoutes(app)
+	SetupAPIRoutes(app)
+
 }
 
 // setupBasicRoutes configures test and debug routes
-func setupBasicRoutes(app *fiber.App) {
+func SetupBasicRoutes(app *fiber.App) {
 	// Simple test endpoint
 	app.Get("/test", func(c *fiber.Ctx) error {
 		return c.SendString(`
@@ -60,10 +60,10 @@ func setupBasicRoutes(app *fiber.App) {
 }
 
 // setupPageRoutes configures basic page routes
-func setupPageRoutes(app *fiber.App) {
+func SetupPageRoutes(app *fiber.App) {
 	// Home page
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.Render("index", fiber.Map{
+		return c.Render("base", fiber.Map{
 			"Title":       "Kwangdi Pahuna Ghar - Traditional Nepali Guesthouse",
 			"Description": "Experience authentic Nepali hospitality in the beautiful Shantipur valley of Gulmi district",
 			"CurrentYear": time.Now().Year(),
@@ -72,7 +72,7 @@ func setupPageRoutes(app *fiber.App) {
 
 	// Alternative home route
 	app.Get("/home", func(c *fiber.Ctx) error {
-		return c.Render("index", fiber.Map{
+		return c.Render("base", fiber.Map{
 			"Title":       "Kwangdi Pahuna Ghar - Traditional Nepali Guesthouse",
 			"Description": "Experience authentic Nepali hospitality in the beautiful Shantipur valley of Gulmi district",
 			"CurrentYear": time.Now().Year(),
@@ -155,7 +155,7 @@ func setupPageRoutes(app *fiber.App) {
 }
 
 // setupRoomRoutes configures room-related routes
-func setupRoomRoutes(app *fiber.App) {
+func SetupRoomRoutes(app *fiber.App) {
 	// Rooms main page
 	app.Get("/rooms", func(c *fiber.Ctx) error {
 		return c.Render("rooms/index", fiber.Map{
@@ -204,7 +204,7 @@ func setupRoomRoutes(app *fiber.App) {
 }
 
 // setupExperienceRoutes configures experience-related routes
-func setupExperienceRoutes(app *fiber.App) {
+func SetupExperienceRoutes(app *fiber.App) {
 	// Main experiences page
 	app.Get("/experiences", func(c *fiber.Ctx) error {
 		return c.Render("experiences/index", fiber.Map{
@@ -282,7 +282,7 @@ func setupExperienceRoutes(app *fiber.App) {
 }
 
 // setupDiningRoutes configures dining-related routes
-func setupDiningRoutes(app *fiber.App) {
+func SetupDiningRoutes(app *fiber.App) {
 	// Dining main page
 	app.Get("/dining", func(c *fiber.Ctx) error {
 		return c.Render("dining/index", fiber.Map{
@@ -311,31 +311,11 @@ func setupDiningRoutes(app *fiber.App) {
 }
 
 // setupBookingRoutes configures booking-related routes
-// setupBookingRoutes configures booking-related routes
-func setupBookingRoutes(app *fiber.App) {
+func SetupBookingRoutes(app *fiber.App) {
 	app.Get("/booking", func(c *fiber.Ctx) error {
 
-		today := time.Now()
-		tomorrow := today.AddDate(0, 0, 1)
-
-		// Format dates for HTML date input (YYYY-MM-DD)
-		todayStr := today.Format("2006-01-02")
-		tomorrowStr := tomorrow.Format("2006-01-02")
-
-		// Format dates for display
-		todayDisplay := today.Format("Jan 2, 2006")
-		tomorrowDisplay := tomorrow.Format("Jan 2, 2006")
-
 		fmt.Println("Attempting to render booking/index template")
-		err := c.Render("booking/form", fiber.Map{
-			"Title":           "Book Your Stay | Kwangdi Pahuna Ghar",
-			"Description":     "Reserve your room at our traditional Nepali guesthouse",
-			"CurrentYear":     today.Year(),
-			"TodayDate":       todayStr,
-			"TomorrowDate":    tomorrowStr,
-			"TodayDisplay":    todayDisplay,
-			"TomorrowDisplay": tomorrowDisplay,
-		})
+		err := c.Render("booking/form", fiber.Map{})
 
 		if err != nil {
 			fmt.Println("ERROR rendering template:", err)
@@ -386,7 +366,7 @@ func setupBookingRoutes(app *fiber.App) {
 }
 
 // setupGalleryRoutes configures photo gallery routes
-func setupGalleryRoutes(app *fiber.App) {
+func SetupGalleryRoutes(app *fiber.App) {
 	// Gallery main page
 	app.Get("/gallery", func(c *fiber.Ctx) error {
 		return c.Render("gallery/index", fiber.Map{
@@ -431,7 +411,7 @@ func setupGalleryRoutes(app *fiber.App) {
 }
 
 // setupBlogRoutes configures blog-related routes
-func setupBlogRoutes(app *fiber.App) {
+func SetupBlogRoutes(app *fiber.App) {
 	// Blog main page
 	app.Get("/blog", func(c *fiber.Ctx) error {
 		return c.Render("blog/index", fiber.Map{
@@ -464,7 +444,7 @@ func setupBlogRoutes(app *fiber.App) {
 }
 
 // setupAdminRoutes configures admin panel routes
-func setupAdminRoutes(app *fiber.App) {
+func SetupAdminRoutes(app *fiber.App) {
 	// Admin routes should be protected with authentication middleware
 	admin := app.Group("/admin", func(c *fiber.Ctx) error {
 		// This is where you would check for admin authentication
@@ -509,7 +489,7 @@ func setupAdminRoutes(app *fiber.App) {
 }
 
 // setupAPIRoutes configures API endpoints (separate from web routes)
-func setupAPIRoutes(app *fiber.App) {
+func SetupAPIRoutes(app *fiber.App) {
 	api := app.Group("/api")
 
 	// API version group

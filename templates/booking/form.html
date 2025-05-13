@@ -1,185 +1,197 @@
-{{define "content"}}
-<div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-    <div class="text-center mb-12">
-        <span class="text-sm font-medium tracking-wider text-forest uppercase">Reservations</span>
-        <h1 class="text-3xl font-bold text-forest-dark mt-2">Book Your Stay</h1>
-        <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-            Reserve your room at Kwangdi Pahuna Ghar and experience authentic Nepali hospitality
-        </p>
-    </div>
-
-    <!-- Booking form container -->
-    <div class="bg-white shadow-lg rounded-lg overflow-hidden max-w-4xl mx-auto">
-        <div class="bg-forest-dark text-white p-6">
-            <h2 class="text-xl font-semibold">Reservation Details</h2>
-            <p class="text-cream-light text-sm mt-1">
-                Check availability and make a reservation
-            </p>
-        </div>
-
-        <!-- Include the booking form partial -->
-        {{template "partials/booking_form" .}}
-    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <meta name="description" content="{{.Description}}">
     
-    <!-- Booking information and policies -->
-    <div class="mt-16 max-w-4xl mx-auto">
-        <h3 class="text-xl font-bold text-forest-dark mb-4">Booking Information</h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-                <h4 class="font-semibold text-forest mb-2">Check-in & Check-out</h4>
-                <ul class="text-gray-600 space-y-2">
-                    <li class="flex items-start">
-                        <i class="fas fa-clock text-forest mt-1 mr-2"></i>
-                        <span>Check-in: 2:00 PM - 8:00 PM</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-clock text-forest mt-1 mr-2"></i>
-                        <span>Check-out: By 12:00 PM</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-info-circle text-forest mt-1 mr-2"></i>
-                        <span>Please contact us for late check-in arrangements</span>
-                    </li>
-                </ul>
-            </div>
-            
-            <div>
-                <h4 class="font-semibold text-forest mb-2">Cancellation Policy</h4>
-                <ul class="text-gray-600 space-y-2">
-                    <li class="flex items-start">
-                        <i class="fas fa-calendar-times text-forest mt-1 mr-2"></i>
-                        <span>Free cancellation up to 48 hours before arrival</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-money-bill-wave text-forest mt-1 mr-2"></i>
-                        <span>Cancellations within 48 hours: 50% of first night charged</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-ban text-forest mt-1 mr-2"></i>
-                        <span>No-show: First night charged in full</span>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        
-        <div class="mt-8">
-            <h4 class="font-semibold text-forest mb-2">Special Requests</h4>
-            <p class="text-gray-600">
-                We're happy to accommodate special requests when possible. Please note any requirements in the booking form and we'll do our best to fulfill them.
-            </p>
-        </div>
-        
-        <div class="mt-8 p-4 bg-cream-light rounded-md">
-            <h4 class="font-semibold text-forest mb-2">Need Help?</h4>
-            <p class="text-gray-600 mb-3">
-                If you have any questions or need assistance with your booking, please don't hesitate to contact us:
-            </p>
-            <div class="flex items-center">
-                <a href="tel:+9779801234567" class="flex items-center text-forest hover:text-forest-dark mr-6">
-                    <i class="fas fa-phone-alt mr-2"></i>
-                    <span>+977 9801234567</span>
-                </a>
-                <a href="mailto:info@kwangdipahunaghaar.com" class="flex items-center text-forest hover:text-forest-dark">
-                    <i class="fas fa-envelope mr-2"></i>
-                    <span>info@kwangdipahunaghaar.com</span>
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-{{end}}
-
-{{define "head"}}
-<style>
-    /* Custom booking page styles */
-    .form-input {
-        @apply rounded-md border-gray-300 focus:border-forest focus:ring focus:ring-forest focus:ring-opacity-50 shadow-sm;
-    }
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     
-    .form-select {
-        @apply rounded-md border-gray-300 focus:border-forest focus:ring focus:ring-forest focus:ring-opacity-50 shadow-sm;
-    }
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     
-    .form-label {
-        @apply block text-sm font-medium text-gray-700 mb-1;
-    }
+    <!-- HTMX for dynamic content -->
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
     
-    /* Calendar highlight colors */
-    .datepicker-day.is-selected {
-        background-color: #2D5F5D !important;
-    }
-    
-    .datepicker-day.is-today {
-        border-color: #2D5F5D !important;
-    }
-</style>
-{{end}}
-
-{{define "scripts"}}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize any booking-specific scripts here
-        console.log('Booking page loaded');
-        
-        // Handle date selection validation
-        const checkInDate = document.getElementById('check_in');
-        const checkOutDate = document.getElementById('check_out');
-        
-        if(checkInDate && checkOutDate) {
-            // Ensure checkout is after checkin
-            checkOutDate.addEventListener('change', function() {
-                const checkIn = new Date(checkInDate.value);
-                const checkOut = new Date(checkOutDate.value);
-                
-                if(checkOut <= checkIn) {
-                    alert('Check-out date must be after check-in date');
-                    // Set checkout to day after checkin
-                    const nextDay = new Date(checkIn);
-                    nextDay.setDate(nextDay.getDate() + 1);
-                    checkOutDate.valueAsDate = nextDay;
-                }
-            });
-            
-            // Ensure checkin is not before today
-            checkInDate.addEventListener('change', function() {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const checkIn = new Date(checkInDate.value);
-                
-                if(checkIn < today) {
-                    alert('Check-in date cannot be in the past');
-                    checkInDate.valueAsDate = today;
-                }
-                
-                // Also update checkout if needed
-                const checkOut = new Date(checkOutDate.value);
-                if(checkOut <= checkIn) {
-                    const nextDay = new Date(checkIn);
-                    nextDay.setDate(nextDay.getDate() + 1);
-                    checkOutDate.valueAsDate = nextDay;
-                }
-            });
+    <!-- Custom styles -->
+    <style>
+        :root {
+            --color-forest: #2D5F5D;
+            --color-forest-dark: #234E52;
+            --color-cream: #E8DDB5;
+            --color-cream-light: #F4F0E2;
         }
         
-        // Handle HTMX success on availability check
-        document.body.addEventListener('htmx:afterSwap', function(event) {
-            if (event.detail.target.id === 'availability-message') {
-                const submitBtn = document.getElementById('submit-button');
-                const response = event.detail.xhr.response;
-                
-                // Enable/disable submit button based on availability
-                if (response && response.includes('Room is available')) {
-                    submitBtn.disabled = false;
-                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    submitBtn.classList.add('hover:bg-forest-dark');
-                } else {
-                    submitBtn.disabled = true;
-                    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                    submitBtn.classList.remove('hover:bg-forest-dark');
-                }
+        body {
+            background-color: #F5F5F5;
+            color: #333333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .text-forest { color: var(--color-forest); }
+        .text-forest-dark { color: var(--color-forest-dark); }
+        .text-cream { color: var(--color-cream); }
+        .text-cream-light { color: var(--color-cream-light); }
+        
+        .bg-forest { background-color: var(--color-forest); }
+        .bg-forest-dark { background-color: var(--color-forest-dark); }
+        .bg-cream { background-color: var(--color-cream); }
+        .bg-cream-light { background-color: var(--color-cream-light); }
+        
+        .hover\:bg-forest-dark:hover { background-color: var(--color-forest-dark); }
+        .hover\:text-forest-dark:hover { color: var(--color-forest-dark); }
+        
+        /* Custom form styles */
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #2D5F5D;
+            box-shadow: 0 0 0 2px rgba(45, 95, 93, 0.2);
+        }
+        
+        /* Availability message styling */
+        .available {
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.5);
+            color: #065f46;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+        }
+        
+        .unavailable {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #b91c1c;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-forest-dark text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div>
+                <a href="/" class="flex items-center">
+                    <span class="text-xl font-bold">Kwangdi Pahuna Ghar</span>
+                </a>
+            </div>
+            <nav>
+                <ul class="flex space-x-6">
+                    <li><a href="/" class="hover:text-cream-light">Home</a></li>
+                    <li><a href="/rooms" class="hover:text-cream-light">Rooms</a></li>
+                    <li><a href="/onsen" class="hover:text-cream-light">Onsen</a></li>
+                    <li><a href="/contact" class="hover:text-cream-light">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+            <!-- Header Section -->
+            <div class="text-center mb-12">
+                <span class="text-sm font-medium tracking-wider text-forest uppercase">Book Your Stay</span>
+                <h1 class="text-3xl font-bold text-forest-dark mt-2">Reserve Your Experience</h1>
+                <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+                    Secure your traditional Japanese onsen experience at Kwangdi Pahuna Ghar
+                </p>
+            </div>
+
+            <!-- Booking form content here -->
+            <!-- Rest of your booking form HTML from previous response -->
+            <!-- ... -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-forest-dark text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Kwangdi Pahuna Ghar</h3>
+                    <p class="text-cream-light">Authentic Nepali hospitality in the beautiful Shantipur valley of Gulmi district.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Contact Us</h3>
+                    <p class="flex items-center text-cream-light mb-2">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        <span>Shantipur Valley, Gulmi District, Nepal</span>
+                    </p>
+                    <p class="flex items-center text-cream-light mb-2">
+                        <i class="fas fa-phone mr-2"></i>
+                        <span>+977 980-123-4567</span>
+                    </p>
+                    <p class="flex items-center text-cream-light">
+                        <i class="fas fa-envelope mr-2"></i>
+                        <span>info@kwangdipahunaghaar.com</span>
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Follow Us</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-white hover:text-cream"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-white hover:text-cream"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-white hover:text-cream"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white hover:text-cream"><i class="fab fa-tripadvisor"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-700 text-center text-sm text-cream-light">
+                <p>&copy; {{.CurrentYear}} Kwangdi Pahuna Ghar. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle date input changes
+            const checkInDate = document.getElementById('check_in');
+            const checkOutDate = document.getElementById('check_out');
+            
+            if (checkInDate && checkOutDate) {
+                // Make sure check-out is after check-in
+                checkInDate.addEventListener('change', function() {
+                    const checkIn = new Date(this.value);
+                    const checkOut = new Date(checkOutDate.value);
+                    
+                    // If check-out is before or same as check-in, update it
+                    if (checkOut <= checkIn) {
+                        // Set check-out to the day after check-in
+                        const nextDay = new Date(checkIn);
+                        nextDay.setDate(nextDay.getDate() + 1);
+                        
+                        // Format as YYYY-MM-DD
+                        const year = nextDay.getFullYear();
+                        const month = String(nextDay.getMonth() + 1).padStart(2, '0');
+                        const day = String(nextDay.getDate()).padStart(2, '0');
+                        checkOutDate.value = `${year}-${month}-${day}`;
+                    }
+                });
             }
+            
+            // Handle HTMX success on availability check
+            document.body.addEventListener('htmx:afterSwap', function(event) {
+                if (event.detail.target.id === 'availability-message') {
+                    const submitBtn = document.getElementById('submit-button');
+                    const response = event.detail.xhr.response;
+                    
+                    // Enable/disable submit button based on availability
+                    if (response && response.includes('is available')) {
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        submitBtn.classList.add('hover:bg-forest-dark');
+                    } else {
+                        submitBtn.disabled = true;
+                        submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                        submitBtn.classList.remove('hover:bg-forest-dark');
+                    }
+                }
+            });
         });
-    });
-</script>
-{{end}}
+    </script>
+</body>
+</html>
