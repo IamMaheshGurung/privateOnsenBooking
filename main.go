@@ -18,6 +18,16 @@ import (
 	"go.uber.org/zap"
 )
 
+func init() {
+	// Check if the template file exists
+	templatePath := "./templates/booking/form.html"
+	if _, err := os.Stat(templatePath); os.IsNotExist(err) {
+		fmt.Printf("ERROR: Template file does not exist at path: %s\n", templatePath)
+	} else {
+		fmt.Printf("SUCCESS: Template file exists at path: %s\n", templatePath)
+	}
+}
+
 func fileExists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
@@ -66,6 +76,9 @@ func main() {
 		fmt.Printf("ERROR LOADING TEMPLATES: %v\n", err)
 		// Exit early if templates can't be loaded
 		os.Exit(1)
+	}
+	if err := engine.AddFile("booking/form", "./templates/booking/form.html"); err != nil {
+		log.Fatalf("Error adding booking form template: %v", err)
 	}
 
 	// Add template functions
@@ -151,9 +164,6 @@ func main() {
 		fileExists(filepath.Join(cwd, "templates", "index.html")))
 
 	// Setup routes
-
-	// Setup routes
-	routes.SetupRoutes(app, roomController, bookingController, guestController)
 
 	// Get port from environment or use default
 	port := os.Getenv("PORT")

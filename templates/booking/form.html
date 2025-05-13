@@ -1,0 +1,185 @@
+{{define "content"}}
+<div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+        <span class="text-sm font-medium tracking-wider text-forest uppercase">Reservations</span>
+        <h1 class="text-3xl font-bold text-forest-dark mt-2">Book Your Stay</h1>
+        <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+            Reserve your room at Kwangdi Pahuna Ghar and experience authentic Nepali hospitality
+        </p>
+    </div>
+
+    <!-- Booking form container -->
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden max-w-4xl mx-auto">
+        <div class="bg-forest-dark text-white p-6">
+            <h2 class="text-xl font-semibold">Reservation Details</h2>
+            <p class="text-cream-light text-sm mt-1">
+                Check availability and make a reservation
+            </p>
+        </div>
+
+        <!-- Include the booking form partial -->
+        {{template "partials/booking_form" .}}
+    </div>
+    
+    <!-- Booking information and policies -->
+    <div class="mt-16 max-w-4xl mx-auto">
+        <h3 class="text-xl font-bold text-forest-dark mb-4">Booking Information</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+                <h4 class="font-semibold text-forest mb-2">Check-in & Check-out</h4>
+                <ul class="text-gray-600 space-y-2">
+                    <li class="flex items-start">
+                        <i class="fas fa-clock text-forest mt-1 mr-2"></i>
+                        <span>Check-in: 2:00 PM - 8:00 PM</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-clock text-forest mt-1 mr-2"></i>
+                        <span>Check-out: By 12:00 PM</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-info-circle text-forest mt-1 mr-2"></i>
+                        <span>Please contact us for late check-in arrangements</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div>
+                <h4 class="font-semibold text-forest mb-2">Cancellation Policy</h4>
+                <ul class="text-gray-600 space-y-2">
+                    <li class="flex items-start">
+                        <i class="fas fa-calendar-times text-forest mt-1 mr-2"></i>
+                        <span>Free cancellation up to 48 hours before arrival</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-money-bill-wave text-forest mt-1 mr-2"></i>
+                        <span>Cancellations within 48 hours: 50% of first night charged</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-ban text-forest mt-1 mr-2"></i>
+                        <span>No-show: First night charged in full</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="mt-8">
+            <h4 class="font-semibold text-forest mb-2">Special Requests</h4>
+            <p class="text-gray-600">
+                We're happy to accommodate special requests when possible. Please note any requirements in the booking form and we'll do our best to fulfill them.
+            </p>
+        </div>
+        
+        <div class="mt-8 p-4 bg-cream-light rounded-md">
+            <h4 class="font-semibold text-forest mb-2">Need Help?</h4>
+            <p class="text-gray-600 mb-3">
+                If you have any questions or need assistance with your booking, please don't hesitate to contact us:
+            </p>
+            <div class="flex items-center">
+                <a href="tel:+9779801234567" class="flex items-center text-forest hover:text-forest-dark mr-6">
+                    <i class="fas fa-phone-alt mr-2"></i>
+                    <span>+977 9801234567</span>
+                </a>
+                <a href="mailto:info@kwangdipahunaghaar.com" class="flex items-center text-forest hover:text-forest-dark">
+                    <i class="fas fa-envelope mr-2"></i>
+                    <span>info@kwangdipahunaghaar.com</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
+{{define "head"}}
+<style>
+    /* Custom booking page styles */
+    .form-input {
+        @apply rounded-md border-gray-300 focus:border-forest focus:ring focus:ring-forest focus:ring-opacity-50 shadow-sm;
+    }
+    
+    .form-select {
+        @apply rounded-md border-gray-300 focus:border-forest focus:ring focus:ring-forest focus:ring-opacity-50 shadow-sm;
+    }
+    
+    .form-label {
+        @apply block text-sm font-medium text-gray-700 mb-1;
+    }
+    
+    /* Calendar highlight colors */
+    .datepicker-day.is-selected {
+        background-color: #2D5F5D !important;
+    }
+    
+    .datepicker-day.is-today {
+        border-color: #2D5F5D !important;
+    }
+</style>
+{{end}}
+
+{{define "scripts"}}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize any booking-specific scripts here
+        console.log('Booking page loaded');
+        
+        // Handle date selection validation
+        const checkInDate = document.getElementById('check_in');
+        const checkOutDate = document.getElementById('check_out');
+        
+        if(checkInDate && checkOutDate) {
+            // Ensure checkout is after checkin
+            checkOutDate.addEventListener('change', function() {
+                const checkIn = new Date(checkInDate.value);
+                const checkOut = new Date(checkOutDate.value);
+                
+                if(checkOut <= checkIn) {
+                    alert('Check-out date must be after check-in date');
+                    // Set checkout to day after checkin
+                    const nextDay = new Date(checkIn);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    checkOutDate.valueAsDate = nextDay;
+                }
+            });
+            
+            // Ensure checkin is not before today
+            checkInDate.addEventListener('change', function() {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const checkIn = new Date(checkInDate.value);
+                
+                if(checkIn < today) {
+                    alert('Check-in date cannot be in the past');
+                    checkInDate.valueAsDate = today;
+                }
+                
+                // Also update checkout if needed
+                const checkOut = new Date(checkOutDate.value);
+                if(checkOut <= checkIn) {
+                    const nextDay = new Date(checkIn);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    checkOutDate.valueAsDate = nextDay;
+                }
+            });
+        }
+        
+        // Handle HTMX success on availability check
+        document.body.addEventListener('htmx:afterSwap', function(event) {
+            if (event.detail.target.id === 'availability-message') {
+                const submitBtn = document.getElementById('submit-button');
+                const response = event.detail.xhr.response;
+                
+                // Enable/disable submit button based on availability
+                if (response && response.includes('Room is available')) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    submitBtn.classList.add('hover:bg-forest-dark');
+                } else {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    submitBtn.classList.remove('hover:bg-forest-dark');
+                }
+            }
+        });
+    });
+</script>
+{{end}}

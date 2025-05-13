@@ -5,116 +5,42 @@ import (
 	"time"
 
 	"github.com/IamMaheshGurung/privateOnsenBooking/controllers"
-	"github.com/IamMaheshGurung/privateOnsenBooking/middleware"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/compress"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/gofiber/fiber/v2/middleware/recover"
+	// Import your controllers if you have them
+	// "github.com/yourusername/privateOnsen/controllers"
 )
 
 // SetupRoutes configures all application routes
-func SetupRoutes(app *fiber.App,
+func SetupRoutes(
+	app *fiber.App,
 	roomController *controllers.RoomController,
 	bookingController *controllers.BookingController,
-	guestController *controllers.GuestController) {
-
-	// 1. Setup global middleware first
-	setupMiddleware(app)
-
-	// 2. CRITICAL: Setup partials routes before any page routes
-	// This ensures partials are registered and available for HTMX requests
-	partials := app.Group("/partials")
-	setupPartialsRoutes(partials)
-
-	// 3. Add debugging routes to help troubleshoot template issues
-	setupDebugRoutes(app)
-
-	// 4. Then setup static file serving (early to ensure assets are available)
-	app.Static("/static", "./static")
-
-	// 5. Only after partials and static files are setup, register page routes
+	guestController *controllers.GuestController,
+) {
+	// Setup routes by category
+	setupBasicRoutes(app)
 	setupPageRoutes(app)
-
-	// 6. Register feature routes
-	setupRoomRoutes(app, roomController)
-	setupBookingRoutes(app, bookingController)
-	setupGuestRoutes(app, guestController)
-
-	// 7. API routes for frontend functionality
-	api := app.Group("/api")
-	setupApiRoutes(api, roomController, bookingController, guestController)
-
-	// 8. Admin routes with authentication
-	admin := app.Group("/admin", middleware.AdminAuth())
-	setupAdminRoutes(admin, roomController, bookingController, guestController)
+	setupBookingRoutes(app)
+	setupExperienceRoutes(app)
+	setupGalleryRoutes(app)
+	setupBlogRoutes(app)
+	setupRoomRoutes(app)
+	setupDiningRoutes(app)
+	setupAdminRoutes(app)
+	setupAPIRoutes(app)
 }
 
-// setupPartialsRoutes configures routes for HTML partials (used by HTMX)
-// This MUST be called before any page routes to ensure partials are available
-func setupPartialsRoutes(router fiber.Router) {
-	// Log that we're setting up partials
-	fmt.Println("Setting up partials routes")
-
-	// Navigation and footer
-	router.Get("/navigation", func(c *fiber.Ctx) error {
-		fmt.Println("Loading navigation partial")
-		return c.Render("partials/navigation", fiber.Map{
-			"CurrentPath": c.Path(),
-			"CurrentYear": time.Now().Year(),
-		})
-	})
-
-	router.Get("/footer", func(c *fiber.Ctx) error {
-		fmt.Println("Loading footer partial")
-		return c.Render("partials/footer", fiber.Map{
-			"CurrentYear": time.Now().Year(),
-		})
-	})
-
-	// Home page partials
-	router.Get("/hero", func(c *fiber.Ctx) error {
-		fmt.Println("Loading hero partial")
-		return c.Render("partials/hero", fiber.Map{})
-	})
-
-	// Room partials
-	router.Get("/room-card", func(c *fiber.Ctx) error {
-		fmt.Println("Loading room-card partial")
-		return c.Render("partials/room_card", fiber.Map{})
-	})
-
-	router.Get("/room-grid", func(c *fiber.Ctx) error {
-		fmt.Println("Loading room-grid partial")
-		return c.Render("partials/room_grid", fiber.Map{})
-	})
-
-	// Booking partials
-	router.Get("/booking-form", func(c *fiber.Ctx) error {
-		return c.Render("partials/booking_form", fiber.Map{})
-	})
-
-	router.Get("/booking-summary", func(c *fiber.Ctx) error {
-		return c.Render("partials/booking_summary", fiber.Map{})
-	})
-
-	// HTMX test endpoint (for debugging)
-	router.Get("/test", func(c *fiber.Ctx) error {
-		return c.SendString("<div class='bg-green-100 p-4 rounded text-green-800'>HTMX is working! Loaded at: " +
-			time.Now().Format("15:04:05") + "</div>")
-	})
-}
-
-// setupDebugRoutes adds debugging routes to test template rendering
-func setupDebugRoutes(app *fiber.App) {
-	// Direct HTML response (no templates)
-	app.Get("/debug/direct", func(c *fiber.Ctx) error {
+// setupBasicRoutes configures test and debug routes
+func setupBasicRoutes(app *fiber.App) {
+	// Simple test endpoint
+	app.Get("/test", func(c *fiber.Ctx) error {
 		return c.SendString(`
             <!DOCTYPE html>
             <html>
             <head>
-                <title>Direct HTML Response</title>
-                <script src="https://cdn.tailwindcss.com"></script>
+                <title>Test Page</title>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
             </head>
             <body class="p-8 bg-gray-100">
                 <h1 class="text-2xl font-bold mb-4">Direct HTML Response</h1>
@@ -133,52 +59,31 @@ func setupDebugRoutes(app *fiber.App) {
 	})
 }
 
-// setupPageRoutes configures basic page routes (after partials are setup)
+// setupPageRoutes configures basic page routes
 func setupPageRoutes(app *fiber.App) {
 	// Home page
-
-	// Add this to your setupPageRoutes function in routes.go
-	app.Get("/simple", func(c *fiber.Ctx) error {
-		// Send direct HTML without using templates
-		return c.SendString(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Simple Test</title>
-        </head>
-        <body>
-            <h1>Simple Test Page</h1>
-            <p>If you can see this, your server is responding correctly.</p>
-            <p>Time: ` + time.Now().Format(time.RFC3339) + `</p>
-        </body>
-        </html>
-    `)
-	})
-	app.Get("/home", func(c *fiber.Ctx) error {
-		// Log that we're handling the request
-		fmt.Println("Rendering index template")
-
-		// Try rendering with additional data
-		err := c.Render("index", fiber.Map{
-			"Title":       "Kwangdi Hotel - Traditional Japanese Ryokan",
-			"Debug":       "If you can see this, template is rendering",
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.Render("index", fiber.Map{
+			"Title":       "Kwangdi Pahuna Ghar - Traditional Nepali Guesthouse",
+			"Description": "Experience authentic Nepali hospitality in the beautiful Shantipur valley of Gulmi district",
 			"CurrentYear": time.Now().Year(),
 		})
+	})
 
-		// Check for errors
-		if err != nil {
-			fmt.Println("Error rendering template:", err)
-			return c.Status(500).SendString("Error: " + err.Error())
-		}
-
-		fmt.Println("Successfully rendered template")
-		return nil
+	// Alternative home route
+	app.Get("/home", func(c *fiber.Ctx) error {
+		return c.Render("index", fiber.Map{
+			"Title":       "Kwangdi Pahuna Ghar - Traditional Nepali Guesthouse",
+			"Description": "Experience authentic Nepali hospitality in the beautiful Shantipur valley of Gulmi district",
+			"CurrentYear": time.Now().Year(),
+		})
 	})
 
 	// About page
 	app.Get("/about", func(c *fiber.Ctx) error {
 		return c.Render("about", fiber.Map{
-			"Title":       "About - Kwangdi Hotel",
+			"Title":       "About Us | Kwangdi Pahuna Ghar",
+			"Description": "Learn about our story, values and the team behind Kwangdi Pahuna Ghar",
 			"CurrentYear": time.Now().Year(),
 		})
 	})
@@ -186,197 +91,511 @@ func setupPageRoutes(app *fiber.App) {
 	// Contact page
 	app.Get("/contact", func(c *fiber.Ctx) error {
 		return c.Render("contact", fiber.Map{
-			"Title":       "Contact Us - Kwangdi Hotel",
+			"Title":       "Contact Us | Kwangdi Pahuna Ghar",
+			"Description": "Get in touch with us for bookings, inquiries or feedback",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
+
+	// Location page
+	app.Get("/location", func(c *fiber.Ctx) error {
+		return c.Render("location", fiber.Map{
+			"Title":       "Location | Kwangdi Pahuna Ghar",
+			"Description": "Find us in the beautiful Shantipur valley of Gulmi district, Nepal",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
+
+	// Virtual Tour page
+	app.Get("/virtual-tour", func(c *fiber.Ctx) error {
+		return c.Render("virtual-tour", fiber.Map{
+			"Title":       "Virtual Tour | Kwangdi Pahuna Ghar",
+			"Description": "Take a virtual tour of our guesthouse and surroundings",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
+
+	// FAQ page
+	app.Get("/faq", func(c *fiber.Ctx) error {
+		return c.Render("faq", fiber.Map{
+			"Title":       "FAQs | Kwangdi Pahuna Ghar",
+			"Description": "Frequently asked questions about your stay at Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
+
+	// Legal pages
+	app.Get("/terms", func(c *fiber.Ctx) error {
+		return c.Render("terms", fiber.Map{
+			"Title":       "Terms & Conditions | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
+
+	app.Get("/privacy", func(c *fiber.Ctx) error {
+		return c.Render("privacy", fiber.Map{
+			"Title":       "Privacy Policy | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
+
+	app.Get("/cookies", func(c *fiber.Ctx) error {
+		return c.Render("cookies", fiber.Map{
+			"Title":       "Cookie Policy | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
+
+	app.Get("/sitemap", func(c *fiber.Ctx) error {
+		return c.Render("sitemap", fiber.Map{
+			"Title":       "Sitemap | Kwangdi Pahuna Ghar",
 			"CurrentYear": time.Now().Year(),
 		})
 	})
 }
 
-// setupMiddleware configures global middleware for the application
-func setupMiddleware(app *fiber.App) {
-	// Recover from panics
-	app.Use(recover.New())
+// setupRoomRoutes configures room-related routes
+func setupRoomRoutes(app *fiber.App) {
+	// Rooms main page
+	app.Get("/rooms", func(c *fiber.Ctx) error {
+		return c.Render("rooms/index", fiber.Map{
+			"Title":       "Accommodations | Kwangdi Pahuna Ghar",
+			"Description": "Explore our comfortable and authentic Nepali accommodations",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
 
-	// Request logging
-	app.Use(logger.New(logger.Config{
-		Format: "[${time}] ${status} - ${method} ${path} (${latency})\n",
-	}))
+	// Room categories
+	app.Get("/rooms/standard", func(c *fiber.Ctx) error {
+		return c.Render("rooms/standard", fiber.Map{
+			"Title":       "Standard Rooms | Kwangdi Pahuna Ghar",
+			"Description": "Our comfortable standard rooms with traditional Nepali touches",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
 
-	// CORS setup
-	app.Use(cors.New(cors.Config{
-		AllowOrigins: "*",
-		AllowMethods: "GET,POST,PUT,DELETE,OPTIONS",
-		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
-	}))
+	app.Get("/rooms/deluxe", func(c *fiber.Ctx) error {
+		return c.Render("rooms/deluxe", fiber.Map{
+			"Title":       "Deluxe Rooms | Kwangdi Pahuna Ghar",
+			"Description": "Spacious deluxe rooms with premium amenities and valley views",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
 
-	// Compress responses
-	app.Use(compress.New())
+	app.Get("/rooms/family", func(c *fiber.Ctx) error {
+		return c.Render("rooms/family", fiber.Map{
+			"Title":       "Family Suites | Kwangdi Pahuna Ghar",
+			"Description": "Our finest family accommodations with panoramic mountain views",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
 
-	// Add request ID
-	app.Use(func(c *fiber.Ctx) error {
-		c.Set("X-Request-ID", c.GetRespHeader("X-Request-ID"))
-		return c.Next()
+	// Individual room details - dynamic routes
+	app.Get("/rooms/:id", func(c *fiber.Ctx) error {
+		id := c.Params("id")
+		// In a real app, you would fetch the room data from a database
+		return c.Render("rooms/detail", fiber.Map{
+			"Title":       "Room Details | Kwangdi Pahuna Ghar",
+			"Description": "Detailed information about our accommodations",
+			"RoomID":      id,
+			"CurrentYear": time.Now().Year(),
+		})
 	})
 }
 
-// setupRoomRoutes configures room-related routes
-func setupRoomRoutes(app *fiber.App, controller *controllers.RoomController) {
-	// Public room routes
-	rooms := app.Group("/rooms")
+// setupExperienceRoutes configures experience-related routes
+func setupExperienceRoutes(app *fiber.App) {
+	// Main experiences page
+	app.Get("/experiences", func(c *fiber.Ctx) error {
+		return c.Render("experiences/index", fiber.Map{
+			"Title":       "Cultural Experiences | Kwangdi Pahuna Ghar",
+			"Description": "Discover authentic Nepali cultural experiences during your stay",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
 
-	// Room listing and details
-	rooms.Get("/", controller.GetAllRooms)
-	rooms.Get("/preview", controller.PreviewRooms)
-	rooms.Get("/:id", controller.GetRoomDetails)
-	rooms.Get("/types", controller.GetRoomTypes)
+	// Cultural experiences
+	app.Get("/experiences/trekking", func(c *fiber.Ctx) error {
+		return c.Render("experiences/trekking", fiber.Map{
+			"Title":       "Guided Treks | Kwangdi Pahuna Ghar",
+			"Description": "Explore the beautiful trails of Gulmi district with our expert guides",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
 
-	// Room availability checking
-	rooms.Get("/available", controller.GetAvailableRooms)
+	app.Get("/experiences/cultural", func(c *fiber.Ctx) error {
+		return c.Render("experiences/cultural", fiber.Map{
+			"Title":       "Cultural Tours | Kwangdi Pahuna Ghar",
+			"Description": "Immerse yourself in the rich cultural heritage of rural Nepal",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
+
+	app.Get("/experiences/cooking", func(c *fiber.Ctx) error {
+		return c.Render("experiences/cooking", fiber.Map{
+			"Title":       "Nepali Cooking Classes | Kwangdi Pahuna Ghar",
+			"Description": "Learn how to prepare authentic Nepali dishes with our experienced cooks",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
+
+	app.Get("/experiences/farming", func(c *fiber.Ctx) error {
+		return c.Render("experiences/farming", fiber.Map{
+			"Title":       "Farming Experience | Kwangdi Pahuna Ghar",
+			"Description": "Experience traditional Nepali farming methods and organic gardening",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
+
+	// Cultural dances and performances
+	app.Get("/experiences/panche-baja", func(c *fiber.Ctx) error {
+		return c.Render("experiences/panche-baja", fiber.Map{
+			"Title":       "Panche Baja | Kwangdi Pahuna Ghar",
+			"Description": "Experience traditional Nepali folk music with Panche Baja performances",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
+
+	app.Get("/experiences/sorathi", func(c *fiber.Ctx) error {
+		return c.Render("experiences/sorathi", fiber.Map{
+			"Title":       "Sorathi Dance | Kwangdi Pahuna Ghar",
+			"Description": "Witness the enchanting Sorathi folk dance cultural performance",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
+
+	app.Get("/experiences/gatu-nach", func(c *fiber.Ctx) error {
+		return c.Render("experiences/gatu-nach", fiber.Map{
+			"Title":       "Gatu Nach | Kwangdi Pahuna Ghar",
+			"Description": "Enjoy the traditional Gatu Nach dance of the Gurung community",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
+
+	app.Get("/experiences/kwangdi-club", func(c *fiber.Ctx) error {
+		return c.Render("experiences/kwangdi-club", fiber.Map{
+			"Title":       "Kwangdi Club Dance | Kwangdi Pahuna Ghar",
+			"Description": "Experience fusion dance performances by talented local youth",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
+}
+
+// setupDiningRoutes configures dining-related routes
+func setupDiningRoutes(app *fiber.App) {
+	// Dining main page
+	app.Get("/dining", func(c *fiber.Ctx) error {
+		return c.Render("dining/index", fiber.Map{
+			"Title":       "Dining | Kwangdi Pahuna Ghar",
+			"Description": "Discover authentic Nepali cuisine prepared with fresh local ingredients",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
+
+	// Special dining experiences
+	app.Get("/dining/menu", func(c *fiber.Ctx) error {
+		return c.Render("dining/menu", fiber.Map{
+			"Title":       "Menu | Kwangdi Pahuna Ghar",
+			"Description": "Our full menu featuring traditional Nepali dishes and local specialties",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
+
+	app.Get("/dining/special", func(c *fiber.Ctx) error {
+		return c.Render("dining/special", fiber.Map{
+			"Title":       "Special Dining | Kwangdi Pahuna Ghar",
+			"Description": "Special dining experiences and celebrations at our guesthouse",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
 }
 
 // setupBookingRoutes configures booking-related routes
-func setupBookingRoutes(app *fiber.App, controller *controllers.BookingController) {
-	// Public booking routes
-	booking := app.Group("/booking")
+// setupBookingRoutes configures booking-related routes
+func setupBookingRoutes(app *fiber.App) {
+	app.Get("/booking", func(c *fiber.Ctx) error {
 
-	// Main booking flow
-	booking.Get("/", controller.ShowBookingForm)
-	booking.Post("/reserve", controller.CreateBooking)
-	booking.Get("/confirmation/:id", controller.ShowConfirmation)
+		today := time.Now()
+		tomorrow := today.AddDate(0, 0, 1)
 
-	// Availability checking
-	booking.Get("/check", controller.CheckAvailability)
+		// Format dates for HTML date input (YYYY-MM-DD)
+		todayStr := today.Format("2006-01-02")
+		tomorrowStr := tomorrow.Format("2006-01-02")
 
-	// Guest booking management
-	lookup := booking.Group("/lookup")
-	lookup.Get("/", controller.ShowLookupForm)
-	lookup.Post("/", controller.LookupBooking)
-	lookup.Get("/:id/:token", controller.ShowBookingDetails)
-	lookup.Post("/:id/:token/cancel", controller.CancelBookingByGuest)
+		// Format dates for display
+		todayDisplay := today.Format("Jan 2, 2006")
+		tomorrowDisplay := tomorrow.Format("Jan 2, 2006")
+
+		fmt.Println("Attempting to render booking/index template")
+		err := c.Render("booking/form", fiber.Map{
+			"Title":           "Book Your Stay | Kwangdi Pahuna Ghar",
+			"Description":     "Reserve your room at our traditional Nepali guesthouse",
+			"CurrentYear":     today.Year(),
+			"TodayDate":       todayStr,
+			"TomorrowDate":    tomorrowStr,
+			"TodayDisplay":    todayDisplay,
+			"TomorrowDisplay": tomorrowDisplay,
+		})
+
+		if err != nil {
+			fmt.Println("ERROR rendering template:", err)
+			return c.Status(500).SendString("Template error: " + err.Error())
+		}
+
+		return nil
+	})
+
+	// Availability check - updated to handle form data
+	app.Get("/booking/availability", func(c *fiber.Ctx) error {
+		// Get form data
+		checkIn := c.Query("check_in")
+		checkOut := c.Query("check_out")
+		guests := c.Query("guests")
+
+		// Format dates for display
+		checkInDate, _ := time.Parse("2006-01-02", checkIn)
+		checkOutDate, _ := time.Parse("2006-01-02", checkOut)
+		checkInDisplay := checkInDate.Format("Jan 2, 2006")
+		checkOutDisplay := checkOutDate.Format("Jan 2, 2006")
+
+		// Calculate nights
+		nights := checkOutDate.Sub(checkInDate).Hours() / 24
+
+		return c.Render("booking/availability", fiber.Map{
+			"Title":         "Available Rooms | Kwangdi Pahuna Ghar",
+			"Description":   "Available rooms for your selected dates",
+			"CurrentYear":   time.Now().Year(),
+			"Check_in":      checkInDisplay,
+			"Check_out":     checkOutDisplay,
+			"Check_in_raw":  checkIn,
+			"Check_out_raw": checkOut,
+			"Guests":        guests,
+			"Nights":        int(nights),
+		})
+	})
+
+	// Booking confirmation
+	app.Get("/booking/confirmation/:id", func(c *fiber.Ctx) error {
+		bookingID := c.Params("id")
+		return c.Render("booking/confirmation", fiber.Map{
+			"Title":       "Booking Confirmation | Kwangdi Pahuna Ghar",
+			"BookingID":   bookingID,
+			"CurrentYear": time.Now().Year(),
+		})
+	})
 }
 
-// setupGuestRoutes configures guest-related routes
-func setupGuestRoutes(app *fiber.App, controller *controllers.GuestController) {
-	// Guest account routes
-	guest := app.Group("/guest")
+// setupGalleryRoutes configures photo gallery routes
+func setupGalleryRoutes(app *fiber.App) {
+	// Gallery main page
+	app.Get("/gallery", func(c *fiber.Ctx) error {
+		return c.Render("gallery/index", fiber.Map{
+			"Title":       "Photo Gallery | Kwangdi Pahuna Ghar",
+			"Description": "Browse photos of our guesthouse, rooms, surroundings and experiences",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
 
-	// Guest registration and profile
-	guest.Post("/register", controller.RegisterGuest)
-	guest.Get("/profile", middleware.GuestAuth(), controller.GetGuestProfile)
-	guest.Put("/profile", middleware.GuestAuth(), controller.UpdateGuestProfile)
+	// Gallery categories
+	app.Get("/gallery/accommodations", func(c *fiber.Ctx) error {
+		return c.Render("gallery/accommodations", fiber.Map{
+			"Title":       "Accommodation Photos | Kwangdi Pahuna Ghar",
+			"Description": "Photos of our rooms and accommodations",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
 
-	// Guest bookings
-	guest.Get("/bookings", middleware.GuestAuth(), controller.GetGuestBookings)
+	app.Get("/gallery/surroundings", func(c *fiber.Ctx) error {
+		return c.Render("gallery/surroundings", fiber.Map{
+			"Title":       "Surroundings Photos | Kwangdi Pahuna Ghar",
+			"Description": "Photos of the beautiful Shantipur valley and surroundings",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
+
+	app.Get("/gallery/cultural", func(c *fiber.Ctx) error {
+		return c.Render("gallery/cultural", fiber.Map{
+			"Title":       "Cultural Photos | Kwangdi Pahuna Ghar",
+			"Description": "Photos of our cultural performances and experiences",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
+
+	app.Get("/gallery/dining", func(c *fiber.Ctx) error {
+		return c.Render("gallery/dining", fiber.Map{
+			"Title":       "Dining Photos | Kwangdi Pahuna Ghar",
+			"Description": "Photos of our traditional Nepali cuisine and dining experiences",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
 }
 
-// setupApiRoutes configures API routes for frontend functionality
-func setupApiRoutes(router fiber.Router,
-	roomController *controllers.RoomController,
-	bookingController *controllers.BookingController,
-	guestController *controllers.GuestController) {
+// setupBlogRoutes configures blog-related routes
+func setupBlogRoutes(app *fiber.App) {
+	// Blog main page
+	app.Get("/blog", func(c *fiber.Ctx) error {
+		return c.Render("blog/index", fiber.Map{
+			"Title":       "Blog | Kwangdi Pahuna Ghar",
+			"Description": "News, stories and insights from our guesthouse and the Shantipur valley",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
 
-	// Room API endpoints
-	roomsApi := router.Group("/rooms")
-	roomsApi.Get("/", roomController.GetAllRooms)
-	roomsApi.Get("/:id", roomController.GetRoomByID)
-	roomsApi.Get("/available", roomController.GetAvailableRooms)
+	// Blog categories
+	app.Get("/blog/category/:category", func(c *fiber.Ctx) error {
+		category := c.Params("category")
+		return c.Render("blog/category", fiber.Map{
+			"Title":       fmt.Sprintf("%s | Blog | Kwangdi Pahuna Ghar", category),
+			"Category":    category,
+			"CurrentYear": time.Now().Year(),
+		})
+	})
 
-	// Booking API endpoints
-	bookingsApi := router.Group("/bookings")
-	bookingsApi.Get("/check", bookingController.CheckAvailability)
-	bookingsApi.Get("/available", bookingController.GetAvailableRooms)
-	bookingsApi.Post("/", bookingController.CreateBooking)
-	bookingsApi.Get("/:id", bookingController.GetBookingByID)
-	bookingsApi.Put("/:id/cancel", bookingController.CancelBooking)
-	bookingsApi.Get("/guest", bookingController.GetGuestBookings)
-
-	// Guest API endpoints
-	guestsApi := router.Group("/guests")
-	guestsApi.Post("/", guestController.CreateGuest)
-	guestsApi.Get("/:id", guestController.GetGuestByID)
-	guestsApi.Get("/email/:email", guestController.GetGuestByEmail)
+	// Individual blog post
+	app.Get("/blog/:slug", func(c *fiber.Ctx) error {
+		slug := c.Params("slug")
+		// In a real app, you would fetch the blog post from a database
+		return c.Render("blog/post", fiber.Map{
+			"Title":       "Blog Post | Kwangdi Pahuna Ghar",
+			"Slug":        slug,
+			"CurrentYear": time.Now().Year(),
+		})
+	})
 }
 
-// setupAdminRoutes configures admin routes
-func setupAdminRoutes(router fiber.Router,
-	roomController *controllers.RoomController,
-	bookingController *controllers.BookingController,
-	guestController *controllers.GuestController) {
+// setupAdminRoutes configures admin panel routes
+func setupAdminRoutes(app *fiber.App) {
+	// Admin routes should be protected with authentication middleware
+	admin := app.Group("/admin", func(c *fiber.Ctx) error {
+		// This is where you would check for admin authentication
+		// For now, we'll just pass through
+		return c.Next()
+	})
 
-	// Admin dashboard
-	router.Get("/", func(c *fiber.Ctx) error {
+	admin.Get("/", func(c *fiber.Ctx) error {
 		return c.Render("admin/dashboard", fiber.Map{
-			"Title": "Admin Dashboard - Kwangdi Hotel",
+			"Title":       "Admin Dashboard | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
 		})
 	})
 
-	// Room management
-	adminRooms := router.Group("/rooms")
-	adminRooms.Get("/", roomController.AdminListRooms)
-	adminRooms.Get("/new", roomController.ShowAddRoomForm)
-	adminRooms.Post("/new", roomController.AddRoom)
-	adminRooms.Get("/:id/edit", roomController.ShowEditRoomForm)
-	adminRooms.Post("/:id/edit", roomController.UpdateRoom)
-	adminRooms.Delete("/:id", roomController.DeleteRoom)
+	admin.Get("/bookings", func(c *fiber.Ctx) error {
+		return c.Render("admin/bookings", fiber.Map{
+			"Title":       "Manage Bookings | Admin | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
 
-	// Booking management
-	adminBookings := router.Group("/bookings")
-	adminBookings.Get("/", bookingController.GetAllBookings)
-	adminBookings.Get("/date/:date", bookingController.GetBookingsByDate)
-	adminBookings.Get("/range", bookingController.GetBookingsByDateRange)
-	adminBookings.Put("/:id", bookingController.UpdateBooking)
-	adminBookings.Put("/:id/check-in", bookingController.CheckInGuest)
-	adminBookings.Put("/:id/check-out", bookingController.CheckOutGuest)
+	admin.Get("/rooms", func(c *fiber.Ctx) error {
+		return c.Render("admin/rooms", fiber.Map{
+			"Title":       "Manage Rooms | Admin | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
 
-	// Guest management
-	adminGuests := router.Group("/guests")
-	adminGuests.Get("/", guestController.GetAllGuests)
-	adminGuests.Put("/:id", guestController.UpdateGuest)
-	adminGuests.Delete("/:id", guestController.DeleteGuest)
-	adminGuests.Get("/:id/bookings", guestController.GetGuestBookingHistory)
+	admin.Get("/blog", func(c *fiber.Ctx) error {
+		return c.Render("admin/blog", fiber.Map{
+			"Title":       "Manage Blog | Admin | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
+
+	admin.Get("/users", func(c *fiber.Ctx) error {
+		return c.Render("admin/users", fiber.Map{
+			"Title":       "Manage Users | Admin | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+		})
+	})
 }
 
-// SetupErrorHandlers configures custom error handlers
-func SetupErrorHandlers(app *fiber.App) {
-	// 404 handler
-	app.Use(func(c *fiber.Ctx) error {
-		// Check if request is API or HTML
-		if c.Accepts("json") == "json" {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-				"success": false,
-				"error":   "Endpoint not found",
-				"code":    404,
-			})
-		}
+// setupAPIRoutes configures API endpoints (separate from web routes)
+func setupAPIRoutes(app *fiber.App) {
+	api := app.Group("/api")
 
-		return c.Status(fiber.StatusNotFound).Render("error/404", fiber.Map{
-			"Title": "Page Not Found - Kwangdi Hotel",
+	// API version group
+	v1 := api.Group("/v1")
+
+	// Room availability API
+	v1.Get("/rooms/available", func(c *fiber.Ctx) error {
+		// In a real app, you would check room availability from a database
+		return c.JSON(fiber.Map{
+			"success": true,
+			"data": []fiber.Map{
+				{"id": "1", "type": "standard", "available": true, "price": 2500},
+				{"id": "2", "type": "deluxe", "available": true, "price": 4000},
+				{"id": "3", "type": "family", "available": false, "price": 6000},
+			},
 		})
 	})
 
-	// Error handler
-	app.Use(func(c *fiber.Ctx, err error) error {
-		// Status code defaults to 500
-		code := fiber.StatusInternalServerError
+	// Room booking API
+	v1.Post("/bookings", func(c *fiber.Ctx) error {
+		// In a real app, you would save the booking to a database
+		return c.Status(201).JSON(fiber.Map{
+			"success":    true,
+			"message":    "Booking created successfully",
+			"booking_id": "BK12345",
+		})
+	})
 
-		// Check if it's a Fiber error
-		if e, ok := err.(*fiber.Error); ok {
-			code = e.Code
-		}
+	// Contact form submission API
+	v1.Post("/contact", func(c *fiber.Ctx) error {
+		// In a real app, you would process the contact form submission
+		return c.JSON(fiber.Map{
+			"success": true,
+			"message": "Thank you for contacting us. We will respond shortly.",
+		})
+	})
 
-		// Render error page or return JSON based on request
-		if c.Accepts("html") == "html" {
-			return c.Status(code).Render("error/error", fiber.Map{
-				"Title":     "Error - Kwangdi Hotel",
-				"ErrorCode": code,
-				"Message":   err.Error(),
-			})
-		}
+	// Newsletter subscription API
+	v1.Post("/subscribe", func(c *fiber.Ctx) error {
+		// In a real app, you would save the subscriber to a database
+		return c.JSON(fiber.Map{
+			"success": true,
+			"message": "Successfully subscribed to our newsletter",
+		})
+	})
 
-		return c.Status(code).JSON(fiber.Map{
-			"success": false,
-			"error":   err.Error(),
-			"code":    code,
+	// Blog posts API
+	v1.Get("/blog/posts", func(c *fiber.Ctx) error {
+		// In a real app, you would fetch blog posts from a database
+		return c.JSON(fiber.Map{
+			"success": true,
+			"data": []fiber.Map{
+				{"id": "1", "title": "Welcome to Kwangdi Pahuna Ghar", "slug": "welcome"},
+				{"id": "2", "title": "Exploring Shantipur Valley", "slug": "exploring-shantipur"},
+				{"id": "3", "title": "Traditional Nepali Cuisine", "slug": "nepali-cuisine"},
+			},
+		})
+	})
+
+	// Testimonials API
+	v1.Get("/testimonials", func(c *fiber.Ctx) error {
+		// In a real app, you would fetch testimonials from a database
+		return c.JSON(fiber.Map{
+			"success": true,
+			"data": []fiber.Map{
+				{"id": "1", "name": "Maria & John", "country": "United Kingdom", "rating": 5, "comment": "Our stay at Kwangdi Pahuna Ghar was the highlight of our Nepal trip."},
+				{"id": "2", "name": "David & Lisa", "country": "Australia", "rating": 5, "comment": "If you want to experience authentic rural Nepal, this is the place to stay."},
+			},
+		})
+	})
+
+	// Admin API endpoints (should be protected with authentication)
+	admin := v1.Group("/admin", func(c *fiber.Ctx) error {
+		// This is where you would check for admin API authentication
+		// For now, we'll just pass through
+		return c.Next()
+	})
+
+	admin.Get("/bookings", func(c *fiber.Ctx) error {
+		// In a real app, you would fetch bookings from a database
+		return c.JSON(fiber.Map{
+			"success": true,
+			"data": []fiber.Map{
+				{"id": "BK12345", "guest": "John Smith", "room": "1", "check_in": "2023-10-15", "check_out": "2023-10-18"},
+				{"id": "BK12346", "guest": "Jane Doe", "room": "2", "check_in": "2023-10-20", "check_out": "2023-10-25"},
+			},
 		})
 	})
 }
