@@ -43,14 +43,15 @@ func main() {
 
 	config := config.GetConfig()
 
-	// Connect to database
+	// DATABASE SECTION
 	db, err := database.ConnectDB()
 	if err != nil {
 		logger.Error("Error connecting to database", zap.Error(err))
 		return
 	}
 
-	// Auto-migrate models
+	// AUTO MIGRATING MODELS
+	// This will create the tables, missing foreign keys, constraints, columns and indexes
 	if err := db.AutoMigrate(&models.Room{}, &models.Guest{}, &models.RoomBooking{}); err != nil {
 		logger.Error("Error auto-migrating database:", zap.Error(err))
 		return
@@ -63,7 +64,7 @@ func main() {
 		logger.Info("No rooms found in database. Seeding initial data...")
 		if err := database.SeedRooms(db); err != nil {
 			logger.Error("Error seeding database:", zap.Error(err))
-			// Continue anyway, as this is not critical
+			// Continuing anyway, as this wont  effect the app
 		}
 	}
 
@@ -76,9 +77,6 @@ func main() {
 		fmt.Printf("ERROR LOADING TEMPLATES: %v\n", err)
 		// Exit early if templates can't be loaded
 		os.Exit(1)
-	}
-	if err := engine.AddFile("booking/form", "./templates/booking/form.html"); err != nil {
-		log.Fatalf("Error adding booking form template: %v", err)
 	}
 
 	// Add template functions
@@ -95,6 +93,16 @@ func main() {
 			dict[key] = values[i+1]
 		}
 		return dict, nil
+	})
+
+	//Basic upper and lower changes in case>>
+	engine.AddFunc("ToUpper", func(s string) string {
+		return strings.ToUpper(s)
+	})
+
+	engine.AddFunc("ToLower", func(s string) string {
+		return strings.ToLower(s)
+
 	})
 
 	// Create Fiber app
