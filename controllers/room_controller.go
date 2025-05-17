@@ -41,6 +41,35 @@ func (ctrl *RoomController) GetAllRooms(c *fiber.Ctx) error {
 	})
 }
 
+// GetAllRooms returns all rooms, optionally filtered by type
+func (rc *RoomController) GetAllRoomsPage(c *fiber.Ctx) error {
+	roomType := c.Query("typee")
+
+	var rooms []*models.Room
+	var err error
+
+	if roomType != "" {
+		rooms, err = rc.Service.GetRoomByType(roomType)
+	} else {
+		rooms, err = rc.Service.GetAllRooms()
+	}
+
+	if err != nil {
+		rc.Logger.Error("Failed to get rooms", zap.Error(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to get rooms",
+		})
+	}
+
+	return c.Render("rooms/index", fiber.Map{
+		"Title":       "Accommodations | Kwangdi Pahuna Ghar",
+		"Description": "Explore our comfortable and authentic Nepali accommodations",
+		"CurrentYear": time.Now().Year(),
+		"Rooms":       rooms,
+		"RoomType":    roomType,
+	})
+}
+
 // GetRoomByID returns a specific room
 // GET /api/rooms/:id
 func (ctrl *RoomController) GetRoomByID(c *fiber.Ctx) error {

@@ -48,6 +48,16 @@ func (rbs *RoomBookingService) GetRoomByID(id uint) (*models.Room, error) {
 	return room, nil
 }
 
+func (rbs *RoomBookingService) GetRoomByType(typee string) ([]*models.Room, error) {
+	var rooms []*models.Room
+	if err := rbs.db.Where("typee = ? ", typee).Find(&rooms).Error; err != nil {
+		rbs.logger.Error("Failed to fetch the rooms", zap.Error(err))
+		return nil, fmt.Errorf("failed to fetch the rooms: %w", err)
+
+	}
+	return rooms, nil
+}
+
 func (rbs *RoomBookingService) CreateRoom(room models.Room) error {
 	if err := rbs.db.Create(room).Error; err != nil {
 		rbs.logger.Error("failed to create room", zap.Error(err))

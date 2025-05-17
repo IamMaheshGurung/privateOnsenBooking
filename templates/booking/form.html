@@ -42,8 +42,9 @@
         
         .hover\:bg-forest-dark:hover { background-color: var(--color-forest-dark); }
         .hover\:text-forest-dark:hover { color: var(--color-forest-dark); }
+        .hover\:text-cream:hover { color: var(--color-cream); }
         
-        /* Custom form styles */
+        /* Form styles */
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #2D5F5D;
@@ -100,14 +101,249 @@
                 </p>
             </div>
 
-            <!-- Booking form content here -->
-            <!-- Rest of your booking form HTML from previous response -->
-            <!-- ... -->
+            <div class="lg:flex lg:gap-8">
+                <!-- Main Booking Form -->
+                <div class="lg:w-2/3">
+                    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                        <div class="bg-forest-dark text-white p-6">
+                            <h2 class="text-xl font-semibold">Reservation Details</h2>
+                            <p class="text-cream-light text-sm mt-1">
+                                All fields marked with * are required
+                            </p>
+                        </div>
+                        
+                        <form action="/booking/submit" method="POST" class="p-6">
+                            <!-- Date Selection -->
+                            <div class="mb-6">
+                                <h3 class="text-lg font-semibold text-forest-dark mb-4">Select Your Dates</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label for="check_in" class="block text-sm font-medium text-gray-700 mb-1">Check-in Date*</label>
+                                        <div class="relative">
+                                            <input type="date" id="check_in" name="check_in" 
+                                                required
+                                                min="{{.TodayDate}}" 
+                                                value="{{.TodayDate}}" 
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-forest focus:border-forest">
+                                            <div class="text-xs text-gray-500 mt-1">{{.TodayDisplay}}</div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label for="check_out" class="block text-sm font-medium text-gray-700 mb-1">Check-out Date*</label>
+                                        <div class="relative">
+                                            <input type="date" id="check_out" name="check_out" 
+                                                required
+                                                min="{{.TomorrowDate}}" 
+                                                value="{{.TomorrowDate}}" 
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-forest focus:border-forest">
+                                            <div class="text-xs text-gray-500 mt-1">{{.TomorrowDisplay}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Room Selection -->
+                            <div class="mb-6">
+                                <h3 class="text-lg font-semibold text-forest-dark mb-4">Select Room Type</h3>
+                                <div class="grid grid-cols-1 gap-4">
+                                    <div class="border border-gray-200 rounded-md p-4 flex items-start">
+                                        <input type="radio" name="room_type" id="standard_room" value="standard" class="mt-1" checked>
+                                        <div class="ml-3">
+                                            <label for="standard_room" class="font-medium">Standard Room</label>
+                                            <p class="text-sm text-gray-600">Perfect for couples or solo travelers. Includes traditional futon beds and a view of the garden.</p>
+                                            <div class="text-forest font-bold mt-1">NPR 2,500 / night</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="border border-gray-200 rounded-md p-4 flex items-start">
+                                        <input type="radio" name="room_type" id="deluxe_room" value="deluxe" class="mt-1">
+                                        <div class="ml-3">
+                                            <label for="deluxe_room" class="font-medium">Deluxe Room</label>
+                                            <p class="text-sm text-gray-600">Spacious room with panoramic valley views. Includes private sitting area and premium amenities.</p>
+                                            <div class="text-forest font-bold mt-1">NPR 4,000 / night</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="border border-gray-200 rounded-md p-4 flex items-start">
+                                        <input type="radio" name="room_type" id="family_suite" value="family" class="mt-1">
+                                        <div class="ml-3">
+                                            <label for="family_suite" class="font-medium">Family Suite</label>
+                                            <p class="text-sm text-gray-600">Ideal for families or groups. Includes separate sleeping areas, living space and mountain views.</p>
+                                            <div class="text-forest font-bold mt-1">NPR 6,000 / night</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Guest Information -->
+                            <div class="mb-6">
+                                <h3 class="text-lg font-semibold text-forest-dark mb-4">Guest Information</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label for="full_name" class="block text-sm font-medium text-gray-700 mb-1">Full Name*</label>
+                                        <input type="text" id="full_name" name="full_name" 
+                                            required
+                                            placeholder="Enter your full name" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-forest focus:border-forest">
+                                    </div>
+                                    <div>
+                                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address*</label>
+                                        <input type="email" id="email" name="email" 
+                                            required
+                                            placeholder="your@email.com" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-forest focus:border-forest">
+                                    </div>
+                                    <div>
+                                        <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number*</label>
+                                        <input type="tel" id="phone" name="phone" 
+                                            required
+                                            placeholder="Your contact number" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-forest focus:border-forest">
+                                    </div>
+                                    <div>
+                                        <label for="guests" class="block text-sm font-medium text-gray-700 mb-1">Number of Guests*</label>
+                                        <select id="guests" name="guests" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-forest focus:border-forest">
+                                            <option value="1">1 Guest</option>
+                                            <option value="2" selected>2 Guests</option>
+                                            <option value="3">3 Guests</option>
+                                            <option value="4">4 Guests</option>
+                                            <option value="5">5 Guests</option>
+                                            <option value="6">6 Guests</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Special Requests -->
+                            <div class="mb-6">
+                                <label for="special_requests" class="block text-sm font-medium text-gray-700 mb-1">Special Requests (Optional)</label>
+                                <textarea id="special_requests" name="special_requests" rows="3" 
+                                    placeholder="Please let us know if you have any special requirements" 
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-forest focus:border-forest"></textarea>
+                                <p class="text-xs text-gray-500 mt-1">We'll do our best to accommodate your requests, but they cannot be guaranteed.</p>
+                            </div>
+                            
+                            <!-- Check Availability Button -->
+                            <div class="mb-6" id="availability-section">
+                                <button type="button" 
+                                        id="check-availability" 
+                                        hx-get="/booking/availability"
+                                        hx-trigger="click"
+                                        hx-target="#availability-message"
+                                        hx-vals='{"check_in": document.getElementById("check_in").value, "check_out": document.getElementById("check_out").value, "room_type": document.querySelector("input[name=room_type]:checked").value, "guests": document.getElementById("guests").value}'
+                                        class="w-full bg-forest-dark text-white py-3 px-6 rounded-md hover:bg-forest-darker transition-colors duration-300 flex items-center justify-center">
+                                    <i class="fas fa-calendar-check mr-2"></i>
+                                    Check Availability
+                                </button>
+                                <div id="availability-message" class="mt-3 text-center"></div>
+                            </div>
+                            
+                            <!-- Submit Button (disabled initially) -->
+                            <div class="flex items-center justify-between">
+                                <div class="text-sm">
+                                    <a href="/rooms" class="font-medium text-forest hover:text-forest-dark">
+                                        <i class="fas fa-arrow-left mr-1"></i>
+                                        View All Rooms
+                                    </a>
+                                </div>
+                                <button type="submit" 
+                                        id="submit-button" 
+                                        disabled
+                                        class="bg-forest text-white py-3 px-8 rounded-md opacity-50 cursor-not-allowed">
+                                    Complete Booking
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Sidebar with Information -->
+                <div class="mt-8 lg:mt-0 lg:w-1/3">
+                    <!-- Property Information -->
+                    <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-6">
+                        <img src="/static/images/nepali-house.jpg" alt="Kwangdi Pahuna Ghar Exterior" class="w-full h-48 object-cover"
+                             onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'800\' height=\'400\' viewBox=\'0 0 800 400\' preserveAspectRatio=\'none\'%3E%3Crect fill=\'%23234E52\' width=\'800\' height=\'400\' /%3E%3Ctext fill=\'%23FFFFFF\' font-family=\'Arial\' font-size=\'32\' x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dominant-baseline=\'middle\'%3EProperty Photo%3C/text%3E%3C/svg%3E'">
+                        <div class="p-6">
+                            <h3 class="text-lg font-bold text-forest-dark">Kwangdi Pahuna Ghar</h3>
+                            <div class="flex items-center mt-2 text-sm text-gray-600">
+                                <i class="fas fa-map-marker-alt text-forest mr-2"></i>
+                                <span>Shantipur Valley, Gulmi District, Nepal</span>
+                            </div>
+                            <div class="mt-4">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-star text-yellow-500"></i>
+                                    <i class="fas fa-star text-yellow-500"></i>
+                                    <i class="fas fa-star text-yellow-500"></i>
+                                    <i class="fas fa-star text-yellow-500"></i>
+                                    <i class="fas fa-star-half-alt text-yellow-500"></i>
+                                    <span class="ml-2 text-sm text-gray-600">4.5/5 from 28 reviews</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-award text-forest mr-2"></i>
+                                    <span>Authentic Nepali Hospitality</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Booking Information -->
+                    <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-6">
+                        <div class="bg-forest-dark text-white p-4">
+                            <h3 class="font-semibold">Booking Information</h3>
+                        </div>
+                        <div class="p-6">
+                            <ul class="space-y-4">
+                                <li class="flex items-start">
+                                    <i class="fas fa-clock text-forest mt-1 mr-3"></i>
+                                    <div>
+                                        <span class="font-medium text-gray-700">Check-in/out</span>
+                                        <p class="text-sm text-gray-600">Check-in from 2:00 PM<br>Check-out by 12:00 PM</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-credit-card text-forest mt-1 mr-3"></i>
+                                    <div>
+                                        <span class="font-medium text-gray-700">Payment</span>
+                                        <p class="text-sm text-gray-600">No deposit required<br>Pay at the property</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-calendar-times text-forest mt-1 mr-3"></i>
+                                    <div>
+                                        <span class="font-medium text-gray-700">Cancellation</span>
+                                        <p class="text-sm text-gray-600">Free cancellation up to 48 hours before check-in</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Information -->
+                    <div class="bg-cream-light rounded-lg p-6">
+                        <h3 class="font-semibold text-forest-dark mb-3">Need Help?</h3>
+                        <p class="text-sm text-gray-600 mb-4">If you have any questions about your booking, please contact us:</p>
+                        <div class="space-y-2">
+                            <div class="flex items-center">
+                                <i class="fas fa-phone text-forest mr-3"></i>
+                                <a href="tel:+9779801234567" class="text-forest hover:text-forest-dark">+977 980-123-4567</a>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-envelope text-forest mr-3"></i>
+                                <a href="mailto:info@kwangdipahunaghaar.com" class="text-forest hover:text-forest-dark">info@kwangdipahunaghaar.com</a>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-comment text-forest mr-3"></i>
+                                <a href="#" class="text-forest hover:text-forest-dark">Live Chat</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
     <!-- Footer -->
-    <footer class="bg-forest-dark text-white py-12">
+    <footer class="bg-forest-dark text-white py-12 mt-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div>
