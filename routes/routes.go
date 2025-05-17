@@ -23,7 +23,7 @@ func SetupRoutes(
 	SetupExperienceRoutes(app)
 	SetupGalleryRoutes(app)
 	SetupBlogRoutes(app)
-	SetupRoomRoutes(app)
+	SetupRoomRoutes(app, roomController)
 	SetupDiningRoutes(app)
 	SetupAdminRoutes(app)
 	SetupAPIRoutes(app)
@@ -155,15 +155,11 @@ func SetupPageRoutes(app *fiber.App) {
 }
 
 // setupRoomRoutes configures room-related routes
-func SetupRoomRoutes(app *fiber.App) {
+func SetupRoomRoutes(app *fiber.App, roomController *controllers.RoomController) {
 	// Rooms main page
-	app.Get("/rooms", func(c *fiber.Ctx) error {
-		return c.Render("rooms/index", fiber.Map{
-			"Title":       "Accommodations | Kwangdi Pahuna Ghar",
-			"Description": "Explore our comfortable and authentic Nepali accommodations",
-			"CurrentYear": time.Now().Year(),
-		})
-	})
+	app.Get("/rooms", roomController.GetAllRoomsPage)
+	// Room quick view API endpoint for HTMX
+	app.Get("/api/rooms/:id/quick-view", roomController.GetRoomQuickView)
 
 	// Room categories
 	app.Get("/rooms/standard", func(c *fiber.Ctx) error {

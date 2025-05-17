@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"text/template"
 
@@ -75,6 +76,32 @@ func main() {
 		"ToLower": strings.ToLower,
 		"toLower": strings.ToLower,
 		"tolower": strings.ToLower,
+		"limit": func(arr interface{}, limit int) interface{} {
+			reflectValue := reflect.ValueOf(arr)
+			if reflectValue.Kind() != reflect.Slice {
+				return arr
+			}
+
+			length := reflectValue.Len()
+			if length <= limit {
+				return arr
+			}
+
+			return reflectValue.Slice(0, limit).Interface()
+		},
+
+		"truncate": func(s string, n int) string {
+			if len(s) <= n {
+				return s
+			}
+			return s[:n] + "..."
+
+		},
+
+		"split": func(s string, sep string) []string {
+			return strings.Split(s, sep)
+		},
+
 		"dict": func(values ...interface{}) (map[string]interface{}, error) {
 			if len(values)%2 != 0 {
 				return nil, fmt.Errorf("dict requires an even number of arguments")

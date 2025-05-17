@@ -41,9 +41,11 @@ func (ctrl *RoomController) GetAllRooms(c *fiber.Ctx) error {
 	})
 }
 
-// GetAllRooms returns all rooms, optionally filtered by type
+// GetAllRoomsPage returns all rooms, optionally filtered by type
 func (rc *RoomController) GetAllRoomsPage(c *fiber.Ctx) error {
 	roomType := c.Query("typee")
+
+	rc.Logger.Info("Fetching rooms", zap.String("type", roomType))
 
 	var rooms []*models.Room
 	var err error
@@ -56,18 +58,48 @@ func (rc *RoomController) GetAllRoomsPage(c *fiber.Ctx) error {
 
 	if err != nil {
 		rc.Logger.Error("Failed to get rooms", zap.Error(err))
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to get rooms",
-		})
+		// Send a simple error message for now instead of trying to render a template
+		return c.Status(fiber.StatusInternalServerError).SendString("Error fetching rooms: " + err.Error())
 	}
 
-	return c.Render("rooms/index", fiber.Map{
+	// Debug log to see what data we're trying to render
+	rc.Logger.Info("Rendering rooms page",
+		zap.Int("room_count", len(rooms)),
+		zap.String("template", "rooms/index"))
+
+	// Try rendering with error handling
+	err = c.Render("rooms/index", fiber.Map{
 		"Title":       "Accommodations | Kwangdi Pahuna Ghar",
 		"Description": "Explore our comfortable and authentic Nepali accommodations",
 		"CurrentYear": time.Now().Year(),
 		"Rooms":       rooms,
 		"RoomType":    roomType,
 	})
+
+	if err != nil {
+		rc.Logger.Error("Template rendering error", zap.Error(err))
+		return c.Status(fiber.StatusInternalServerError).SendString("Template error: " + err.Error())
+	}
+
+	return nil
+}
+
+// Add this to your RoomController and route it to /api/rooms/:id/quick-view
+func (rc *RoomController) GetRoomQuickView(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid room ID"})
+	}
+
+	room, err := rc.Service.GetRoomByID(uint(id))
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Room not found"})
+	}
+
+	// Just return the HTML for the modal
+	return c.Render("partials/room_quick_view", fiber.Map{
+		"Room": room,
+	}, "")
 }
 
 // GetRoomByID returns a specific room

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <meta name="description" content="{{.Description}}">
+    
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    
+    <!-- Custom styles -->
+    <style>
+        :root {
+            --color-forest: #2D5F5D;
+            --color-forest-dark: #234E52;
+            --color-cream: #E8DDB5;
+            --color-cream-light: #F4F0E2;
+        }
+        
+        body {
+            background-color: #F5F5F5;
+            color: #333333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .text-forest { color: var(--color-forest); }
+        .text-forest-dark { color: var(--color-forest-dark); }
+        .text-cream { color: var(--color-cream); }
+        .text-cream-light { color: var(--color-cream-light); }
+        
+        .bg-forest { background-color: var(--color-forest); }
+        .bg-forest-dark { background-color: var(--color-forest-dark); }
+        .bg-cream { background-color: var(--color-cream); }
+        .bg-cream-light { background-color: var(--color-cream-light); }
+        
+        .hover\:bg-forest-dark:hover { background-color: var(--color-forest-dark); }
+        .hover\:text-forest-dark:hover { color: var(--color-forest-dark); }
+        .hover\:text-cream:hover { color: var(--color-cream); }
+        
+        .room-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .room-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .room-image {
+            height: 250px;
+            object-fit: cover;
+            width: 100%;
+        }
+        
+        .filter-btn {
+            transition: all 0.2s;
+        }
+        
+        .filter-btn.active {
+            background-color: var(--color-forest);
+            color: white;
+        }
+        
+        .htmx-indicator {
+            opacity: 0;
+            transition: opacity 300ms ease-in;
+        }
+        
+        .htmx-request .htmx-indicator {
+            opacity: 1;
+        }
+        
+        .htmx-request.htmx-indicator {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-forest-dark text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div>
+                <a href="/" class="flex items-center">
+                    <span class="text-xl font-bold">Kwangdi Pahuna Ghar</span>
+                </a>
+            </div>
+            <nav>
+                <ul class="flex space-x-6">
+                    <li><a href="/" class="hover:text-cream-light">Home</a></li>
+                    <li><a href="/rooms" class="hover:text-cream-light font-bold">Rooms</a></li>
+                    <li><a href="/onsen" class="hover:text-cream-light">Onsen</a></li>
+                    <li><a href="/dining" class="hover:text-cream-light">Dining</a></li>
+                    <li><a href="/contact" class="hover:text-cream-light">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <div class="bg-cream-light py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold text-forest-dark">Our Rooms</h1>
+                <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
+                    Experience the perfect blend of traditional Nepali architecture and modern comforts in our thoughtfully designed rooms
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Room Filters -->
+            <div class="mb-10">
+                <!-- Date Range Filter -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <form id="availability-form" class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div>
+                            <label for="check_in" class="block text-sm font-medium text-gray-700 mb-1">Check-in Date</label>
+                            <input type="date" id="check_in" name="check_in" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-forest focus:border-forest">
+                        </div>
+                        
+                        <div>
+                            <label for="check_out" class="block text-sm font-medium text-gray-700 mb-1">Check-out Date</label>
+                            <input type="date" id="check_out" name="check_out" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-forest focus:border-forest">
+                        </div>
+                        
+                        <div>
+                            <label for="guests" class="block text-sm font-medium text-gray-700 mb-1">Guests</label>
+                            <select id="guests" name="guests" 
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-forest focus:border-forest">
+                                <option value="1">1 Guest</option>
+                                <option value="2" selected>2 Guests</option>
+                                <option value="3">3 Guests</option>
+                                <option value="4">4 Guests</option>
+                                <option value="5">5 Guests</option>
+                                <option value="6">6+ Guests</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex items-end">
+                            <button type="submit" 
+                                    class="w-full bg-forest text-white py-2 px-4 rounded-md hover:bg-forest-dark transition-colors duration-300 flex items-center justify-center">
+                                <i class="fas fa-search mr-2"></i>
+                                <span>Check Availability</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Room Type Filters -->
+                <div class="flex flex-wrap gap-2 mb-6">
+                    <a href="/rooms" 
+                       class="filter-btn px-4 py-2 rounded-full border-2 border-forest text-forest font-medium hover:bg-forest hover:text-white active">
+                        All Rooms
+                    </a>
+                    
+                    <a href="/rooms?typee=standard" 
+                       class="filter-btn px-4 py-2 rounded-full border-2 border-forest text-forest font-medium hover:bg-forest hover:text-white">
+                        Standard
+                    </a>
+                    
+                    <a href="/rooms?typee=deluxe" 
+                       class="filter-btn px-4 py-2 rounded-full border-2 border-forest text-forest font-medium hover:bg-forest hover:text-white">
+                        Deluxe
+                    </a>
+                    
+                    <a href="/rooms?typee=suite" 
+                       class="filter-btn px-4 py-2 rounded-full border-2 border-forest text-forest font-medium hover:bg-forest hover:text-white">
+                        Suite
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Room Listings -->
+            <div id="room-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {{if .Rooms}}
+                    {{range .Rooms}}
+                        <div class="room-card bg-white rounded-lg overflow-hidden shadow-md">
+                            <img src="{{if .ImageURL}}{{.ImageURL}}{{else}}/static/images/rooms/default.jpg{{end}}" 
+                                 alt="Room {{.RoomNo}}" 
+                                 class="room-image"
+                                 onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'800\' height=\'400\' viewBox=\'0 0 800 400\' preserveAspectRatio=\'none\'%3E%3Crect fill=\'%23234E52\' width=\'800\' height=\'400\' /%3E%3Ctext fill=\'%23FFFFFF\' font-family=\'Arial\' font-size=\'32\' x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dominant-baseline=\'middle\'%3ERoom {{.RoomNo}}%3C/text%3E%3C/svg%3E'">
+                            
+                            <div class="p-6">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="text-xl font-bold text-forest-dark">Room {{.RoomNo}} - {{.Type}} Room</h3>
+                                    <span class="text-forest-dark font-bold">NPR {{.PricePerNight}}<span class="text-sm font-normal">/night</span></span>
+                                </div>
+                                
+                                <div class="mt-2 flex items-center">
+                                    <span class="text-sm bg-cream-light text-forest-dark px-2 py-1 rounded-full">{{.Capacity}} {{if eq .Capacity 1}}guest{{else}}guests{{end}}</span>
+                                    <span class="text-sm text-gray-500 ml-2">{{.Status}}</span>
+                                </div>
+                                
+                                <p class="mt-4 text-gray-600">
+                                    {{if .Description}}
+                                        {{if gt (len .Description) 120}}
+                                            {{slice .Description 0 120}}...
+                                        {{else}}
+                                            {{.Description}}
+                                        {{end}}
+                                    {{else}}
+                                        A comfortable {{.Type}} room with traditional Nepali design elements and modern amenities.
+                                    {{end}}
+                                </p>
+                                
+                                <div class="mt-4">
+                                    {{if .Amenities}}
+                                        {{range $index, $amenity := split .Amenities ","}}
+                                            {{if lt $index 4}}
+                                                <span class="inline-flex items-center mr-3 mb-2 text-sm text-gray-600">
+                                                    <i class="fas fa-check text-forest mr-1"></i> {{$amenity}}
+                                                </span>
+                                            {{end}}
+                                        {{end}}
+                                    {{else}}
+                                        <span class="inline-flex items-center mr-3 mb-2 text-sm text-gray-600">
+                                            <i class="fas fa-wifi text-forest mr-1"></i> Free WiFi
+                                        </span>
+                                        <span class="inline-flex items-center mr-3 mb-2 text-sm text-gray-600">
+                                            <i class="fas fa-shower text-forest mr-1"></i> Hot Water
+                                        </span>
+                                    {{end}}
+                                </div>
+                                
+                                <div class="mt-6 flex justify-between items-center">
+                                    <a href="/rooms/{{.ID}}" class="text-forest hover:text-forest-dark font-medium">View details</a>
+                                    <a href="/booking?room={{.ID}}" class="bg-forest text-white px-4 py-2 rounded-md hover:bg-forest-dark transition-colors duration-300">Book Now</a>
+                                </div>
+                            </div>
+                        </div>
+                    {{end}}
+                {{else}}
+                    <div class="col-span-3 py-12 text-center">
+                        <div class="mb-6">
+                            <i class="fas fa-bed text-6xl text-gray-300"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-700 mb-2">No Rooms Found</h3>
+                        <p class="text-gray-500 max-w-md mx-auto">
+                            We couldn't find any rooms matching your criteria. Try adjusting your filters or dates.
+                        </p>
+                        <a href="/rooms" class="mt-4 inline-flex items-center px-4 py-2 border border-forest text-forest rounded-md hover:bg-forest hover:text-white transition-colors duration-300">
+                            <i class="fas fa-redo mr-2"></i> Reset Filters
+                        </a>
+                    </div>
+                {{end}}
+            </div>
+            
+            <!-- Room Amenities Section -->
+            <div class="mt-16 bg-white p-8 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold text-forest-dark mb-6">All Rooms Include</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-wifi text-forest mr-3 text-xl"></i>
+                        <span>Free WiFi</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-coffee text-forest mr-3 text-xl"></i>
+                        <span>Tea & Coffee</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-temperature-low text-forest mr-3 text-xl"></i>
+                        <span>Heating</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-shower text-forest mr-3 text-xl"></i>
+                        <span>Hot Water</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-bed text-forest mr-3 text-xl"></i>
+                        <span>Quality Bedding</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-broom text-forest mr-3 text-xl"></i>
+                        <span>Daily Cleaning</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-utensils text-forest mr-3 text-xl"></i>
+                        <span>Breakfast Available</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-key text-forest mr-3 text-xl"></i>
+                        <span>Private Entrance</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Booking Policy Section -->
+            <div class="mt-10 bg-cream-light p-8 rounded-lg">
+                <h2 class="text-2xl font-bold text-forest-dark mb-4">Booking Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-lg font-semibold text-forest-dark mb-2">Check-in & Check-out</h3>
+                        <ul class="space-y-2 text-gray-700">
+                            <li class="flex items-start">
+                                <i class="fas fa-clock text-forest mt-1 mr-2"></i>
+                                <span>Check-in: 2:00 PM - 8:00 PM</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-clock text-forest mt-1 mr-2"></i>
+                                <span>Check-out: By 12:00 PM</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-info-circle text-forest mt-1 mr-2"></i>
+                                <span>Early check-in and late check-out available on request (additional charges may apply)</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-forest-dark mb-2">Cancellation Policy</h3>
+                        <ul class="space-y-2 text-gray-700">
+                            <li class="flex items-start">
+                                <i class="fas fa-calendar-times text-forest mt-1 mr-2"></i>
+                                <span>Free cancellation up to 48 hours before arrival</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-money-bill-wave text-forest mt-1 mr-2"></i>
+                                <span>Cancellations within 48 hours: 50% of first night charged</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-ban text-forest mt-1 mr-2"></i>
+                                <span>No-show: First night charged in full</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Call to Action -->
+    <section class="py-16 bg-forest-dark text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl font-bold mb-4">Ready to Experience Authentic Nepali Hospitality?</h2>
+            <p class="text-cream-light text-lg max-w-3xl mx-auto mb-8">
+                Book your stay now and enjoy our special seasonal discounts on selected rooms
+            </p>
+            <a href="/booking" class="inline-block bg-cream text-forest-dark font-semibold px-8 py-3 rounded-md hover:bg-cream-light transition-colors duration-300">
+                Book Your Stay Now
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-forest-dark text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Kwangdi Pahuna Ghar</h3>
+                    <p class="text-cream-light">Authentic Nepali hospitality in the beautiful Shantipur valley of Gulmi district.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Contact Us</h3>
+                    <p class="flex items-center text-cream-light mb-2">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        <span>Shantipur Valley, Gulmi District, Nepal</span>
+                    </p>
+                    <p class="flex items-center text-cream-light mb-2">
+                        <i class="fas fa-phone mr-2"></i>
+                        <span>+977 980-123-4567</span>
+                    </p>
+                    <p class="flex items-center text-cream-light">
+                        <i class="fas fa-envelope mr-2"></i>
+                        <span>info@kwangdipahunaghaar.com</span>
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Follow Us</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-white hover:text-cream"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-white hover:text-cream"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-white hover:text-cream"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white hover:text-cream"><i class="fab fa-tripadvisor"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-700 text-center text-sm text-cream-light">
+                <p>&copy; {{.CurrentYear}} Kwangdi Pahuna Ghar. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default dates for the form
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+            
+            // Format as YYYY-MM-DD
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+            
+            // Set form default values
+            const checkInInput = document.getElementById('check_in');
+            const checkOutInput = document.getElementById('check_out');
+            
+            if (checkInInput && checkOutInput) {
+                checkInInput.value = formatDate(today);
+                checkInInput.min = formatDate(today);
+                checkOutInput.value = formatDate(tomorrow);
+                checkOutInput.min = formatDate(tomorrow);
+                
+                // Make sure check-out is after check-in
+                checkInInput.addEventListener('change', function() {
+                    const checkIn = new Date(this.value);
+                    const checkOut = new Date(checkOutInput.value);
+                    
+                    // If check-out is before or same as check-in, update it
+                    if (checkOut <= checkIn) {
+                        const nextDay = new Date(checkIn);
+                        nextDay.setDate(nextDay.getDate() + 1);
+                        checkOutInput.value = formatDate(nextDay);
+                    }
+                    
+                    // Update min date for checkout
+                    const minCheckout = new Date(checkIn);
+                    minCheckout.setDate(minCheckout.getDate() + 1);
+                    checkOutInput.min = formatDate(minCheckout);
+                });
+            }
+            
+            // Highlight active filter button based on URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomType = urlParams.get('typee');
+            
+            if (roomType) {
+                const filterBtns = document.querySelectorAll('.filter-btn');
+                filterBtns.forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.getAttribute('href').includes(`typee=${roomType}`)) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
