@@ -158,6 +158,7 @@ func SetupPageRoutes(app *fiber.App) {
 func SetupRoomRoutes(app *fiber.App, roomController *controllers.RoomController) {
 	// Rooms main page
 	app.Get("/rooms", roomController.GetAllRoomsPage)
+	app.Get("rooms/availablity", roomController.GetAvailableRooms)
 	// Room quick view API endpoint for HTMX
 	app.Get("/api/rooms/:id/quick-view", roomController.GetRoomQuickView)
 

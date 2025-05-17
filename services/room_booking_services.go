@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"time"
@@ -159,7 +160,14 @@ func (rbs *RoomBookingService) IsRoomAvailableForUpdate(roomID uint, bookingID u
 }
 
 // GetAvailableRooms returns all rooms that are available between checkIn and checkOut
-func (rbs *RoomBookingService) GetAvailableRooms(checkIn, checkOut time.Time) ([]models.Room, error) {
+func (rbs *RoomBookingService) GetAvailableRooms(checkIn, checkOut time.Time, guestStr string) ([]models.Room, error) {
+	guestCount, err := strconv.Atoi(guestStr)
+
+	if err != nil {
+		rbs.logger.Warn("Invalid guest count, defaulting to 1", zap.String("guest_input", guestStr))
+		guestCount = 2
+	}
+
 	var allRooms []models.Room
 
 	if err := rbs.db.Find(&allRooms).Error; err != nil {
@@ -173,7 +181,7 @@ func (rbs *RoomBookingService) GetAvailableRooms(checkIn, checkOut time.Time) ([
 		if err != nil {
 			return nil, err
 		}
-		if available {
+		if available && room.Capacity >= guestCount {
 			availableRooms = append(availableRooms, room)
 		}
 	}

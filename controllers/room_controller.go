@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/IamMaheshGurung/privateOnsenBooking/models"
@@ -125,56 +126,110 @@ func (ctrl *RoomController) GetRoomByID(c *fiber.Ctx) error {
 	})
 }
 
-// GetAvailableRooms returns available rooms for a date range
-// GET /api/rooms/available?check_in=YYYY-MM-DD&check_out=YYYY-MM-DD
-func (ctrl *RoomController) GetAvailableRooms(c *fiber.Ctx) error {
-	// Parse check-in and check-out dates
-	checkInStr := c.Query("check_in")
-	checkOutStr := c.Query("check_out")
+// GetAvailableRooms returns rooms available for a specific date range and guest count
+// GET /api/rooms/available or /rooms/availability
+func (rc *RoomController) GetAvailableRooms(c *fiber.Ctx) error {
+	// Parse request parameters
+	checkIn := c.Query("check_in")
+	checkOut := c.Query("check_out")
+	guestsStr := c.Query("guests")
 
-	if checkInStr == "" || checkOutStr == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Check-in and check-out dates are required",
-		})
+	rc.Logger.Info("Checking room availability",
+		zap.String("check_in", checkIn),
+		zap.String("check_out", checkOut),
+		zap.String("guests", guestsStr))
+
+	// Validate check-in and check-out dates
+	if checkIn == "" || checkOut == "" {
+		if c.Get("HX-Request") == "true" {
+			// If it's an HTMX request, return just the content with error message
+			return c.Render("partials/rooms_grid_error", fiber.Map{
+				"Message": "Please select both check-in and check-out dates",
+			}, "")
+		}
+
+		// If it's a regular request, redirect to the rooms page
+		return c.Redirect("/rooms")
 	}
 
-	checkIn, err := time.Parse("2006-01-02", checkInStr)
+	// Parse dates
+	checkInDate, err := time.Parse("2006-01-02", checkIn)
 	if err != nil {
+		rc.Logger.Error("Invalid check-in date", zap.Error(err))
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid check-in date format. Use YYYY-MM-DD",
 		})
 	}
 
-	checkOut, err := time.Parse("2006-01-02", checkOutStr)
+	checkOutDate, err := time.Parse("2006-01-02", checkOut)
 	if err != nil {
+		rc.Logger.Error("Invalid check-out date", zap.Error(err))
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid check-out date format. Use YYYY-MM-DD",
 		})
 	}
 
-	// Validate dates
-	if checkIn.Before(time.Now()) {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Check-in date cannot be in the past",
-		})
-	}
+	// Make sure check-out is after check-in
+	if checkOutDate.Before(checkInDate) || checkOutDate.Equal(checkInDate) {
+		rc.Logger.Error("Invalid date range",
+			zap.Time("check_in", checkInDate),
+			zap.Time("check_out", checkOutDate))
 
-	if checkOut.Before(checkIn) {
+		if c.Get("HX-Request") == "true" {
+			return c.Render("partials/rooms_grid_error", fiber.Map{
+				"Message": "Check-out date must be after check-in date",
+			}, "")
+		}
+
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Check-out date must be after check-in date",
 		})
 	}
 
-	rooms, err := ctrl.Service.GetAvailableRooms(checkIn, checkOut)
+	// Parse guest count (default to 1 if not provided or invalid)
+	guests := 1
+	if guestsStr != "" {
+		guests, err = strconv.Atoi(guestsStr)
+		if err != nil || guests < 1 {
+			guests = 1
+		}
+	}
+
+	// Get available rooms from service
+	rooms, err := rc.Service.GetAvailableRooms(checkInDate, checkOutDate, guests)
 	if err != nil {
+		rc.Logger.Error("Failed to get available rooms", zap.Error(err))
+
+		if c.Get("HX-Request") == "true" {
+			return c.Render("partials/rooms_grid_error", fiber.Map{
+				"Message": "Error finding available rooms",
+			}, "")
+		}
+
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to get available rooms: " + err.Error(),
 		})
 	}
 
-	return c.JSON(fiber.Map{
-		"success": true,
-		"data":    rooms,
+	// If it's an HTMX request, return just the room grid
+	if c.Get("HX-Request") == "true" {
+		return c.Render("partials/rooms_grid", fiber.Map{
+			"Rooms":    rooms,
+			"CheckIn":  checkIn,
+			"CheckOut": checkOut,
+			"Guests":   guests,
+		}, "")
+	}
+
+	// For a full page request, render the complete page
+	return c.Render("rooms/index", fiber.Map{
+		"Title":       "Available Rooms | Kwangdi Pahuna Ghar",
+		"Description": "Available rooms for your selected dates",
+		"CurrentYear": time.Now().Year(),
+		"Rooms":       rooms,
+		"CheckIn":     checkIn,
+		"CheckOut":    checkOut,
+		"Guests":      guests,
 	})
 }
 
