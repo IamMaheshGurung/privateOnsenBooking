@@ -159,6 +159,7 @@ func (ctrl *BookingController) GetAvailableRooms(c *fiber.Ctx) error {
 
 	checkInStr := c.Query("check_in")
 	checkOutStr := c.Query("check_out")
+	guestStr := c.Query("guests")
 
 	// Validate input
 	if checkInStr == "" || checkOutStr == "" {
@@ -202,7 +203,7 @@ func (ctrl *BookingController) GetAvailableRooms(c *fiber.Ctx) error {
 	}
 
 	// Get available rooms
-	rooms, err := ctrl.RoomService.GetAvailableRooms(checkIn, checkOut)
+	rooms, err := ctrl.RoomService.GetAvailableRooms(checkIn, checkOut, guestStr)
 	if err != nil {
 		ctrl.Logger.Error("Failed to get available rooms",
 			zap.Time("checkIn", checkIn),

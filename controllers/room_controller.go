@@ -68,21 +68,15 @@ func (rc *RoomController) GetAllRoomsPage(c *fiber.Ctx) error {
 		zap.Int("room_count", len(rooms)),
 		zap.String("template", "rooms/index"))
 
-	// Try rendering with error handling
-	err = c.Render("rooms/index", fiber.Map{
-		"Title":       "Accommodations | Kwangdi Pahuna Ghar",
+	return c.Render("rooms/index", fiber.Map{
+		"Title":       "Our Rooms | Kwangdi Pahuna Ghar",
 		"Description": "Explore our comfortable and authentic Nepali accommodations",
 		"CurrentYear": time.Now().Year(),
 		"Rooms":       rooms,
 		"RoomType":    roomType,
+		"IsFiltered":  false, // Indicate this is showing all rooms
+		"FilterType":  "all", // Used in the template to show filtering state
 	})
-
-	if err != nil {
-		rc.Logger.Error("Template rendering error", zap.Error(err))
-		return c.Status(fiber.StatusInternalServerError).SendString("Template error: " + err.Error())
-	}
-
-	return nil
 }
 
 // Add this to your RoomController and route it to /api/rooms/:id/quick-view
@@ -196,7 +190,7 @@ func (rc *RoomController) GetAvailableRooms(c *fiber.Ctx) error {
 	}
 
 	// Get available rooms from service
-	rooms, err := rc.Service.GetAvailableRooms(checkInDate, checkOutDate, guests)
+	rooms, err := rc.Service.GetAvailableRooms(checkInDate, checkOutDate, guestsStr)
 	if err != nil {
 		rc.Logger.Error("Failed to get available rooms", zap.Error(err))
 
@@ -214,10 +208,12 @@ func (rc *RoomController) GetAvailableRooms(c *fiber.Ctx) error {
 	// If it's an HTMX request, return just the room grid
 	if c.Get("HX-Request") == "true" {
 		return c.Render("partials/rooms_grid", fiber.Map{
-			"Rooms":    rooms,
-			"CheckIn":  checkIn,
-			"CheckOut": checkOut,
-			"Guests":   guests,
+			"Rooms":      rooms,
+			"CheckIn":    checkIn,
+			"CheckOut":   checkOut,
+			"IsFiltered": true,
+			"FilterType": "Availability",
+			"Guests":     guests,
 		}, "")
 	}
 
@@ -230,6 +226,9 @@ func (rc *RoomController) GetAvailableRooms(c *fiber.Ctx) error {
 		"CheckIn":     checkIn,
 		"CheckOut":    checkOut,
 		"Guests":      guests,
+		"IsFiltered":  true,                                       // Indicate these are filtered rooms
+		"FilterType":  "availability",                             // Used in the template to show filtering state
+		"FilterDates": fmt.Sprintf("%s to %s", checkIn, checkOut), //
 	})
 }
 

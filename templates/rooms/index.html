@@ -15,6 +15,9 @@
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.2"></script>
     
+    <!-- Alpine.js for interactive components -->
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.2/dist/alpine.min.js" defer></script>
+    
     <!-- Custom styles -->
     <style>
         :root {
@@ -40,9 +43,17 @@
         .bg-cream { background-color: var(--color-cream); }
         .bg-cream-light { background-color: var(--color-cream-light); }
         
+        .border-forest { border-color: var(--color-forest); }
+        .border-forest-dark { border-color: var(--color-forest-dark); }
+        .border-cream { border-color: var(--color-cream); }
+        
+        .hover\:bg-forest:hover { background-color: var(--color-forest); }
         .hover\:bg-forest-dark:hover { background-color: var(--color-forest-dark); }
-        .hover\:text-forest-dark:hover { color: var(--color-forest-dark); }
+        .hover\:text-white:hover { color: white; }
         .hover\:text-cream:hover { color: var(--color-cream); }
+        
+        .focus\:ring-forest:focus { --tw-ring-color: var(--color-forest); }
+        .focus\:border-forest:focus { border-color: var(--color-forest); }
         
         .room-card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -54,7 +65,7 @@
         }
         
         .room-image {
-            height: 250px;
+            height: 220px;
             object-fit: cover;
             width: 100%;
         }
@@ -85,21 +96,40 @@
 <body>
     <!-- Header -->
     <header class="bg-forest-dark text-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row md:justify-between md:items-center">
+            <div class="flex justify-between items-center">
                 <a href="/" class="flex items-center">
                     <span class="text-xl font-bold">Kwangdi Pahuna Ghar</span>
                 </a>
+                <button class="md:hidden text-white focus:outline-none" x-data="{open: false}" @click="open = !open" :aria-expanded="open">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
             </div>
-            <nav>
-                <ul class="flex space-x-6">
+            <nav class="hidden md:block">
+                <ul class="flex space-x-8">
                     <li><a href="/" class="hover:text-cream-light">Home</a></li>
-                    <li><a href="/rooms" class="hover:text-cream-light font-bold">Rooms</a></li>
+                    <li><a href="/rooms" class="hover:text-cream-light font-bold border-b-2 border-cream pb-1">Rooms</a></li>
                     <li><a href="/onsen" class="hover:text-cream-light">Onsen</a></li>
                     <li><a href="/dining" class="hover:text-cream-light">Dining</a></li>
+                    <li><a href="/experience" class="hover:text-cream-light">Experiences</a></li>
+                    <li><a href="/gallery" class="hover:text-cream-light">Gallery</a></li>
                     <li><a href="/contact" class="hover:text-cream-light">Contact</a></li>
                 </ul>
             </nav>
+        </div>
+        <!-- Mobile menu -->
+        <div class="md:hidden" x-data="{open: false}" x-show="open" @click.away="open = false">
+            <ul class="px-4 pt-2 pb-4 space-y-2">
+                <li><a href="/" class="block hover:text-cream-light">Home</a></li>
+                <li><a href="/rooms" class="block hover:text-cream-light font-bold">Rooms</a></li>
+                <li><a href="/onsen" class="block hover:text-cream-light">Onsen</a></li>
+                <li><a href="/dining" class="block hover:text-cream-light">Dining</a></li>
+                <li><a href="/experience" class="block hover:text-cream-light">Experiences</a></li>
+                <li><a href="/gallery" class="block hover:text-cream-light">Gallery</a></li>
+                <li><a href="/contact" class="block hover:text-cream-light">Contact</a></li>
+            </ul>
         </div>
     </header>
 
@@ -115,36 +145,86 @@
         </div>
     </div>
 
+    <!-- Filter Status Banner -->
+    <div class="bg-white py-4 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                    {{if .IsFiltered}}
+                        {{if eq .FilterType "availability"}}
+                            <h2 class="text-xl font-semibold text-forest-dark">
+                                <i class="fas fa-calendar-check mr-2"></i>Available Rooms
+                            </h2>
+                            <p class="text-gray-600">
+                                Showing available rooms for {{.Guests}} guests from {{.FilterDates}}
+                            </p>
+                        {{else if eq .FilterType "type"}}
+                            <h2 class="text-xl font-semibold text-forest-dark">
+                                <i class="fas fa-filter mr-2"></i>{{.RoomType}} Rooms
+                            </h2>
+                            <p class="text-gray-600">
+                                Showing all {{.RoomType}} rooms
+                            </p>
+                        {{end}}
+                    {{else}}
+                        <h2 class="text-xl font-semibold text-forest-dark">
+                            <i class="fas fa-bed mr-2"></i>All Rooms
+                        </h2>
+                        <p class="text-gray-600">
+                            Showing all available accommodation options
+                        </p>
+                    {{end}}
+                </div>
+                
+                {{if .IsFiltered}}
+                    <a href="/rooms" class="mt-3 md:mt-0 inline-flex items-center px-4 py-2 border border-forest text-forest rounded-md hover:bg-forest hover:text-white transition-colors duration-300">
+                        <i class="fas fa-redo mr-2"></i> View All Rooms
+                    </a>
+                {{end}}
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content -->
     <main class="py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Room Filters -->
             <div class="mb-10">
-                <!-- Date Range Filter -->
+                <!-- HTMX Date Range Filter -->
                 <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                    <form id="availability-form" class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <h3 class="text-lg font-semibold text-forest-dark mb-4">Find Available Rooms</h3>
+                    
+                    <form id="availability-form" 
+                          hx-get="/rooms/availability" 
+                          hx-target="#room-grid" 
+                          hx-indicator="#loading-indicator"
+                          hx-push-url="true"
+                          class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                          
                         <div>
                             <label for="check_in" class="block text-sm font-medium text-gray-700 mb-1">Check-in Date</label>
                             <input type="date" id="check_in" name="check_in" 
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-forest focus:border-forest">
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-forest focus:border-forest"
+                                   value="{{if .CheckIn}}{{.CheckIn}}{{end}}">
                         </div>
                         
                         <div>
                             <label for="check_out" class="block text-sm font-medium text-gray-700 mb-1">Check-out Date</label>
                             <input type="date" id="check_out" name="check_out" 
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-forest focus:border-forest">
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-forest focus:border-forest"
+                                   value="{{if .CheckOut}}{{.CheckOut}}{{end}}">
                         </div>
                         
                         <div>
                             <label for="guests" class="block text-sm font-medium text-gray-700 mb-1">Guests</label>
                             <select id="guests" name="guests" 
                                     class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-forest focus:border-forest">
-                                <option value="1">1 Guest</option>
-                                <option value="2" selected>2 Guests</option>
-                                <option value="3">3 Guests</option>
-                                <option value="4">4 Guests</option>
-                                <option value="5">5 Guests</option>
-                                <option value="6">6+ Guests</option>
+                                <option value="1" {{if eq .Guests 1}}selected{{end}}>1 Guest</option>
+                                <option value="2" {{if or (eq .Guests 2) (not .Guests)}}selected{{end}}>2 Guests</option>
+                                <option value="3" {{if eq .Guests 3}}selected{{end}}>3 Guests</option>
+                                <option value="4" {{if eq .Guests 4}}selected{{end}}>4 Guests</option>
+                                <option value="5" {{if eq .Guests 5}}selected{{end}}>5 Guests</option>
+                                <option value="6" {{if eq .Guests 6}}selected{{end}}>6+ Guests</option>
                             </select>
                         </div>
                         
@@ -153,6 +233,12 @@
                                     class="w-full bg-forest text-white py-2 px-4 rounded-md hover:bg-forest-dark transition-colors duration-300 flex items-center justify-center">
                                 <i class="fas fa-search mr-2"></i>
                                 <span>Check Availability</span>
+                                <div id="loading-indicator" class="htmx-indicator ml-2">
+                                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </div>
                             </button>
                         </div>
                     </form>
@@ -161,100 +247,30 @@
                 <!-- Room Type Filters -->
                 <div class="flex flex-wrap gap-2 mb-6">
                     <a href="/rooms" 
-                       class="filter-btn px-4 py-2 rounded-full border-2 border-forest text-forest font-medium hover:bg-forest hover:text-white active">
+                       class="filter-btn px-4 py-2 rounded-full border-2 border-forest text-forest font-medium hover:bg-forest hover:text-white {{if and (not .RoomType) (not .IsFiltered)}}active{{end}}">
                         All Rooms
                     </a>
                     
                     <a href="/rooms?typee=standard" 
-                       class="filter-btn px-4 py-2 rounded-full border-2 border-forest text-forest font-medium hover:bg-forest hover:text-white">
+                       class="filter-btn px-4 py-2 rounded-full border-2 border-forest text-forest font-medium hover:bg-forest hover:text-white {{if eq .RoomType "standard"}}active{{end}}">
                         Standard
                     </a>
                     
                     <a href="/rooms?typee=deluxe" 
-                       class="filter-btn px-4 py-2 rounded-full border-2 border-forest text-forest font-medium hover:bg-forest hover:text-white">
+                       class="filter-btn px-4 py-2 rounded-full border-2 border-forest text-forest font-medium hover:bg-forest hover:text-white {{if eq .RoomType "deluxe"}}active{{end}}">
                         Deluxe
                     </a>
                     
                     <a href="/rooms?typee=suite" 
-                       class="filter-btn px-4 py-2 rounded-full border-2 border-forest text-forest font-medium hover:bg-forest hover:text-white">
+                       class="filter-btn px-4 py-2 rounded-full border-2 border-forest text-forest font-medium hover:bg-forest hover:text-white {{if eq .RoomType "suite"}}active{{end}}">
                         Suite
                     </a>
                 </div>
             </div>
             
-            <!-- Room Listings -->
+            <!-- Room Listings with HTMX -->
             <div id="room-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {{if .Rooms}}
-                    {{range .Rooms}}
-                        <div class="room-card bg-white rounded-lg overflow-hidden shadow-md">
-                            <img src="{{if .ImageURL}}{{.ImageURL}}{{else}}/static/images/rooms/default.jpg{{end}}" 
-                                 alt="Room {{.RoomNo}}" 
-                                 class="room-image"
-                                 onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'800\' height=\'400\' viewBox=\'0 0 800 400\' preserveAspectRatio=\'none\'%3E%3Crect fill=\'%23234E52\' width=\'800\' height=\'400\' /%3E%3Ctext fill=\'%23FFFFFF\' font-family=\'Arial\' font-size=\'32\' x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dominant-baseline=\'middle\'%3ERoom {{.RoomNo}}%3C/text%3E%3C/svg%3E'">
-                            
-                            <div class="p-6">
-                                <div class="flex justify-between items-start">
-                                    <h3 class="text-xl font-bold text-forest-dark">Room {{.RoomNo}} - {{.Type}} Room</h3>
-                                    <span class="text-forest-dark font-bold">NPR {{.PricePerNight}}<span class="text-sm font-normal">/night</span></span>
-                                </div>
-                                
-                                <div class="mt-2 flex items-center">
-                                    <span class="text-sm bg-cream-light text-forest-dark px-2 py-1 rounded-full">{{.Capacity}} {{if eq .Capacity 1}}guest{{else}}guests{{end}}</span>
-                                    <span class="text-sm text-gray-500 ml-2">{{.Status}}</span>
-                                </div>
-                                
-                                <p class="mt-4 text-gray-600">
-                                    {{if .Description}}
-                                        {{if gt (len .Description) 120}}
-                                            {{slice .Description 0 120}}...
-                                        {{else}}
-                                            {{.Description}}
-                                        {{end}}
-                                    {{else}}
-                                        A comfortable {{.Type}} room with traditional Nepali design elements and modern amenities.
-                                    {{end}}
-                                </p>
-                                
-                                <div class="mt-4">
-                                    {{if .Amenities}}
-                                        {{range $index, $amenity := split .Amenities ","}}
-                                            {{if lt $index 4}}
-                                                <span class="inline-flex items-center mr-3 mb-2 text-sm text-gray-600">
-                                                    <i class="fas fa-check text-forest mr-1"></i> {{$amenity}}
-                                                </span>
-                                            {{end}}
-                                        {{end}}
-                                    {{else}}
-                                        <span class="inline-flex items-center mr-3 mb-2 text-sm text-gray-600">
-                                            <i class="fas fa-wifi text-forest mr-1"></i> Free WiFi
-                                        </span>
-                                        <span class="inline-flex items-center mr-3 mb-2 text-sm text-gray-600">
-                                            <i class="fas fa-shower text-forest mr-1"></i> Hot Water
-                                        </span>
-                                    {{end}}
-                                </div>
-                                
-                                <div class="mt-6 flex justify-between items-center">
-                                    <a href="/rooms/{{.ID}}" class="text-forest hover:text-forest-dark font-medium">View details</a>
-                                    <a href="/booking?room={{.ID}}" class="bg-forest text-white px-4 py-2 rounded-md hover:bg-forest-dark transition-colors duration-300">Book Now</a>
-                                </div>
-                            </div>
-                        </div>
-                    {{end}}
-                {{else}}
-                    <div class="col-span-3 py-12 text-center">
-                        <div class="mb-6">
-                            <i class="fas fa-bed text-6xl text-gray-300"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-700 mb-2">No Rooms Found</h3>
-                        <p class="text-gray-500 max-w-md mx-auto">
-                            We couldn't find any rooms matching your criteria. Try adjusting your filters or dates.
-                        </p>
-                        <a href="/rooms" class="mt-4 inline-flex items-center px-4 py-2 border border-forest text-forest rounded-md hover:bg-forest hover:text-white transition-colors duration-300">
-                            <i class="fas fa-redo mr-2"></i> Reset Filters
-                        </a>
-                    </div>
-                {{end}}
+                {{template "partials/rooms_grid" .}}
             </div>
             
             <!-- Room Amenities Section -->
@@ -394,7 +410,7 @@
     <!-- Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Set default dates for the form
+            // Set default dates for the form if not already set
             const today = new Date();
             const tomorrow = new Date(today);
             tomorrow.setDate(today.getDate() + 1);
@@ -407,15 +423,19 @@
                 return `${year}-${month}-${day}`;
             };
             
-            // Set form default values
+            // Set form default values only if not already set
             const checkInInput = document.getElementById('check_in');
             const checkOutInput = document.getElementById('check_out');
             
             if (checkInInput && checkOutInput) {
-                checkInInput.value = formatDate(today);
+                if (!checkInInput.value) {
+                    checkInInput.value = formatDate(today);
+                }
                 checkInInput.min = formatDate(today);
-                checkOutInput.value = formatDate(tomorrow);
-                checkOutInput.min = formatDate(tomorrow);
+                
+                if (!checkOutInput.value) {
+                    checkOutInput.value = formatDate(tomorrow);
+                }
                 
                 // Make sure check-out is after check-in
                 checkInInput.addEventListener('change', function() {
@@ -436,19 +456,7 @@
                 });
             }
             
-            // Highlight active filter button based on URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const roomType = urlParams.get('typee');
-            
-            if (roomType) {
-                const filterBtns = document.querySelectorAll('.filter-btn');
-                filterBtns.forEach(btn => {
-                    btn.classList.remove('active');
-                    if (btn.getAttribute('href').includes(`typee=${roomType}`)) {
-                        btn.classList.add('active');
-                    }
-                });
-            }
+            // Mobile menu functionality is handled by Alpine.js
         });
     </script>
 </body>
