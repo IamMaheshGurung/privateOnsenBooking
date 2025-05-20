@@ -17,7 +17,7 @@ type Guest struct {
 type Room struct {
 	ID            uint      `json:"id" gorm:"primaryKey"`
 	RoomNo        string    `json:"room_no" gorm:"not null;unique"`
-	Type          string    `json:"type" gorm:"not null"`      // Standard, Deluxe, Suite, etc.
+	Type          string    `json:"typee" gorm:"not null"`     // Standard, Deluxe, Suite, etc.
 	Capacity      int       `json:"capacity" gorm:"default:2"` // Number of guests
 	PricePerNight float64   `json:"price_per_night" gorm:"not null"`
 	Status        string    `json:"status" gorm:"default:'active'"` // Available, Booked, Maintenance
@@ -33,6 +33,7 @@ type RoomBooking struct {
 	GuestID            uint      `json:"guest_id"`
 	Guest              Guest     `json:"guest" gorm:"foreignKey:GuestID"`
 	RoomID             uint      `json:"room_id"`
+	GuestCount         uint      `json:"guestcount"`
 	Room               Room      `json:"room" gorm:"foreignKey:RoomID"`
 	CheckIn            time.Time `json:"check_in" gorm:"not null"`
 	CheckOut           time.Time `json:"check_out" gorm:"not null"`
@@ -74,4 +75,5 @@ const (
 	BookingStatusCheckedOut = "checked_out"
 	BookingStatusCompleted  = "completed"
 	BookingStatusRejected   = "rejected"
+	BookingStatusPending    = "pending"
 )

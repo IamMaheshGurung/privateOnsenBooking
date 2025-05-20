@@ -343,6 +343,57 @@ func (rbs *RoomBookingService) CancelBookingByID(bookingID uint) error {
 	return nil
 }
 
+// UpdateBookingStatus changes the status of a booking
+func (rbs *RoomBookingService) UpdateBookingStatus(bookingID uint, status string) error {
+	result := rbs.db.Model(&models.RoomBooking{}).
+		Where("id = ?", bookingID).
+		Update("status", status)
+
+	if result.Error != nil {
+		rbs.logger.Error("Failed to update booking status",
+			zap.Uint("bookingID", bookingID),
+			zap.String("status", status),
+			zap.Error(result.Error))
+		return fmt.Errorf("failed to update booking status: %w", result.Error)
+	}
+
+	if result.RowsAffected == 0 {
+		rbs.logger.Warn("No booking found to update status",
+			zap.Uint("bookingID", bookingID))
+		return fmt.Errorf("booking not found")
+	}
+
+	return nil
+}
+
+// UpdateBookingDetails updates additional details for a booking
+func (rbs *RoomBookingService) UpdateBookingDetails(bookingID uint, status string, specialRequests string, guestCount int, totalPrice float64) error {
+	// Find the booking
+	var booking models.RoomBooking
+	if err := rbs.db.First(&booking, bookingID).Error; err != nil {
+		rbs.logger.Error("Failed to find booking for update",
+			zap.Uint("bookingID", bookingID),
+			zap.Error(err))
+		return fmt.Errorf("booking not found: %w", err)
+	}
+
+	// Update fields
+	booking.Status = status
+	booking.SpecialRequests = specialRequests
+	booking.GuestCount = uint(guestCount)
+	booking.TotalPrice = totalPrice
+
+	// Save changes
+	if err := rbs.db.Save(&booking).Error; err != nil {
+		rbs.logger.Error("Failed to update booking details",
+			zap.Uint("bookingID", bookingID),
+			zap.Error(err))
+		return fmt.Errorf("failed to update booking: %w", err)
+	}
+
+	return nil
+}
+
 // GetBookingsByGuestID retrieves all bookings for a specific guest
 func (rbs *RoomBookingService) GetBookingsByGuestID(guestID uint) ([]models.RoomBooking, error) {
 	var bookings []models.RoomBooking

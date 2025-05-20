@@ -246,191 +246,370 @@ func (ctrl *BookingController) GetAvailableRooms(c *fiber.Ctx) error {
 	})
 }
 
-// CreateBooking creates a new booking
-// POST /api/bookings
-func (ctrl *BookingController) CreateBooking(c *fiber.Ctx) error {
-	ctrl.Logger.Info("CreateBooking request received")
+// CreateBookingFromForm processes a booking from the website form
+// POST /booking
+func (ctrl *BookingController) CreateBookingFromForm(c *fiber.Ctx) error {
+	ctrl.Logger.Info("CreateBookingFromForm request received")
 
-	var bookingData struct {
-		GuestName       string  `json:"guest_name"`
-		GuestEmail      string  `json:"guest_email"`
-		GuestPhone      string  `json:"guest_phone"`
-		RoomID          uint    `json:"room_id"`
-		CheckIn         string  `json:"check_in"`
-		CheckOut        string  `json:"check_out"`
-		SpecialRequests string  `json:"special_requests"`
-		TotalPrice      float64 `json:"total_price"`
-	}
-
-	// Parse request body
-	if err := c.BodyParser(&bookingData); err != nil {
-		ctrl.Logger.Warn("Cannot parse JSON", zap.Error(err))
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"error":   "Cannot parse JSON: " + err.Error(),
+	// Parse form data
+	roomID, err := strconv.Atoi(c.FormValue("room_id"))
+	if err != nil {
+		ctrl.Logger.Error("Invalid room ID", zap.Error(err))
+		return c.Status(fiber.StatusBadRequest).Render("booking/error", fiber.Map{
+			"Title":       "Booking Error | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+			"Error":       "Invalid room ID. Please try again.",
 		})
 	}
 
+	// Get guest information
+	firstName := c.FormValue("first_name")
+	lastName := c.FormValue("last_name")
+	email := c.FormValue("email")
+	phone := c.FormValue("phone")
+	specialRequests := c.FormValue("special_requests")
+
+	// Construct full name from first and last name
+	guestName := firstName + " " + lastName
+
 	// Validate required fields
-	if bookingData.GuestName == "" || bookingData.GuestEmail == "" ||
-		bookingData.GuestPhone == "" || bookingData.RoomID == 0 ||
-		bookingData.CheckIn == "" || bookingData.CheckOut == "" {
-		ctrl.Logger.Warn("Missing required fields", zap.Any("data", bookingData))
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"error":   "All required fields must be provided",
+	if firstName == "" || lastName == "" || email == "" || phone == "" {
+		return c.Status(fiber.StatusBadRequest).Render("booking/error", fiber.Map{
+			"Title":       "Booking Error | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+			"Error":       "Please fill in all required fields.",
 		})
 	}
 
 	// Validate email format
-	if !utils.IsValidEmail(bookingData.GuestEmail) {
-		ctrl.Logger.Warn("Invalid email format", zap.String("email", bookingData.GuestEmail))
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"error":   "Invalid email format",
+	if !utils.IsValidEmail(email) {
+		ctrl.Logger.Warn("Invalid email format", zap.String("email", email))
+		return c.Status(fiber.StatusBadRequest).Render("booking/error", fiber.Map{
+			"Title":       "Booking Error | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+			"Error":       "Invalid email format. Please enter a valid email address.",
 		})
 	}
 
 	// Parse dates
-	checkIn, err := time.Parse("2006-01-02", bookingData.CheckIn)
+	checkInStr := c.FormValue("check_in")
+	checkOutStr := c.FormValue("check_out")
+	guestsStr := c.FormValue("guests", "1")
+
+	checkIn, err := time.Parse("2006-01-02", checkInStr)
 	if err != nil {
-		ctrl.Logger.Warn("Invalid check-in date format", zap.String("checkIn", bookingData.CheckIn))
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"error":   "Invalid check-in date format. Use YYYY-MM-DD",
+		ctrl.Logger.Error("Invalid check-in date", zap.Error(err))
+		return c.Status(fiber.StatusBadRequest).Render("booking/error", fiber.Map{
+			"Title":       "Booking Error | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+			"Error":       "Invalid check-in date format. Please use YYYY-MM-DD format.",
 		})
 	}
 
-	checkOut, err := time.Parse("2006-01-02", bookingData.CheckOut)
+	checkOut, err := time.Parse("2006-01-02", checkOutStr)
 	if err != nil {
-		ctrl.Logger.Warn("Invalid check-out date format", zap.String("checkOut", bookingData.CheckOut))
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"error":   "Invalid check-out date format. Use YYYY-MM-DD",
+		ctrl.Logger.Error("Invalid check-out date", zap.Error(err))
+		return c.Status(fiber.StatusBadRequest).Render("booking/error", fiber.Map{
+			"Title":       "Booking Error | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+			"Error":       "Invalid check-out date format. Please use YYYY-MM-DD format.",
 		})
 	}
 
-	// Validate booking dates
+	// Validate booking dates using your existing validation function
 	if err := ctrl.validateBookingDates(checkIn, checkOut); err != nil {
 		ctrl.Logger.Warn("Date validation failed",
 			zap.Time("checkIn", checkIn),
 			zap.Time("checkOut", checkOut),
 			zap.Error(err))
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"error":   err.Error(),
+		return c.Status(fiber.StatusBadRequest).Render("booking/error", fiber.Map{
+			"Title":       "Booking Error | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+			"Error":       err.Error(),
 		})
 	}
 
-	// Check if room exists
-	room, err := ctrl.RoomService.GetRoomByID(bookingData.RoomID)
+	// Parse guest count
+	guests, err := strconv.Atoi(guestsStr)
+	if err != nil || guests < 1 {
+		guests = 1
+	}
+
+	// Get room details
+	room, err := ctrl.RoomService.GetRoomByID(uint(roomID))
 	if err != nil {
-		ctrl.Logger.Warn("Room not found", zap.Uint("roomID", bookingData.RoomID))
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"success": false,
-			"error":   "Room not found",
+		ctrl.Logger.Error("Failed to get room", zap.Error(err), zap.Int("roomID", roomID))
+		return c.Status(fiber.StatusNotFound).Render("booking/error", fiber.Map{
+			"Title":       "Booking Error | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+			"Error":       "The selected room could not be found.",
+		})
+	}
+
+	// Check if guest count exceeds room capacity
+	if guests > room.Capacity {
+		return c.Status(fiber.StatusBadRequest).Render("booking/error", fiber.Map{
+			"Title":       "Booking Error | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+			"Error":       fmt.Sprintf("The selected room can only accommodate up to %d guests.", room.Capacity),
 		})
 	}
 
 	// Double-check room availability
-	available, err := ctrl.RoomService.IsRoomAvailable(bookingData.RoomID, checkIn, checkOut)
+	available, err := ctrl.RoomService.IsRoomAvailable(room.ID, checkIn, checkOut)
 	if err != nil {
 		ctrl.Logger.Error("Failed to check availability", zap.Error(err))
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"error":   "Failed to check room availability: " + err.Error(),
+		return c.Status(fiber.StatusInternalServerError).Render("booking/error", fiber.Map{
+			"Title":       "Booking Error | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+			"Error":       "Failed to check room availability. Please try again.",
 		})
 	}
 
 	if !available {
-		ctrl.Logger.Warn("Room not available",
-			zap.Uint("roomID", bookingData.RoomID),
-			zap.Time("checkIn", checkIn),
-			zap.Time("checkOut", checkOut))
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"error":   "The room is no longer available for the selected dates",
+		return c.Status(fiber.StatusConflict).Render("booking/error", fiber.Map{
+			"Title":       "Booking Error | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+			"Error":       "Sorry, this room is no longer available for the selected dates.",
+			"RedirectURL": fmt.Sprintf("/rooms/availability?check_in=%s&check_out=%s&guests=%d", checkInStr, checkOutStr, guests),
 		})
 	}
 
-	// Calculate correct total price
+	// Calculate nights and total price
 	nightCount := int(checkOut.Sub(checkIn).Hours() / 24)
-	correctPrice := room.PricePerNight * float64(nightCount)
+	totalPrice := room.PricePerNight * float64(nightCount)
 
-	// Validate price (optional, prevents frontend manipulation)
-	if bookingData.TotalPrice > 0 && !utils.IsCloseEnough(bookingData.TotalPrice, correctPrice, 0.01) {
-		ctrl.Logger.Warn("Price mismatch",
-			zap.Float64("submittedPrice", bookingData.TotalPrice),
-			zap.Float64("calculatedPrice", correctPrice))
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success":      false,
-			"error":        "Price calculation mismatch. Please try again.",
-			"correctPrice": correctPrice,
-		})
-	}
-
-	// Create or get guest
+	// Create or get guest using your existing guest service
 	guest, err := ctrl.GuestService.CreateOrGetGuest(
-		bookingData.GuestName,
-		bookingData.GuestEmail,
-		bookingData.GuestPhone,
+		guestName,
+		email,
+		phone,
 	)
 	if err != nil {
 		ctrl.Logger.Error("Failed to create guest", zap.Error(err))
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"error":   "Failed to process guest information: " + err.Error(),
+		return c.Status(fiber.StatusInternalServerError).Render("booking/error", fiber.Map{
+			"Title":       "Booking Error | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+			"Error":       "Failed to process guest information. Please try again.",
 		})
 	}
 
 	// Create a new RoomBooking object
 	booking := models.RoomBooking{
 		GuestID:         guest.ID,
-		RoomID:          bookingData.RoomID,
+		RoomID:          room.ID,
 		CheckIn:         checkIn,
 		CheckOut:        checkOut,
-		Status:          models.BookingStatusConfirmed,
-		SpecialRequests: bookingData.SpecialRequests,
-		TotalPrice:      correctPrice,
+		Status:          models.BookingStatusPending, // Pending until payment is confirmed
+		SpecialRequests: specialRequests,
+		TotalPrice:      totalPrice,
+		GuestCount:      uint(guests),
 	}
 
-	// Create booking
+	// Create booking using your existing service
 	createdBooking, err := ctrl.RoomService.CreateBooking(booking.RoomID, booking.GuestID, booking.CheckIn, booking.CheckOut)
 	if err != nil {
 		ctrl.Logger.Error("Failed to create booking", zap.Error(err))
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"error":   "Failed to create booking: " + err.Error(),
+		return c.Status(fiber.StatusInternalServerError).Render("booking/error", fiber.Map{
+			"Title":       "Booking Error | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+			"Error":       "Failed to create booking. Please try again.",
 		})
 	}
 
-	// Send confirmation email asynchronously
-	go func() {
-		if err := ctrl.EmailService.SendBookingConfirmation(createdBooking, guest, room); err != nil {
-			ctrl.Logger.Error("Failed to send confirmation email",
-				zap.Uint("bookingID", createdBooking.ID),
-				zap.Error(err))
-		}
-	}()
+	// Update additional booking details if needed
+	if err := ctrl.RoomService.UpdateBookingDetails(createdBooking.ID, models.BookingStatusPending, specialRequests, guests, totalPrice); err != nil {
+		ctrl.Logger.Error("Failed to update booking details", zap.Error(err))
+		// Continue anyway since the core booking was created
+	}
 
 	ctrl.Logger.Info("Booking created successfully",
 		zap.Uint("bookingID", createdBooking.ID),
 		zap.Uint("guestID", guest.ID),
-		zap.Uint("roomID", bookingData.RoomID))
+		zap.Uint("roomID", room.ID))
 
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"success": true,
-		"message": "Booking created successfully",
-		"data": fiber.Map{
-			"booking_id":  createdBooking.ID,
-			"guest_id":    createdBooking.GuestID,
-			"room_id":     createdBooking.RoomID,
-			"check_in":    createdBooking.CheckIn,
-			"check_out":   createdBooking.CheckOut,
-			"total_price": createdBooking.TotalPrice,
-			"status":      createdBooking.Status,
-			"created_at":  createdBooking.CreatedAt,
-		},
+	// Redirect to booking summary page
+	return c.Redirect(fmt.Sprintf("/booking/summary/%d", createdBooking.ID))
+}
+
+// ShowBookingSummary displays the booking summary before payment
+func (ctrl *BookingController) ShowBookingSummary(c *fiber.Ctx) error {
+	// Get booking ID from URL
+	bookingID, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).Render("booking/error", fiber.Map{
+			"Title":       "Booking Error | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+			"Error":       "Invalid booking ID",
+		})
+	}
+
+	// Get booking details
+	booking, err := ctrl.RoomService.GetBookingByID(uint(bookingID))
+	if err != nil {
+		ctrl.Logger.Error("Booking not found", zap.Int("id", bookingID), zap.Error(err))
+		return c.Status(fiber.StatusNotFound).Render("booking/error", fiber.Map{
+			"Title":       "Booking Error | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+			"Error":       "Booking not found",
+		})
+	}
+
+	// Get room details
+	room, err := ctrl.RoomService.GetRoomByID(booking.RoomID)
+	if err != nil {
+		ctrl.Logger.Error("Room not found for booking", zap.Uint("roomID", booking.RoomID), zap.Error(err))
+		return c.Status(fiber.StatusInternalServerError).Render("booking/error", fiber.Map{
+			"Title":       "Booking Error | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+			"Error":       "Failed to get room details",
+		})
+	}
+
+	// Get guest details
+	guest, err := ctrl.GuestService.GetGuestByID(booking.GuestID)
+	if err != nil {
+		ctrl.Logger.Error("Guest not found for booking", zap.Uint("guestID", booking.GuestID), zap.Error(err))
+		// Continue anyway with limited guest info
+	}
+
+	// Calculate nights
+	nights := int(booking.CheckOut.Sub(booking.CheckIn).Hours() / 24)
+
+	// Calculate fees
+	roomTotal := booking.TotalPrice
+	serviceFee := roomTotal * 0.05 // Example: 5% service fee
+	totalPrice := roomTotal + serviceFee
+
+	return c.Render("booking/summary", fiber.Map{
+		"Title":       "Booking Summary | Kwangdi Pahuna Ghar",
+		"Description": "Review your booking details before confirming",
+		"CurrentYear": time.Now().Year(),
+		"Booking":     booking,
+		"Room":        room,
+		"Guest":       guest,
+		"Nights":      nights,
+		"RoomTotal":   roomTotal,
+		"ServiceFee":  serviceFee,
+		"TotalPrice":  totalPrice,
+	})
+}
+
+// ProcessPayment handles the booking payment and sends confirmation email
+func (ctrl *BookingController) ProcessPayment(c *fiber.Ctx) error {
+	// Get booking ID from URL
+	bookingID, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).Render("booking/error", fiber.Map{
+			"Title":       "Payment Error | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+			"Error":       "Invalid booking ID",
+		})
+	}
+
+	// Get payment method
+	_ = c.FormValue("payment_method", "cash") // Ignoring the value since it's not used
+
+	// Get booking details
+	booking, err := ctrl.RoomService.GetBookingByID(uint(bookingID))
+	if err != nil {
+		ctrl.Logger.Error("Booking not found", zap.Int("id", bookingID), zap.Error(err))
+		return c.Status(fiber.StatusNotFound).Render("booking/error", fiber.Map{
+			"Title":       "Payment Error | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+			"Error":       "Booking not found",
+		})
+	}
+
+	// Here you would process payment based on paymentMethod
+	// For this example, we'll just update the booking status
+
+	// Update booking status to confirmed
+	err = ctrl.RoomService.UpdateBookingStatus(uint(bookingID), models.BookingStatusConfirmed)
+	if err != nil {
+		ctrl.Logger.Error("Failed to confirm booking", zap.Int("id", bookingID), zap.Error(err))
+		return c.Status(fiber.StatusInternalServerError).Render("booking/error", fiber.Map{
+			"Title":       "Payment Error | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+			"Error":       "Failed to confirm booking: " + err.Error(),
+		})
+	}
+
+	// Get updated booking
+	updatedBooking, _ := ctrl.RoomService.GetBookingByID(uint(bookingID))
+
+	// Get room details
+	room, err := ctrl.RoomService.GetRoomByID(booking.RoomID)
+	if err != nil {
+		ctrl.Logger.Error("Room not found for booking", zap.Uint("roomID", booking.RoomID), zap.Error(err))
+		// Continue anyway with limited room info
+	}
+
+	// Get guest details
+	guest, err := ctrl.GuestService.GetGuestByID(booking.GuestID)
+	if err != nil {
+		ctrl.Logger.Error("Guest not found for booking", zap.Uint("guestID", booking.GuestID), zap.Error(err))
+		// Continue anyway with limited guest info
+	}
+
+	// Send confirmation email asynchronously
+	go func() {
+		if err := ctrl.EmailService.SendBookingConfirmation(updatedBooking, guest, room); err != nil {
+			ctrl.Logger.Error("Failed to send confirmation email",
+				zap.Uint("bookingID", updatedBooking.ID),
+				zap.Error(err))
+		}
+	}()
+
+	// Redirect to confirmation page
+	return c.Redirect(fmt.Sprintf("/booking/confirmation/%d", bookingID))
+}
+
+// ShowConfirmation displays the booking confirmation page
+func (ctrl *BookingController) ShowConfirmation(c *fiber.Ctx) error {
+	// Get booking ID from URL
+	bookingID, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).Render("booking/error", fiber.Map{
+			"Title":       "Error | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+			"Error":       "Invalid booking ID",
+		})
+	}
+
+	// Get booking details
+	booking, err := ctrl.RoomService.GetBookingByID(uint(bookingID))
+	if err != nil {
+		ctrl.Logger.Error("Booking not found", zap.Int("id", bookingID), zap.Error(err))
+		return c.Status(fiber.StatusNotFound).Render("booking/error", fiber.Map{
+			"Title":       "Error | Kwangdi Pahuna Ghar",
+			"CurrentYear": time.Now().Year(),
+			"Error":       "Booking not found",
+		})
+	}
+
+	// Get room details
+	room, err := ctrl.RoomService.GetRoomByID(booking.RoomID)
+	if err != nil {
+		ctrl.Logger.Error("Room not found for booking", zap.Uint("roomID", booking.RoomID), zap.Error(err))
+		// Continue anyway with limited room info
+	}
+
+	// Get guest details
+	guest, err := ctrl.GuestService.GetGuestByID(booking.GuestID)
+	if err != nil {
+		ctrl.Logger.Error("Guest not found for booking", zap.Uint("guestID", booking.GuestID), zap.Error(err))
+		// Continue anyway with limited guest info
+	}
+
+	return c.Render("booking/confirmation", fiber.Map{
+		"Title":       "Booking Confirmed | Kwangdi Pahuna Ghar",
+		"Description": "Your booking at Kwangdi Pahuna Ghar has been confirmed",
+		"CurrentYear": time.Now().Year(),
+		"Booking":     booking,
+		"Room":        room,
+		"Guest":       guest,
+		"BookingID":   bookingID,
 	})
 }
 
@@ -1095,33 +1274,6 @@ func (bc *BookingController) ShowBookingForm(c *fiber.Ctx) error {
 		"RoomID":   roomID,
 		"CheckIn":  checkIn,
 		"CheckOut": checkOut,
-	})
-}
-
-// ShowConfirmation displays the booking confirmation page
-func (bc *BookingController) ShowConfirmation(c *fiber.Ctx) error {
-	bookingID := c.Query("booking_id")
-	if bookingID == "" {
-		return c.Redirect("/rooms")
-	}
-
-	id, err := strconv.ParseUint(bookingID, 10, 32)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).Render("error", fiber.Map{
-			"Message": "Invalid booking ID",
-		})
-	}
-
-	booking, err := bc.RoomService.GetBookingByID(uint(id))
-	if err != nil {
-		bc.Logger.Error("Failed to get booking details", zap.Error(err))
-		return c.Status(fiber.StatusNotFound).Render("error", fiber.Map{
-			"Message": "Booking not found",
-		})
-	}
-
-	return c.Render("booking/confirmation", fiber.Map{
-		"Booking": booking,
 	})
 }
 

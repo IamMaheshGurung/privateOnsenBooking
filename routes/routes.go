@@ -353,6 +353,8 @@ func SetupBookingRoutes(app *fiber.App) {
 		})
 	})
 
+	app.Post("/booking", controllers.BookingController)
+
 	// Booking confirmation
 	app.Get("/booking/confirmation/:id", func(c *fiber.Ctx) error {
 		bookingID := c.Params("id")
