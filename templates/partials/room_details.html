@@ -1,350 +1,296 @@
-<div class="bg-white rounded-lg shadow-lg overflow-hidden">
-    <!-- Room Image Gallery -->
-    <div class="relative" x-data="{ activeSlide: 0, totalSlides: {{if .Room.Images}}{{len .Room.Images}}{{else}}1{{end}} }">
-        <!-- Main Image -->
-        <div class="relative h-72 md:h-96 bg-gray-100">
-            {{if .Room.Images}}
-                {{range $index, $image := .Room.Images}}
-                    <div x-show="activeSlide === {{$index}}"
-                         class="absolute inset-0 transition-opacity duration-500" 
-                         x-transition:enter="ease-out duration-300"
-                         x-transition:enter-start="opacity-0"
-                         x-transition:enter-end="opacity-100"
-                         x-transition:leave="ease-in duration-200"
-                         x-transition:leave-start="opacity-100"
-                         x-transition:leave-end="opacity-0">
-                        <img src="{{$image}}" alt="Room {{$.Room.RoomNo}} - Image {{$index}}" class="w-full h-full object-cover">
-                    </div>
-                {{end}}
-            {{else}}
-                <div class="absolute inset-0">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <meta name="description" content="{{.Description}}">
+    
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <style>
+        :root {
+            --color-forest: #2D5F5D;
+            --color-forest-dark: #234E52;
+            --color-cream: #E8DDB5;
+            --color-cream-light: #F4F0E2;
+        }
+        
+        .text-forest { color: var(--color-forest); }
+        .text-forest-dark { color: var(--color-forest-dark); }
+        .bg-forest { background-color: var(--color-forest); }
+        .bg-forest-dark { background-color: var(--color-forest-dark); }
+        .bg-cream { background-color: var(--color-cream); }
+        .bg-cream-light { background-color: var(--color-cream-light); }
+        .border-forest { border-color: var(--color-forest); }
+        
+        .hover\:bg-forest:hover { background-color: var(--color-forest); }
+        .hover\:bg-forest-dark:hover { background-color: var(--color-forest-dark); }
+        .hover\:text-white:hover { color: white; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="bg-forest-dark text-white">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="/" class="text-xl font-bold">Kwangdi Pahuna Ghar</a>
+            <nav class="hidden md:block">
+                <ul class="flex space-x-6">
+                    <li><a href="/" class="hover:text-cream-light">Home</a></li>
+                    <li><a href="/rooms" class="hover:text-cream-light font-bold">Rooms</a></li>
+                    <li><a href="/contact" class="hover:text-cream-light">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <div class="bg-cream-light py-2">
+        <div class="max-w-6xl mx-auto px-4">
+            <nav class="text-sm">
+                <a href="/" class="text-forest-dark hover:text-forest">Home</a> &gt;
+                <a href="/rooms" class="text-forest-dark hover:text-forest">Rooms</a> &gt;
+                <span class="text-gray-500">Room {{.Room.RoomNo}}</span>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="py-8">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <!-- Room Image -->
+                <div class="h-64 md:h-96 relative">
                     <img src="{{if .Room.ImageURL}}{{.Room.ImageURL}}{{else}}/static/images/rooms/default.jpg{{end}}" 
                          alt="Room {{.Room.RoomNo}}" 
                          class="w-full h-full object-cover"
-                         onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'800\' height=\'400\' viewBox=\'0 0 800 400\' preserveAspectRatio=\'none\'%3E%3Crect fill=\'%23234E52\' width=\'800\' height=\'400\' /%3E%3Ctext fill=\'%23FFFFFF\' font-family=\'Arial\' font-size=\'32\' x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dominant-baseline=\'middle\'%3ERoom {{.Room.RoomNo}}%3C/text%3E%3C/svg%3E'">
+                         onerror="this.onerror=null; this.src='/static/images/rooms/default.jpg';">
+                    
+                    <!-- Room Type Badge -->
+                    <div class="absolute top-4 left-4">
+                        <span class="bg-forest text-white px-3 py-1 rounded-full text-xs uppercase font-semibold">
+                            {{.Room.Type}}
+                        </span>
+                    </div>
+                    
+                    <!-- Capacity Badge -->
+                    <div class="absolute top-4 right-4">
+                        <span class="bg-cream text-forest-dark px-3 py-1 rounded-full text-xs font-semibold">
+                            {{.Room.Capacity}} {{if eq .Room.Capacity 1}}Guest{{else}}Guests{{end}}
+                        </span>
+                    </div>
                 </div>
-            {{end}}
+                
+                <!-- Room Info -->
+                <div class="p-6">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
+                        <h1 class="text-2xl font-bold text-forest-dark">Room {{.Room.RoomNo}}</h1>
+                        <p class="text-xl font-bold text-forest-dark">
+                            NPR {{.Room.PricePerNight}}<span class="text-sm font-normal">/night</span>
+                        </p>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <!-- Left: Room Details -->
+                        <div>
+                            <div class="mb-6">
+                                <h2 class="text-lg font-semibold text-forest-dark mb-2">Description</h2>
+                                <p class="text-gray-600">
+                                    {{if .Room.Description}}
+                                        {{.Room.Description}}
+                                    {{else}}
+                                        Experience the perfect blend of traditional Nepali architecture and modern comforts in our {{.Room.Type}} room. This room provides a peaceful retreat after a day of exploration.
+                                    {{end}}
+                                </p>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <h2 class="text-lg font-semibold text-forest-dark mb-2">Room Features</h2>
+                                <div class="grid grid-cols-2 gap-y-2">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-users text-forest mr-2"></i>
+                                        <span>{{.Room.Capacity}} Guests</span>
+                                    </div>
+                                    
+                                    {{if .Room.Amenities}}
+                                        {{range $amenity := split .Room.Amenities ","}}
+                                            <div class="flex items-center">
+                                                <i class="fas fa-check text-forest mr-2"></i>
+                                                <span>{{$amenity}}</span>
+                                            </div>
+                                        {{end}}
+                                    {{else}}
+                                        <div class="flex items-center">
+                                            <i class="fas fa-wifi text-forest mr-2"></i>
+                                            <span>Free WiFi</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-shower text-forest mr-2"></i>
+                                            <span>Hot Water</span>
+                                        </div>
+                                    {{end}}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <h2 class="text-lg font-semibold text-forest-dark mb-2">Policies</h2>
+                                <div class="bg-cream-light p-3 rounded-lg text-sm">
+                                    <p class="mb-1">• Check-in: 2:00 PM - 8:00 PM</p>
+                                    <p class="mb-1">• Check-out: By 11:00 AM</p>
+                                    <p class="mb-1">• Non-smoking room</p>
+                                    <p>• Free cancellation up to 48 hours before check-in</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right: Booking Form -->
+                        <div class="bg-cream-light rounded-lg p-4">
+                            <h2 class="text-lg font-semibold text-forest-dark mb-4">Book This Room</h2>
+                            
+                            <form class="space-y-4">
+                                <div>
+                                    <label for="check_in" class="block text-sm font-medium text-gray-700 mb-1">Check-in Date</label>
+                                    <input type="date" id="check_in" name="check_in" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                           value="{{.CheckIn}}">
+                                </div>
+                                
+                                <div>
+                                    <label for="check_out" class="block text-sm font-medium text-gray-700 mb-1">Check-out Date</label>
+                                    <input type="date" id="check_out" name="check_out" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                           value="{{.CheckOut}}">
+                                </div>
+                                
+                                <div>
+                                    <label for="guests" class="block text-sm font-medium text-gray-700 mb-1">Guests</label>
+                                    <select id="guests" name="guests" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                        <!-- Manually create options based on room capacity -->
+                                        {{if eq .Room.Capacity 1}}
+                                            <option value="1" {{if eq .Guests 1}}selected{{end}}>1 Guest</option>
+                                        {{else if eq .Room.Capacity 2}}
+                                            <option value="1" {{if eq .Guests 1}}selected{{end}}>1 Guest</option>
+                                            <option value="2" {{if eq .Guests 2}}selected{{end}}>2 Guests</option>
+                                        {{else if eq .Room.Capacity 3}}
+                                            <option value="1" {{if eq .Guests 1}}selected{{end}}>1 Guest</option>
+                                            <option value="2" {{if eq .Guests 2}}selected{{end}}>2 Guests</option>
+                                            <option value="3" {{if eq .Guests 3}}selected{{end}}>3 Guests</option>
+                                        {{else if eq .Room.Capacity 4}}
+                                            <option value="1" {{if eq .Guests 1}}selected{{end}}>1 Guest</option>
+                                            <option value="2" {{if eq .Guests 2}}selected{{end}}>2 Guests</option>
+                                            <option value="3" {{if eq .Guests 3}}selected{{end}}>3 Guests</option>
+                                            <option value="4" {{if eq .Guests 4}}selected{{end}}>4 Guests</option>
+                                        {{else}}
+                                            <!-- Fallback for larger capacities -->
+                                            <option value="1" {{if eq .Guests 1}}selected{{end}}>1 Guest</option>
+                                            <option value="2" {{if eq .Guests 2}}selected{{end}}>2 Guests</option>
+                                            <option value="3" {{if eq .Guests 3}}selected{{end}}>3 Guests</option>
+                                            <option value="4" {{if eq .Guests 4}}selected{{end}}>4 Guests</option>
+                                            <option value="5" {{if eq .Guests 5}}selected{{end}}>5 Guests</option>
+                                            <option value="6" {{if eq .Guests 6}}selected{{end}}>6 Guests</option>
+                                        {{end}}
+                                    </select>
+                                </div>
+                                
+                                <a href="/booking?room={{.Room.ID}}&check_in={{.CheckIn}}&check_out={{.CheckOut}}&guests={{.Guests}}" 
+                                   class="block w-full text-center bg-forest text-white py-2 px-4 rounded-md hover:bg-forest-dark">
+                                   Book Now
+                                </a>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
-            <!-- Navigation Arrows -->
-            {{if .Room.Images}}
-                {{if gt (len .Room.Images) 1}}
-                    <button @click="activeSlide = (activeSlide - 1 + totalSlides) % totalSlides" 
-                            class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-forest hover:bg-opacity-100 focus:outline-none">
-                        <span class="sr-only">Previous</span>
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                        </svg>
-                    </button>
-                    <button @click="activeSlide = (activeSlide + 1) % totalSlides" 
-                            class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 text-forest hover:bg-opacity-100 focus:outline-none">
-                        <span class="sr-only">Next</span>
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                    </button>
-                {{end}}
-            {{end}}
-            
-            <!-- Image Indicator Dots -->
-            {{if .Room.Images}}
-                {{if gt (len .Room.Images) 1}}
-                    <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                        {{range $index, $_ := .Room.Images}}
-                            <button @click="activeSlide = {{$index}}" 
-                                    class="w-3 h-3 rounded-full focus:outline-none"
-                                    :class="activeSlide === {{$index}} ? 'bg-white' : 'bg-white bg-opacity-50'">
-                                <span class="sr-only">Image {{$index}}</span>
-                            </button>
+            <!-- Similar Rooms Section (if available) -->
+            {{if .SimilarRooms}}
+                <div class="mt-8">
+                    <h2 class="text-xl font-bold text-forest-dark mb-4">Similar Rooms</h2>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        {{range .SimilarRooms}}
+                            <a href="/rooms/{{.ID}}" class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md">
+                                <div class="h-40">
+                                    <img src="{{if .ImageURL}}{{.ImageURL}}{{else}}/static/images/rooms/default.jpg{{end}}" 
+                                         alt="Room {{.RoomNo}}" 
+                                         class="w-full h-full object-cover">
+                                </div>
+                                <div class="p-3">
+                                    <h3 class="font-semibold text-forest-dark">Room {{.RoomNo}}</h3>
+                                    <div class="flex justify-between text-sm mt-1">
+                                        <span>{{.Capacity}} Guests</span>
+                                        <span class="font-medium">NPR {{.PricePerNight}}/night</span>
+                                    </div>
+                                </div>
+                            </a>
                         {{end}}
                     </div>
-                {{end}}
-            {{end}}
-            
-            <!-- Room Type Badge -->
-            <div class="absolute top-4 left-4">
-                <span class="bg-forest text-white px-3 py-1 rounded-full text-xs uppercase tracking-wider font-semibold">
-                    {{.Room.Type}}
-                </span>
-            </div>
-            
-            <!-- Status Badge -->
-            <div class="absolute top-4 right-4">
-                <span class="{{if eq .Room.Status "active"}}bg-green-100 text-green-800{{else if eq .Room.Status "maintenance"}}bg-yellow-100 text-yellow-800{{else}}bg-red-100 text-red-800{{end}} px-3 py-1 rounded-full text-xs uppercase tracking-wider font-semibold">
-                    {{.Room.Status}}
-                </span>
-            </div>
-        </div>
-        
-        <!-- Thumbnails (Desktop Only) -->
-        {{if .Room.Images}}
-            {{if gt (len .Room.Images) 1}}
-                <div class="hidden md:flex mt-2 space-x-2 px-2">
-                    {{range $index, $image := .Room.Images}}
-                        <button @click="activeSlide = {{$index}}" 
-                                class="focus:outline-none w-20 h-20 flex-shrink-0 rounded overflow-hidden" 
-                                :class="activeSlide === {{$index}} ? 'ring-2 ring-forest' : ''">
-                            <img src="{{$image}}" alt="Thumbnail {{$index}}" class="w-full h-full object-cover">
-                        </button>
-                    {{end}}
                 </div>
             {{end}}
-        {{end}}
-    </div>
-    
-    <!-- Room Information -->
-    <div class="p-6">
-        <!-- Room Header -->
-        <div class="flex flex-col md:flex-row md:justify-between md:items-start mb-6">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-bold text-forest-dark">Room {{.Room.RoomNo}}</h1>
-                <p class="text-gray-600 mt-1">{{.Room.Type}} Room • {{.Room.Capacity}} {{if eq .Room.Capacity 1}}Guest{{else}}Guests{{end}}</p>
-            </div>
-            <div class="mt-2 md:mt-0 text-xl md:text-2xl font-bold text-forest-dark">
-                NPR {{.Room.PricePerNight}}<span class="text-sm font-normal">/night</span>
-            </div>
         </div>
-        
-        <!-- Room Description -->
-        <div class="mb-8">
-            <h2 class="text-xl font-semibold text-forest-dark mb-2">Description</h2>
-            <p class="text-gray-600">
-                {{if .Room.Description}}
-                    {{.Room.Description}}
-                {{else}}
-                    Experience the perfect blend of traditional Nepali architecture and modern comforts in our {{.Room.Type}} room. Featuring authentic local decor and furnishings, this room provides a cozy retreat after a day of exploration. The room offers stunning views of the surrounding nature, creating a peaceful atmosphere for relaxation.
-                {{end}}
-            </p>
-        </div>
-        
-        <!-- Room Features -->
-        <div class="mb-8">
-            <h2 class="text-xl font-semibold text-forest-dark mb-4">Room Features</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
-                <div class="flex items-center">
-                    <i class="fas fa-users text-forest mr-3 w-6 text-center"></i>
-                    <span>{{.Room.Capacity}} Person{{if ne .Room.Capacity 1}}s{{end}} Maximum</span>
-                </div>
-                
-                {{if .Room.Amenities}}
-                    {{range $amenity := split .Room.Amenities ","}}
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-forest mr-3 w-6 text-center"></i>
-                            <span>{{$amenity}}</span>
-                        </div>
-                    {{end}}
-                {{else}}
-                    <!-- Default amenities if none are specified -->
-                    <div class="flex items-center">
-                        <i class="fas fa-wifi text-forest mr-3 w-6 text-center"></i>
-                        <span>Free WiFi</span>
-                    </div>
-                    <div class="flex items-center">
-                        <i class="fas fa-shower text-forest mr-3 w-6 text-center"></i>
-                        <span>Hot Water</span>
-                    </div>
-                    <div class="flex items-center">
-                        <i class="fas fa-coffee text-forest mr-3 w-6 text-center"></i>
-                        <span>Tea & Coffee</span>
-                    </div>
-                    <div class="flex items-center">
-                        <i class="fas fa-temperature-low text-forest mr-3 w-6 text-center"></i>
-                        <span>Heating</span>
-                    </div>
-                {{end}}
-            </div>
-        </div>
-        
-        <!-- Room Policies -->
-        <div class="mb-8">
-            <h2 class="text-xl font-semibold text-forest-dark mb-4">Room Policies</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
-                <div class="flex items-center">
-                    <i class="fas fa-clock text-forest mr-3 w-6 text-center"></i>
-                    <span>Check-in: 2:00 PM - 8:00 PM</span>
-                </div>
-                <div class="flex items-center">
-                    <i class="fas fa-clock text-forest mr-3 w-6 text-center"></i>
-                    <span>Check-out: By 12:00 PM</span>
-                </div>
-                <div class="flex items-center">
-                    <i class="fas fa-smoking-ban text-forest mr-3 w-6 text-center"></i>
-                    <span>Non-smoking Room</span>
-                </div>
-                <div class="flex items-center">
-                    <i class="fas fa-paw text-forest mr-3 w-6 text-center"></i>
-                    <span>No Pets Allowed</span>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Availability Calendar (placeholder - would require JavaScript calendar implementation) -->
-        <div class="mb-8">
-            <h2 class="text-xl font-semibold text-forest-dark mb-2">Availability</h2>
-            <p class="text-gray-600 mb-2">Check availability and book your stay:</p>
-            <div class="bg-cream-light p-4 rounded-lg text-center">
-                <a href="/booking?room={{.Room.ID}}" class="text-forest hover:text-forest-dark">
-                    <i class="far fa-calendar-alt mr-2"></i>View Availability Calendar
-                </a>
-            </div>
-        </div>
-        
-        <!-- Booking Action -->
-        <div class="border-t border-gray-200 pt-6">
-            <h2 class="text-xl font-semibold text-forest-dark mb-4">Book This Room</h2>
-            
-            <!-- Booking Form (HTMX) -->
-            <form hx-get="/rooms/{{.Room.ID}}/check-availability" 
-                  hx-target="#availability-result"
-                  hx-indicator="#booking-indicator"
-                  class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                
-                <div>
-                    <label for="booking_check_in" class="block text-sm font-medium text-gray-700 mb-1">Check-in Date</label>
-                    <input type="date" id="booking_check_in" name="check_in" 
-                           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-forest focus:border-forest"
-                           min="{{formatDate (now)}}">
-                </div>
-                
-                <div>
-                    <label for="booking_check_out" class="block text-sm font-medium text-gray-700 mb-1">Check-out Date</label>
-                    <input type="date" id="booking_check_out" name="check_out" 
-                           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-forest focus:border-forest">
-                </div>
-                
-                <div>
-                    <label for="booking_guests" class="block text-sm font-medium text-gray-700 mb-1">Guests</label>
-                    <select id="booking_guests" name="guests" 
-                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-forest focus:border-forest">
-                        {{range $i := iterate 1 (add .Room.Capacity 1)}}
-                            <option value="{{$i}}">{{$i}} Guest{{if ne $i 1}}s{{end}}</option>
-                        {{end}}
-                    </select>
-                </div>
-                
-                <div class="flex items-end">
-                    <button type="submit" 
-                            class="w-full bg-forest text-white py-2 px-4 rounded-md hover:bg-forest-dark transition-colors duration-300 flex items-center justify-center">
-                        <i class="fas fa-search mr-2"></i>
-                        <span>Check Availability</span>
-                        <div id="booking-indicator" class="htmx-indicator ml-2">
-                            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                        </div>
-                    </button>
-                </div>
-            </form>
-            
-            <!-- Availability Result Area -->
-            <div id="availability-result" class="my-4"></div>
-            
-            <!-- Direct Booking Button (shown by default) -->
-            <div class="mt-4">
-                <a href="/booking?room={{.Room.ID}}" 
-                   class="block w-full md:w-auto text-center bg-forest text-white py-3 px-6 rounded-md hover:bg-forest-dark transition-colors duration-300">
-                    <i class="fas fa-calendar-check mr-2"></i>Book Now
-                </a>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Similar Rooms (Optional) -->
-    {{if .SimilarRooms}}
-        <div class="mt-12 bg-cream-light p-6 rounded-b-lg">
-            <h2 class="text-xl font-semibold text-forest-dark mb-4">Similar Rooms You Might Like</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {{range .SimilarRooms}}
-                    <a href="/rooms/{{.ID}}" class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
-                        <div class="h-32 overflow-hidden">
-                            <img src="{{if .ImageURL}}{{.ImageURL}}{{else}}/static/images/rooms/default.jpg{{end}}" 
-                                 alt="Room {{.RoomNo}}" 
-                                 class="w-full h-full object-cover">
-                        </div>
-                        <div class="p-3">
-                            <h3 class="font-semibold text-forest-dark">Room {{.RoomNo}} - {{.Type}}</h3>
-                            <p class="text-sm text-gray-600">{{.Capacity}} Guests • NPR {{.PricePerNight}}/night</p>
-                        </div>
-                    </a>
-                {{end}}
-            </div>
-        </div>
-    {{end}}
-</div>
+    </main>
 
-<!-- Availability Result Templates (will be injected via HTMX) -->
-<template id="availability-available">
-    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
-        <div class="flex">
-            <div class="flex-shrink-0">
-                <i class="fas fa-check-circle text-green-600"></i>
+    <!-- Footer -->
+    <footer class="bg-forest-dark text-white py-6 mt-12">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <div class="flex justify-center space-x-6 mb-4">
+                <a href="#" class="text-white hover:text-cream-light"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="text-white hover:text-cream-light"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="text-white hover:text-cream-light"><i class="fab fa-twitter"></i></a>
             </div>
-            <div class="ml-3">
-                <p class="text-sm text-green-800">
-                    This room is available for your selected dates. 
-                    <a href="/booking?room={{.Room.ID}}&check_in=${checkIn}&check_out=${checkOut}&guests=${guests}" 
-                       class="font-medium underline">
-                        Proceed to booking
-                    </a>
-                </p>
-            </div>
+            <p class="text-sm text-cream-light">&copy; {{.CurrentYear}} Kwangdi Pahuna Ghar. All rights reserved.</p>
         </div>
-    </div>
-</template>
+    </footer>
 
-<template id="availability-unavailable">
-    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
-        <div class="flex">
-            <div class="flex-shrink-0">
-                <i class="fas fa-times-circle text-red-600"></i>
-            </div>
-            <div class="ml-3">
-                <p class="text-sm text-red-800">
-                    Sorry, this room is not available for your selected dates.
-                    Please try different dates or check our other rooms.
-                </p>
-            </div>
-        </div>
-    </div>
-</template>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Set default dates for the form
-        const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(today.getDate() + 1);
-        
-        // Format as YYYY-MM-DD
-        const formatDate = (date) => {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        };
-        
-        // Set form default values
-        const checkInInput = document.getElementById('booking_check_in');
-        const checkOutInput = document.getElementById('booking_check_out');
-        
-        if (checkInInput && checkOutInput) {
-            checkInInput.value = formatDate(today);
-            checkInInput.min = formatDate(today);
-            checkOutInput.value = formatDate(tomorrow);
-            checkOutInput.min = formatDate(tomorrow);
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set min dates for check-in and check-out
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
             
-            // Make sure check-out is after check-in
-            checkInInput.addEventListener('change', function() {
-                const checkIn = new Date(this.value);
-                const nextDay = new Date(checkIn);
-                nextDay.setDate(nextDay.getDate() + 1);
-                
-                if (new Date(checkOutInput.value) <= checkIn) {
-                    checkOutInput.value = formatDate(nextDay);
+            // Format as YYYY-MM-DD
+            const formatDate = (date) => {
+                return date.toISOString().split('T')[0];
+            };
+            
+            const checkInInput = document.getElementById('check_in');
+            const checkOutInput = document.getElementById('check_out');
+            
+            if (checkInInput && checkOutInput) {
+                // If no dates are set, use today and tomorrow
+                if (!checkInInput.value) {
+                    checkInInput.value = formatDate(today);
                 }
                 
-                checkOutInput.min = formatDate(nextDay);
-            });
-        }
-    });
-</script>
+                if (!checkOutInput.value) {
+                    checkOutInput.value = formatDate(tomorrow);
+                }
+                
+                // Set min values
+                checkInInput.min = formatDate(today);
+                
+                // When check-in changes, update check-out min
+                checkInInput.addEventListener('change', function() {
+                    const checkInDate = new Date(this.value);
+                    const minCheckOutDate = new Date(checkInDate);
+                    minCheckOutDate.setDate(checkInDate.getDate() + 1);
+                    
+                    checkOutInput.min = formatDate(minCheckOutDate);
+                    
+                    // If check-out is before check-in + 1, update it
+                    if (new Date(checkOutInput.value) <= checkInDate) {
+                        checkOutInput.value = formatDate(minCheckOutDate);
+                    }
+                });
+                
+                // Trigger change to set initial values
+                checkInInput.dispatchEvent(new Event('change'));
+            }
+        });
+    </script>
+</body>
+</html>
