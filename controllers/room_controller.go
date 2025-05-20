@@ -98,25 +98,63 @@ func (rc *RoomController) GetRoomQuickView(c *fiber.Ctx) error {
 }
 
 // GetRoomByID returns a specific room
-// GET /api/rooms/:id
-func (ctrl *RoomController) GetRoomByID(c *fiber.Ctx) error {
-	id, err := c.ParamsInt("id")
+func (rc *RoomController) GetRoomByID(c *fiber.Ctx) error {
+	// Parse the room ID from the URL
+	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
+		rc.Logger.Warn("Invalid room ID format", zap.String("id", c.Params("id")))
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid room ID",
+			"error": "Invalid room ID format",
 		})
 	}
 
-	room, err := ctrl.Service.GetRoomByID(uint(id))
+	// Get the room from the service
+	room, err := rc.Service.GetRoomByID(uint(id))
 	if err != nil {
+		rc.Logger.Error("Failed to get room", zap.Int("id", id), zap.Error(err))
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": "Room not found: " + err.Error(),
+			"error": "Room not found",
 		})
 	}
 
-	return c.JSON(fiber.Map{
-		"success": true,
-		"data":    room,
+	// Get similar rooms for recommendations
+	similarRooms, err := rc.Service.GetSimilarRooms(room.ID, room.Type, 3)
+	if err != nil {
+		// Just log the error but continue - this is not critical
+		rc.Logger.Warn("Failed to get similar rooms", zap.Error(err))
+	}
+
+	// Get any query parameters that might have been passed
+	checkIn := c.Query("check_in", "")
+	checkOut := c.Query("check_out", "")
+	guests := 1
+
+	guestsStr := c.Query("guests", "1")
+	if guestsVal, err := strconv.Atoi(guestsStr); err == nil && guestsVal > 0 {
+		guests = guestsVal
+	}
+
+	// Ensure we have today's date if no check-in is specified
+	if checkIn == "" {
+		checkIn = time.Now().Format("2006-01-02")
+	}
+
+	// And tomorrow for checkout if not specified
+	if checkOut == "" {
+		tomorrow := time.Now().AddDate(0, 0, 1)
+		checkOut = tomorrow.Format("2006-01-02")
+	}
+
+	// Render the room details page
+	return c.Render("partials/room_details", fiber.Map{
+		"Title":        fmt.Sprintf("Room %s - %s | Kwangdi Pahuna Ghar", room.RoomNo, room.Type),
+		"Description":  fmt.Sprintf("Book our %s room for up to %d guests at Kwangdi Pahuna Ghar", room.Type, room.Capacity),
+		"CurrentYear":  time.Now().Year(),
+		"Room":         room,
+		"SimilarRooms": similarRooms,
+		"CheckIn":      checkIn,
+		"CheckOut":     checkOut,
+		"Guests":       guests,
 	})
 }
 

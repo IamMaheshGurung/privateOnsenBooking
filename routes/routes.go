@@ -162,6 +162,8 @@ func SetupRoomRoutes(app *fiber.App, roomController *controllers.RoomController)
 	// Room quick view API endpoint for HTMX
 	app.Get("/api/rooms/:id/quick-view", roomController.GetRoomQuickView)
 
+	app.Get("/rooms/:id", roomController.GetRoomByID)
+
 	// Room categories
 	app.Get("/rooms/standard", func(c *fiber.Ctx) error {
 		return c.Render("rooms/standard", fiber.Map{

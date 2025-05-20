@@ -40,13 +40,18 @@ func (rbs *RoomBookingService) GetAllRooms() ([]*models.Room, error) {
 	return rooms, nil
 }
 
-func (rbs *RoomBookingService) GetRoomByID(id uint) (*models.Room, error) {
-	var room *models.Room
-	if err := rbs.db.Find(&room, id).Error; err != nil {
-		rbs.logger.Error("failed to fetch room", zap.Error(err))
+func (rbs *RoomBookingService) GetRoomByID(roomID uint) (*models.Room, error) {
+	var room models.Room
+	if err := rbs.db.First(&room, roomID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			rbs.logger.Warn("Room not found", zap.Uint("roomID", roomID))
+			return nil, fmt.Errorf("room with ID %d not found", roomID)
+		}
+		rbs.logger.Error("Database error when fetching room", zap.Error(err))
 		return nil, fmt.Errorf("failed to fetch room: %w", err)
 	}
-	return room, nil
+
+	return &room, nil
 }
 
 func (rbs *RoomBookingService) GetRoomByType(typee string) ([]*models.Room, error) {
@@ -570,4 +575,114 @@ func (rbs *RoomBookingService) CancelBooking(bookingID uint) error {
 		zap.Float64("cancellationFee", cancellationFee))
 
 	return nil
+}
+
+// GetSimilarRooms returns rooms similar to the specified room
+// Parameters:
+// - roomID: ID of the reference room
+// - roomType: Type of the reference room (e.g., "standard", "deluxe", "suite")
+// - limit: Maximum number of similar rooms to return
+// Returns:
+// - []models.Room: List of similar rooms
+// - error: Any error that occurred during the operation
+func (rbs *RoomBookingService) GetSimilarRooms(roomID uint, roomType string, limit int) ([]models.Room, error) {
+	rbs.logger.Info("Finding similar rooms",
+		zap.Uint("roomID", roomID),
+		zap.String("roomType", roomType),
+		zap.Int("limit", limit))
+
+	// Get the reference room first to compare attributes
+	var referenceRoom models.Room
+	if err := rbs.db.First(&referenceRoom, roomID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			rbs.logger.Warn("Reference room not found", zap.Uint("roomID", roomID))
+			// If room not found, we'll just use the type to find similar rooms
+		} else {
+			rbs.logger.Error("Failed to fetch reference room", zap.Error(err))
+			return nil, fmt.Errorf("failed to fetch reference room: %w", err)
+		}
+	}
+
+	// Build the query
+	query := rbs.db.Model(&models.Room{})
+
+	// Never include the reference room itself
+	query = query.Where("id != ?", roomID)
+
+	// Always filter by active status
+	query = query.Where("status = ?", "active")
+
+	// If we got the reference room, use its attributes for more precise matching
+	if referenceRoom.ID != 0 {
+		// First priority: same room type
+		query = query.Where("type = ?", referenceRoom.Type)
+
+		// Calculate price range (±20% of reference room's price)
+		minPrice := referenceRoom.PricePerNight * 0.8
+		maxPrice := referenceRoom.PricePerNight * 1.2
+
+		// Find rooms with similar price
+		query = query.Where("price_per_night BETWEEN ? AND ?", minPrice, maxPrice)
+
+		// Capacity should be at least the same as the reference room
+		query = query.Where("capacity >= ?", referenceRoom.Capacity)
+
+		// Order by similarity (keeping capacity as close as possible)
+		query = query.Order(gorm.Expr("ABS(capacity - ?) ASC", referenceRoom.Capacity))
+	} else {
+		// Fallback if reference room not found: use provided room type
+		query = query.Where("type = ?", roomType)
+
+		// Order by price ascending (cheapest first)
+		query = query.Order("price_per_night ASC")
+	}
+
+	// Apply the limit
+	query = query.Limit(limit)
+
+	// Execute the query
+	var similarRooms []models.Room
+	if err := query.Find(&similarRooms).Error; err != nil {
+		rbs.logger.Error("Failed to fetch similar rooms", zap.Error(err))
+		return nil, fmt.Errorf("failed to fetch similar rooms: %w", err)
+	}
+
+	// If we didn't find enough rooms of the same type, get rooms of different types
+	if len(similarRooms) < limit {
+		var remainingLimit = limit - len(similarRooms)
+		var additionalRooms []models.Room
+
+		fallbackQuery := rbs.db.Model(&models.Room{})
+		fallbackQuery = fallbackQuery.Where("id != ?", roomID)
+		fallbackQuery = fallbackQuery.Where("status = ?", "active")
+
+		// Exclude the room IDs we've already selected
+		var excludeIDs []uint
+		excludeIDs = append(excludeIDs, roomID) // Exclude reference room
+		for _, room := range similarRooms {
+			excludeIDs = append(excludeIDs, room.ID)
+		}
+		fallbackQuery = fallbackQuery.Where("id NOT IN ?", excludeIDs)
+
+		if referenceRoom.ID != 0 {
+			// If we have the reference room, try to match by similar capacity
+			fallbackQuery = fallbackQuery.Where("capacity >= ?", referenceRoom.Capacity)
+			fallbackQuery = fallbackQuery.Order(gorm.Expr("ABS(price_per_night - ?) ASC", referenceRoom.PricePerNight))
+		} else {
+			// Otherwise just get the best rooms available
+			fallbackQuery = fallbackQuery.Order("price_per_night DESC")
+		}
+
+		fallbackQuery = fallbackQuery.Limit(remainingLimit)
+
+		if err := fallbackQuery.Find(&additionalRooms).Error; err != nil {
+			rbs.logger.Warn("Failed to fetch additional similar rooms", zap.Error(err))
+			// Continue with what we have - this is not a critical error
+		} else {
+			similarRooms = append(similarRooms, additionalRooms...)
+		}
+	}
+
+	rbs.logger.Info("Found similar rooms", zap.Int("count", len(similarRooms)))
+	return similarRooms, nil
 }

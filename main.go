@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/IamMaheshGurung/privateOnsenBooking/config"
 	"github.com/IamMaheshGurung/privateOnsenBooking/controllers"
@@ -117,6 +118,20 @@ func main() {
 			return dict, nil
 
 		},
+		"add": func(a, b int) int {
+			return a + b
+		},
+		"iterate": func(start, end int) []int {
+			var result []int
+			for i := start; i < end; i++ {
+				result = append(result, i)
+			}
+			return result
+		},
+		"formatDate": func(t time.Time) string {
+			return t.Format("2006-01-02")
+		},
+		"now": time.Now,
 	}
 
 	// Initialize template engine
