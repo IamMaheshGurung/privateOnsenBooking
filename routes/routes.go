@@ -16,7 +16,7 @@ func SetupRoutes(
 	guestController *controllers.GuestController,
 ) {
 	// Setup routes by category
-	SetupBookingRoutes(app)
+	SetupBookingRoutes(app, bookingController)
 	SetupBasicRoutes(app)
 	SetupPageRoutes(app)
 
@@ -310,7 +310,7 @@ func SetupDiningRoutes(app *fiber.App) {
 }
 
 // setupBookingRoutes configures booking-related routes
-func SetupBookingRoutes(app *fiber.App) {
+func SetupBookingRoutes(app *fiber.App, bookingController *controllers.BookingController) {
 	app.Get("/booking", func(c *fiber.Ctx) error {
 
 		fmt.Println("Attempting to render booking/index template")
@@ -353,8 +353,8 @@ func SetupBookingRoutes(app *fiber.App) {
 		})
 	})
 
-	app.Post("/booking", controllers.BookingController)
-
+	app.Post("/booking", bookingController.CreateBookingFromForm)
+	app.Get("/booking/check-availability", bookingController.CheckRoomAvailability)
 	// Booking confirmation
 	app.Get("/booking/confirmation/:id", func(c *fiber.Ctx) error {
 		bookingID := c.Params("id")

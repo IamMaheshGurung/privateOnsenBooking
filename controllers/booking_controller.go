@@ -1282,6 +1282,80 @@ func (ctrl *BookingController) ShowLookupForm(c *fiber.Ctx) error {
 	return c.Render("booking/lookup_form", fiber.Map{})
 }
 
+func (ctrl *BookingController) CheckRoomAvailability(c *fiber.Ctx) error {
+	roomID, err := strconv.Atoi(c.Query("room_id"))
+	if err != nil || roomID <= 0 {
+		return c.SendString(`
+			<div class="bg-yellow-50 text-yellow-700 p-3 rounded-lg border border-yellow-200 flex items-center">
+				<i class="fas fa-exclamation-triangle mr-2"></i>
+				<span>Please select a room</span>
+			</div>
+		`)
+	}
+
+	// Parse dates
+	checkInStr := c.Query("check_in")
+	checkOutStr := c.Query("check_out")
+
+	checkIn, err := time.Parse("2006-01-02", checkInStr)
+	if err != nil {
+		return c.SendString(`
+            <div class="bg-yellow-50 text-yellow-700 p-3 rounded-lg border border-yellow-200 flex items-center">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                <span>Invalid check-in date</span>
+            </div>
+        `)
+	}
+
+	checkOut, err := time.Parse("2006-01-02", checkOutStr)
+	if err != nil {
+		return c.SendString(`
+            <div class="bg-yellow-50 text-yellow-700 p-3 rounded-lg border border-yellow-200 flex items-center">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                <span>Invalid check-out date</span>
+            </div>
+        `)
+	}
+
+	// Get room details
+	room, err := ctrl.RoomService.GetRoomByID(uint(roomID))
+	if err != nil {
+		return c.SendString(`
+            <div class="bg-red-50 text-red-700 p-3 rounded-lg border border-red-200 flex items-center">
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                <span>Room not found</span>
+            </div>
+        `)
+	}
+
+	// Check availability
+	available, err := ctrl.RoomService.IsRoomAvailable(room.ID, checkIn, checkOut)
+	if err != nil {
+		return c.SendString(`
+			<div class="bg-red-50 text-red-700 p-3 rounded-lg border border-red-200 flex items-center">
+				<i class="fas fa-exclamation-circle mr-2"></i>
+				<span>Error checking availability</span>
+			</div>
+		`)
+	}
+
+	if available {
+		return c.SendString(`
+            <div class="bg-green-50 text-green-700 p-3 rounded-lg border border-green-200 flex items-center animate-fadeIn">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span>Room ${room.RoomNo} is available for your selected dates!</span>
+            </div>
+        `)
+	} else {
+		return c.SendString(`
+            <div class="bg-red-50 text-red-700 p-3 rounded-lg border border-red-200 flex items-center animate-fadeIn">
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                <span>Sorry, this room is not available for the selected dates.</span>
+            </div>
+        `)
+	}
+}
+
 // LookupBooking processes the booking lookup request
 func (ctrl *BookingController) LookupBooking(c *fiber.Ctx) error {
 	email := c.FormValue("email")
